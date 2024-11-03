@@ -27,18 +27,18 @@ class MainApplication(QMainWindow):
         self.stack.addWidget(self.gate_creator_view)
 
         # Connect button in start view to switch view
-        self.start_view.create_new_button.clicked.connect(self.show_dimension_view)
+        self.start_view.create_new_button.clicked.connect(self.show_gate_selection_view)
+
+        # Connect button in gate selection view to switch view
+        self.gate_selection_view.back_button.clicked.connect(self.back_to_start_view)
+        self.gate_selection_view.accept_button.clicked.connect(self.show_dimension_view)
 
         # Connect button in dimension view to switch view
-        self.dimension_view.back_button.clicked.connect(self.back_to_start_view)
-        self.dimension_view.accept_button.clicked.connect(self.show_gate_selection_view)
+        self.dimension_view.back_button.clicked.connect(self.back_to_gate_selection_view)
+        self.dimension_view.accept_button.clicked.connect(self.show_gate_creator)
 
         # Connect button in gate selection view to switch view
-        self.gate_selection_view.back_button.clicked.connect(self.back_to_dimension_view)
-        self.gate_selection_view.accept_button.clicked.connect(self.show_gate_creator)
-
-        # Connect button in gate selection view to switch view
-        self.gate_creator_view.back_button.clicked.connect(self.back_to_gate_selection_view)
+        self.gate_creator_view.back_button.clicked.connect(self.back_to_dimension_view)
         self.gate_creator_view.save_button.clicked.connect(self.back_to_start_view)
 
     def show_dimension_view(self):
