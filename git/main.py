@@ -1,8 +1,8 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget
-from Okno_startowe2 import OknoStartowe
+from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
-from Wybór_bramy2 import WyborBramy
+from Wybór_bramy import WyborBramy
 from Kreator import Kreator
 
 class MainApplication(QMainWindow):
