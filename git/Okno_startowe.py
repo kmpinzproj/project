@@ -1,9 +1,9 @@
+import os
 from PySide6.QtWidgets import (
-    QMainWindow,QSpacerItem,QSizePolicy, QWidget,
+    QMainWindow, QSpacerItem, QSizePolicy, QWidget,
     QListWidget, QVBoxLayout, QHBoxLayout
 )
 from button import StyledButton
-
 
 class OknoStartowe(QMainWindow):
     # Constants for window and panel dimensions
@@ -18,6 +18,8 @@ class OknoStartowe(QMainWindow):
 
         # Setup UI
         self._setup_ui()
+        # Load project files into the project list
+        self._load_project_files()
 
     def _setup_ui(self):
         """Configures the main layout and divides it into left and right panels."""
@@ -61,8 +63,6 @@ class OknoStartowe(QMainWindow):
 
         # Project list widget
         self.project_list = QListWidget()
-        self.project_list.addItem("Lista zapisanych projektów")  # Placeholder item
-
         right_layout.addWidget(self.project_list)
 
         return right_widget
@@ -70,3 +70,26 @@ class OknoStartowe(QMainWindow):
     def _add_spacer(self, layout):
         """Adds a vertical spacer to adjust vertical positioning of content."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+    def _load_project_files(self):
+        """Loads .txt project files from the 'project/zapisane_projekty' directory into the project list."""
+        # Ustaw ścieżkę względną do folderu zapisaen_projekty
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        projects_dir = os.path.join(base_dir, '..', 'zapisane_projekty')
+
+        # Sprawdź, czy katalog istnieje, a jeśli nie, utwórz go
+        if not os.path.exists(projects_dir):
+            os.makedirs(projects_dir)
+
+        # Wyczyść listę projektów
+        self.project_list.clear()
+
+        # Przeszukaj folder i dodaj pliki .txt do listy projektów
+        project_files = [f for f in os.listdir(projects_dir) if f.endswith(".txt")]
+
+        # Wyświetl pliki na liście projektów lub komunikat o braku plików
+        if project_files:
+            for file_name in project_files:
+                self.project_list.addItem(file_name)
+        else:
+            self.project_list.addItem("Brak zapisanych projektów")
