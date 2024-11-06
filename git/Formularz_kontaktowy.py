@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QLineEdit, QTextEdit, QPushButton, QFileDialog, QFormLayout,
-    QSplitter, QMainWindow
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QLineEdit, QTextEdit, QFormLayout, QMainWindow
 )
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
@@ -60,8 +59,8 @@ class ContactForm(QMainWindow):
         button_layout.setAlignment(Qt.AlignCenter)
 
         # Define buttons
-        self.back_button = QPushButton("Cofnij")
-        self.submit_button = QPushButton("Wyślij")
+        self.back_button = StyledButton("Cofnij")
+        self.submit_button = StyledButton("Wyślij")
 
         # Add buttons to the button layout
         button_layout.addWidget(self.back_button)

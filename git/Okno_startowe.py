@@ -1,7 +1,7 @@
-from PySide6.QtWidgets import (QMainWindow,QSpacerItem,QSizePolicy, QWidget,
-                               QPushButton, QListWidget,QSplitter, QVBoxLayout,
-                               QHBoxLayout, QStyleFactory)
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QMainWindow,QSpacerItem,QSizePolicy, QWidget,
+    QListWidget, QVBoxLayout, QHBoxLayout
+)
 from button import StyledButton
 
 

@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import (QMainWindow,QSpacerItem,QSizePolicy, QWidget,
-                               QPushButton, QListWidget,QSplitter, QVBoxLayout,
-                               QHBoxLayout, QStyleFactory)
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout
+)
+
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from Rozwijane_menu import ScrollableMenu
 from button import StyledButton

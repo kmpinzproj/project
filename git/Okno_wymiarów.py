@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import (QMainWindow, QWidget, QLabel,
-                               QLineEdit, QVBoxLayout, QHBoxLayout,
-                               QPushButton,QSpacerItem, QSizePolicy)
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QLabel,QLineEdit,
+    QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy
+)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from button import StyledButton

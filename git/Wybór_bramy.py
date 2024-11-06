@@ -1,8 +1,8 @@
-from PySide6.QtCore import QCoreApplication, QSize, Qt
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QMainWindow, QWidget, QFormLayout, QFrame,
                                QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-                               QGraphicsView, QMenuBar, QStatusBar)
+                               QGraphicsView)
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QFont
 from button import StyledButton
 
 
