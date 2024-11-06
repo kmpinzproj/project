@@ -5,53 +5,57 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from button import StyledButton
 
+
 class OknoWymiarow(QMainWindow):
+    # Constants for window and panel dimensions
+    WINDOW_WIDTH = 800
+    WINDOW_HEIGHT = 600
+    LEFT_PANEL_WIDTH = 400
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
-        # Central widget setup
+        # Setup UI
+        self._setup_ui()
+
+    def _setup_ui(self):
+        """Configures the main layout and divides it into left and right panels."""
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
-        # Splitter to divide the window into left and right sections
-        # splitter = QSplitter(Qt.Horizontal)
+        main_layout = QHBoxLayout(central_widget)
 
-        g_widget = QWidget()
-        g_layout = QHBoxLayout(g_widget)
+        # Left and Right panels
+        left_panel = self._create_left_panel()
+        right_panel = self._create_right_panel()
 
-        # Left side layout (Inputs and buttons)
+        main_layout.addWidget(left_panel)
+        main_layout.addWidget(right_panel)
+
+    def _create_left_panel(self):
+        """Creates the left panel with input fields and buttons."""
         left_widget = QWidget()
-        left_widget.setFixedWidth(400)
+        left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
 
-        # Spacer to push content to vertical center
-        left_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        # Spacer to push content lower on the panel
+        self._add_spacer(left_layout)
 
-        # Label for "Podaj wymiary" and input fields
+        # Title label
         dimensions_label = QLabel("Podaj wymiary")
         dimensions_label.setAlignment(Qt.AlignCenter)
         left_layout.addWidget(dimensions_label)
 
-        # Width input
-        width_label = QLabel("Szerokość")
-        self.width_input = QLineEdit()
-        self.width_input.setValidator(QIntValidator())
-        left_layout.addWidget(width_label)
-        left_layout.addWidget(self.width_input)
+        # Input fields with labels
+        self._add_input_field(left_layout, "Szerokość", self._create_int_input())
+        self._add_input_field(left_layout, "Wysokość", self._create_int_input())
 
-        # Height input
-        height_label = QLabel("Wysokość")
-        self.height_input = QLineEdit()
-        self.height_input.setValidator(QIntValidator())
-        left_layout.addWidget(height_label)
-        left_layout.addWidget(self.height_input)
+        # Spacer to center input fields vertically
+        self._add_spacer(left_layout)
 
-        # Spacer to keep the input fields centered, buttons remain at the bottom
-        left_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-
-        # Buttons (Cofnij and Akceptuj) side by side at the bottom
+        # Buttons at the bottom
         buttons_layout = QHBoxLayout()
         self.back_button = StyledButton("Cofnij")
         self.accept_button = StyledButton("Akceptuj")
@@ -59,20 +63,37 @@ class OknoWymiarow(QMainWindow):
         buttons_layout.addWidget(self.accept_button)
         left_layout.addLayout(buttons_layout)
 
-        # Add left widget to splitter
-        g_layout.addWidget(left_widget)
+        return left_widget
 
-        # Right side layout (Measurement instructions)
+    def _create_right_panel(self):
+        """Creates the right panel with measurement instructions."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
+
+        # Instruction label
         instruction_label = QLabel(
-            "Instrukcja pomiaru:\n1. Zmierz wysokość i szerokość otworu.\n2. Zanotuj dokładne wartości.\n3. Upewnij się, że pomiary są prawidłowe.")
+            "Instrukcja pomiaru:\n"
+            "1. Zmierz wysokość i szerokość otworu.\n"
+            "2. Zanotuj dokładne wartości.\n"
+            "3. Upewnij się, że pomiary są prawidłowe."
+        )
         instruction_label.setWordWrap(True)
         right_layout.addWidget(instruction_label)
 
-        # Add right widget to splitter
-        g_layout.addWidget(right_widget)
+        return right_widget
 
-        # Set splitter as the main layout in central widget
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.addWidget(g_widget)
+    def _add_input_field(self, layout, label_text, input_field):
+        """Adds a labeled input field to the specified layout."""
+        label = QLabel(label_text)
+        layout.addWidget(label)
+        layout.addWidget(input_field)
+
+    def _create_int_input(self):
+        """Creates an input field with an integer validator."""
+        input_field = QLineEdit()
+        input_field.setValidator(QIntValidator())
+        return input_field
+
+    def _add_spacer(self, layout):
+        """Adds a vertical spacer to center content vertically."""
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))

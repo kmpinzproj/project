@@ -7,6 +7,13 @@ from Kreator import Kreator
 from Formularz_kontaktowy import ContactForm
 
 class MainApplication(QMainWindow):
+    # View indices
+    START_VIEW = 0
+    GATE_SELECTION_VIEW = 1
+    DIMENSION_VIEW = 2
+    GATE_CREATOR_VIEW = 3
+    CONTACT_FORM_VIEW = 4
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Application")
@@ -15,63 +22,70 @@ class MainApplication(QMainWindow):
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
-        # Initialize views
+        # Initialize and add views
+        self._initialize_views()
+        self._add_views_to_stack()
+
+        # Set up connections for buttons
+        self._setup_connections()
+
+    def _initialize_views(self):
+        """Initializes all views used in the application."""
         self.start_view = OknoStartowe()
         self.dimension_view = OknoWymiarow()
         self.gate_selection_view = WyborBramy()
         self.gate_creator_view = Kreator()
         self.connect_form_view = ContactForm()
 
-        # Add views to stack
+    def _add_views_to_stack(self):
+        """Adds all views to the QStackedWidget stack."""
         self.stack.addWidget(self.start_view)
-        self.stack.addWidget(self.dimension_view)
         self.stack.addWidget(self.gate_selection_view)
+        self.stack.addWidget(self.dimension_view)
         self.stack.addWidget(self.gate_creator_view)
         self.stack.addWidget(self.connect_form_view)
 
-        # Connect button in start view to switch view
-        self.start_view.create_new_button.clicked.connect(self.show_gate_selection_view)
+    def _setup_connections(self):
+        """Sets up button connections for view navigation."""
+        # Start view button
+        self.start_view.create_new_button.clicked.connect(self.navigate_to_gate_selection_view)
 
-        # Connect button in gate selection view to switch view
-        self.gate_selection_view.back_button.clicked.connect(self.back_to_start_view)
-        self.gate_selection_view.accept_button.clicked.connect(self.show_dimension_view)
+        # Gate selection view buttons
+        self.gate_selection_view.back_button.clicked.connect(self.navigate_to_start_view)
+        self.gate_selection_view.accept_button.clicked.connect(self.navigate_to_dimension_view)
 
-        # Connect button in dimension view to switch view
-        self.dimension_view.back_button.clicked.connect(self.back_to_gate_selection_view)
-        self.dimension_view.accept_button.clicked.connect(self.show_gate_creator)
+        # Dimension view buttons
+        self.dimension_view.back_button.clicked.connect(self.navigate_to_gate_selection_view)
+        self.dimension_view.accept_button.clicked.connect(self.navigate_to_gate_creator_view)
 
-        # Connect button in gate selection view to switch view
-        self.gate_creator_view.back_button.clicked.connect(self.back_to_dimension_view)
-        self.gate_creator_view.save_button.clicked.connect(self.show_contact_form_view)
+        # Gate creator view buttons
+        self.gate_creator_view.back_button.clicked.connect(self.navigate_to_dimension_view)
+        self.gate_creator_view.save_button.clicked.connect(self.navigate_to_contact_form_view)
 
-        # Connect button in contact form view to switch view
-        self.connect_form_view.back_button.clicked.connect(self.back_to_gate_creator)
-        self.connect_form_view.submit_button.clicked.connect(self.back_to_start_view)
+        # Contact form view buttons
+        self.connect_form_view.back_button.clicked.connect(self.navigate_to_gate_creator_view)
+        self.connect_form_view.submit_button.clicked.connect(self.navigate_to_start_view)
 
+    # Navigation methods
+    def navigate_to_start_view(self):
+        """Navigates to the start view."""
+        self.stack.setCurrentIndex(self.START_VIEW)
 
-    def show_dimension_view(self):
-        self.stack.setCurrentWidget(self.dimension_view)
+    def navigate_to_gate_selection_view(self):
+        """Navigates to the gate selection view."""
+        self.stack.setCurrentIndex(self.GATE_SELECTION_VIEW)
 
-    def show_gate_selection_view(self):
-        self.stack.setCurrentWidget(self.gate_selection_view)
+    def navigate_to_dimension_view(self):
+        """Navigates to the dimension view."""
+        self.stack.setCurrentIndex(self.DIMENSION_VIEW)
 
-    def show_gate_creator(self):
-        self.stack.setCurrentWidget(self.gate_creator_view)
+    def navigate_to_gate_creator_view(self):
+        """Navigates to the gate creator view."""
+        self.stack.setCurrentIndex(self.GATE_CREATOR_VIEW)
 
-    def show_contact_form_view(self):
-        self.stack.setCurrentWidget(self.connect_form_view)
-
-    def back_to_start_view(self):
-        self.stack.setCurrentWidget(self.start_view)
-
-    def back_to_dimension_view(self):
-        self.stack.setCurrentWidget(self.dimension_view)
-
-    def back_to_gate_selection_view(self):
-        self.stack.setCurrentWidget(self.gate_selection_view)
-
-    def back_to_gate_creator(self):
-        self.stack.setCurrentWidget(self.gate_creator_view)
+    def navigate_to_contact_form_view(self):
+        """Navigates to the contact form view."""
+        self.stack.setCurrentIndex(self.CONTACT_FORM_VIEW)
 
 
 if __name__ == "__main__":

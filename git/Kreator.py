@@ -5,44 +5,47 @@ from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from Rozwijane_menu import ScrollableMenu
 from button import StyledButton
 
+
 class Kreator(QMainWindow):
+    WINDOW_WIDTH = 800
+    WINDOW_HEIGHT = 600
+    LEFT_PANEL_WIDTH = 400
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        self._setup_ui()
 
-        # Central widget setup
+    def _setup_ui(self):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
+        main_layout = QHBoxLayout(central_widget)
 
-        main_widget = QWidget()
-        main_layout = QHBoxLayout(main_widget)
+        left_panel = self._create_left_panel()
+        right_panel = self._create_right_panel()
 
+        main_layout.addWidget(left_panel)
+        main_layout.addWidget(right_panel)
+
+    def _create_left_panel(self):
         left_widget = QWidget()
-        left_widget.setFixedWidth(400)
+        left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
 
-        # Spacer to push content to vertical center
-        # left_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        navigation_menu = ScrollableMenu()
+        left_layout.addWidget(navigation_menu)
 
-        menu = ScrollableMenu()
-        left_layout.addWidget(menu)
+        return left_widget
 
-        # Spacer to keep the input fields centered, buttons remain at the bottom
-        # left_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
-
-        # Add left widget to splitter
-        main_layout.addWidget(left_widget)
-
-        # Right side layout
+    def _create_right_panel(self):
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # Right section with 3D view
         openGLWidget = QOpenGLWidget()
-        openGLWidget.setObjectName(u"openGLWidget")
+        openGLWidget.setObjectName("openGLWidget")
+        right_layout.addWidget(openGLWidget)
 
-        # Button section
         buttons_widget = QWidget()
         buttons_layout = QHBoxLayout(buttons_widget)
 
@@ -52,15 +55,12 @@ class Kreator(QMainWindow):
         buttons_layout.addWidget(self.back_button)
         buttons_layout.addWidget(self.save_button)
 
-        right_layout.addWidget(openGLWidget)
         right_layout.addWidget(buttons_widget)
-        main_layout.addWidget(right_widget)
 
-        # Adding layouts to main layout
-        main_layout.addWidget(right_widget)
+        return right_widget
 
-        m = QVBoxLayout(central_widget)
-        m.addWidget(main_widget)
+
+
 
 
 
