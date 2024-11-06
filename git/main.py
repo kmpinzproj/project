@@ -4,6 +4,7 @@ from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
 from Kreator import Kreator
+from Formularz_kontaktowy import ContactForm
 
 class MainApplication(QMainWindow):
     def __init__(self):
@@ -19,12 +20,14 @@ class MainApplication(QMainWindow):
         self.dimension_view = OknoWymiarow()
         self.gate_selection_view = WyborBramy()
         self.gate_creator_view = Kreator()
+        self.connect_form_view = ContactForm()
 
         # Add views to stack
         self.stack.addWidget(self.start_view)
         self.stack.addWidget(self.dimension_view)
         self.stack.addWidget(self.gate_selection_view)
         self.stack.addWidget(self.gate_creator_view)
+        self.stack.addWidget(self.connect_form_view)
 
         # Connect button in start view to switch view
         self.start_view.create_new_button.clicked.connect(self.show_gate_selection_view)
@@ -39,31 +42,36 @@ class MainApplication(QMainWindow):
 
         # Connect button in gate selection view to switch view
         self.gate_creator_view.back_button.clicked.connect(self.back_to_dimension_view)
-        self.gate_creator_view.save_button.clicked.connect(self.back_to_start_view)
+        self.gate_creator_view.save_button.clicked.connect(self.show_contact_form_view)
+
+        # Connect button in contact form view to switch view
+        self.connect_form_view.back_button.clicked.connect(self.back_to_gate_creator)
+        self.connect_form_view.submit_button.clicked.connect(self.back_to_start_view)
+
 
     def show_dimension_view(self):
-        # Switch to the dimension view
         self.stack.setCurrentWidget(self.dimension_view)
-
-    def back_to_start_view(self):
-        # Switch to the start view
-        self.stack.setCurrentWidget(self.start_view)
 
     def show_gate_selection_view(self):
-        # Switch to the gate selection
         self.stack.setCurrentWidget(self.gate_selection_view)
-
-    def back_to_dimension_view(self):
-        # Switch to the dimension view
-        self.stack.setCurrentWidget(self.dimension_view)
 
     def show_gate_creator(self):
         self.stack.setCurrentWidget(self.gate_creator_view)
 
+    def show_contact_form_view(self):
+        self.stack.setCurrentWidget(self.connect_form_view)
+
+    def back_to_start_view(self):
+        self.stack.setCurrentWidget(self.start_view)
+
+    def back_to_dimension_view(self):
+        self.stack.setCurrentWidget(self.dimension_view)
+
     def back_to_gate_selection_view(self):
         self.stack.setCurrentWidget(self.gate_selection_view)
 
-
+    def back_to_gate_creator(self):
+        self.stack.setCurrentWidget(self.gate_creator_view)
 
 
 if __name__ == "__main__":
