@@ -105,6 +105,23 @@ class OknoStartowe(QMainWindow):
         """Adds a vertical spacer to adjust vertical positioning of content."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
+    def resizeEvent(self, event):
+        """Adjust grid size in the project list dynamically."""
+        super().resizeEvent(event)
+        self._adjust_grid_size()
+
+    def _adjust_grid_size(self):
+        """Adjusts the grid size of QListWidget items based on available width."""
+        available_width = self.project_list.viewport().width()
+        icon_width = self.project_list.iconSize().width()
+        spacing = self.project_list.spacing()
+
+        # Calculate how many items fit in a row
+        items_per_row = max(1, available_width // (icon_width + spacing))
+
+        # Set grid size to distribute items evenly across the available width
+        self.project_list.setGridSize(QSize(available_width // items_per_row, icon_width + 30))
+
     def _load_project_files(self):
         """Loads .txt project files from the 'project/zapisane_projekty' directory into the project list."""
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -149,3 +166,4 @@ class OknoStartowe(QMainWindow):
             # Select the new item
             widget.set_selected(True)
             self.selected_item = widget
+
