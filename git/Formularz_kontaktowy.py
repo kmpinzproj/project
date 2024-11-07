@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QLineEdit, QTextEdit, QFormLayout, QMainWindow
+    QLineEdit, QTextEdit, QFormLayout, QMainWindow, QSizePolicy
 )
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
@@ -12,6 +12,7 @@ class ContactForm(QMainWindow):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 800, 600)
+        self.setMinimumSize(800, 600)  # Ustawienie minimalnego rozmiaru okna
 
         # Setup the main interface
         self.setup_ui()
@@ -29,6 +30,10 @@ class ContactForm(QMainWindow):
         main_layout.addWidget(navigation_panel)
         main_layout.addWidget(view_panel)
 
+        # Ustaw rozciąganie, aby lewy panel był szerszy
+        main_layout.setStretch(0, 3)
+        main_layout.setStretch(1, 2)
+
     def create_navigation_panel(self):
         # Define navigation panel components
         panel = QWidget()
@@ -44,10 +49,17 @@ class ContactForm(QMainWindow):
 
         # Form layout for contact information fields
         form_layout = QFormLayout()
+        form_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)  # Responsywność pól formularza
         name_input = QLineEdit()
         email_input = QLineEdit()
         phone_input = QLineEdit()
         comments_input = QTextEdit()
+
+        # Ustawienie polityki rozmiaru, aby pola formularza były responsywne
+        name_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        email_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        phone_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        comments_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         form_layout.addRow("Imię i nazwisko*", name_input)
         form_layout.addRow("Twój e-mail*", email_input)
@@ -70,16 +82,23 @@ class ContactForm(QMainWindow):
         layout.addLayout(form_layout)
         layout.addLayout(button_layout)  # Add centered button layout
 
+        # Ustawienie polityki rozmiaru dla panelu nawigacyjnego
+        panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         return panel
 
     def create_view_panel(self):
         # Define view panel (for 3D view) components here
         panel = QWidget()
         layout = QVBoxLayout(panel)
+
         placeholder_label = QLabel("Widok 3D (Placeholder)")
         placeholder_label.setAlignment(Qt.AlignCenter)
         placeholder_label.setFont(QFont("Arial", 12, QFont.Bold))
 
         layout.addWidget(placeholder_label)
+
+        # Ustawienie polityki rozmiaru, aby panel widoku 3D był elastyczny
+        panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         return panel

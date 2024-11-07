@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QMainWindow, QWidget, QFormLayout, QFrame,
                                QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-                               QGraphicsView)
+                               QGraphicsView, QSizePolicy)
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
 from button import StyledButton
@@ -15,6 +15,7 @@ class WyborBramy(QMainWindow):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
+        self.setMinimumSize(834, 559)  # Zachowanie minimalnego rozmiaru
 
         # Central widget setup
         central_widget = QWidget(self)
@@ -36,6 +37,10 @@ class WyborBramy(QMainWindow):
         # Button section
         self.setup_buttons(main_layout)
 
+        # Rozciąganie form layout
+        main_layout.setStretch(0, 1)
+        main_layout.setStretch(1, 0)
+
     def add_frame(self, title, description, row, role):
         """Adds a frame with given title and description to the specified row and role."""
         frame = self.create_inner_frame(title, description)
@@ -44,8 +49,8 @@ class WyborBramy(QMainWindow):
     def create_inner_frame(self, title, description):
         """Creates an individual frame for each door type with a title, description, and selection button."""
         frame = QFrame()
-        frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
-        frame.setMaximumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
+        frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))  # Zachowanie minimalnego rozmiaru dla ramki
+        frame.setMaximumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))  # Dodano ograniczenie maksymalnego rozmiaru
         frame.setStyleSheet("background-color: rgb(255, 249, 218);")
 
         vertical_layout = QVBoxLayout(frame)
@@ -63,9 +68,11 @@ class WyborBramy(QMainWindow):
         horizontal_layout = QHBoxLayout(frame_inner)
 
         graphics_view = QGraphicsView(frame_inner)
+        graphics_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         horizontal_layout.addWidget(graphics_view)
 
         button = QPushButton("Wybierz", frame_inner)
+        button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         horizontal_layout.addWidget(button)
 
         vertical_layout.addWidget(frame_inner)
@@ -97,9 +104,8 @@ class WyborBramy(QMainWindow):
         self.accept_button = StyledButton("Akceptuj")
 
         # Add buttons with centered alignment
-        buttons_layout.addWidget(self.back_button,
-                                 alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
-        buttons_layout.addWidget(self.accept_button,
-                                 alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
+        buttons_layout.addWidget(self.back_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        buttons_layout.addWidget(self.accept_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(buttons_widget)
+        buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # Przyciski mogą się rozciągać w poziomie

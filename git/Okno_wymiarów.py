@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QLabel,QLineEdit,
-    QVBoxLayout, QHBoxLayout,QSpacerItem, QSizePolicy
+    QMainWindow, QWidget, QLabel, QLineEdit,
+    QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
@@ -8,10 +8,9 @@ from button import StyledButton
 
 
 class OknoWymiarow(QMainWindow):
-    # Constants for window and panel dimensions
+    # Constants for window dimensions
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
-    LEFT_PANEL_WIDTH = 400
 
     def __init__(self):
         super().__init__()
@@ -35,10 +34,13 @@ class OknoWymiarow(QMainWindow):
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
 
+        # Ustawienie rozciągania: lewy panel nieco szerszy
+        main_layout.setStretch(0, 3)  # Lewy panel
+        main_layout.setStretch(1, 2)  # Prawy panel
+
     def _create_left_panel(self):
         """Creates the left panel with input fields and buttons."""
         left_widget = QWidget()
-        left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
 
         # Spacer to push content lower on the panel
@@ -64,6 +66,9 @@ class OknoWymiarow(QMainWindow):
         buttons_layout.addWidget(self.accept_button)
         left_layout.addLayout(buttons_layout)
 
+        # Ustaw politykę rozmiaru na Expanding, aby był elastyczny
+        left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         return left_widget
 
     def _create_right_panel(self):
@@ -80,6 +85,9 @@ class OknoWymiarow(QMainWindow):
         )
         instruction_label.setWordWrap(True)
         right_layout.addWidget(instruction_label)
+
+        # Ustaw politykę rozmiaru, aby prawy panel mógł się elastycznie rozszerzać
+        right_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         return right_widget
 

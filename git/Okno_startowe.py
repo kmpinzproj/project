@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
 )
 from button import StyledButton
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon, QColor
+from PySide6.QtGui import QIcon
 from CustomListWidgetItem import CustomListWidgetItem
 
 
@@ -13,7 +13,6 @@ class OknoStartowe(QMainWindow):
     # Constants for window and panel dimensions
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
-    LEFT_PANEL_WIDTH = 400
 
     def __init__(self):
         super().__init__()
@@ -42,10 +41,13 @@ class OknoStartowe(QMainWindow):
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
 
+        # Ustaw rozciąganie: lewy panel będzie bardziej sztywny, prawy bardziej elastyczny
+        main_layout.setStretch(0, 2)  # Lewy panel
+        main_layout.setStretch(1, 2)  # Prawy panel
+
     def _create_left_panel(self):
         """Creates the left panel with buttons for creating or opening projects."""
         left_widget = QWidget()
-        left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
 
         # Spacer to push content lower
@@ -60,6 +62,9 @@ class OknoStartowe(QMainWindow):
 
         # Spacer to keep buttons vertically centered
         self._add_spacer(left_layout)
+
+        # Ustaw politykę rozmiaru na Expanding, aby był elastyczny
+        left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         return left_widget
 
@@ -90,6 +95,9 @@ class OknoStartowe(QMainWindow):
         self.project_list.itemClicked.connect(self._toggle_item_selection)
 
         right_layout.addWidget(self.project_list)
+
+        # Ustaw politykę rozmiaru, aby projekt list mógł się elastycznie rozszerzać
+        self.project_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         return right_widget
 
