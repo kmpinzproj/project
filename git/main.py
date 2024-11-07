@@ -32,8 +32,8 @@ class MainApplication(QMainWindow):
     def _initialize_views(self):
         """Initializes all views used in the application."""
         self.start_view = OknoStartowe()
-        self.dimension_view = OknoWymiarow()
         self.gate_selection_view = WyborBramy()
+        self.dimension_view = OknoWymiarow()
         self.gate_creator_view = Kreator()
         self.connect_form_view = ContactForm()
 
@@ -70,6 +70,8 @@ class MainApplication(QMainWindow):
     def navigate_to_start_view(self):
         """Navigates to the start view."""
         self.stack.setCurrentIndex(self.START_VIEW)
+        print("Wymiary okna:", self.size())
+
 
     def navigate_to_gate_selection_view(self):
         """Navigates to the gate selection view."""

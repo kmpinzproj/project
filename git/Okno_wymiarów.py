@@ -8,14 +8,11 @@ from button import StyledButton
 
 
 class OknoWymiarow(QMainWindow):
-    # Constants for window dimensions
-    WINDOW_WIDTH = 800
-    WINDOW_HEIGHT = 600
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
-        self.setGeometry(100, 100, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        self.setGeometry(100, 100, 834, 559)
+        self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
         # Setup UI
         self._setup_ui()

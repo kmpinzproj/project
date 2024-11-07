@@ -8,14 +8,14 @@ from button import StyledButton
 
 
 class Kreator(QMainWindow):
-    WINDOW_WIDTH = 800
-    WINDOW_HEIGHT = 600
     LEFT_PANEL_WIDTH = 400
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
-        self.setGeometry(100, 100, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        self.setGeometry(100, 100, 834, 559)
+        self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
+
         self._setup_ui()
 
     def _setup_ui(self):

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QMainWindow, QWidget, QGridLayout, QFrame,
                                QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-                               QGraphicsView, QSizePolicy)
+                               QGraphicsView, QSizePolicy, QListWidget)
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
 from button import StyledButton
@@ -8,8 +8,8 @@ from button import StyledButton
 
 class WyborBramy(QMainWindow):
     # Constants for frame size
-    FRAME_WIDTH = 401
-    FRAME_HEIGHT = 231
+    FRAME_WIDTH = 390
+    FRAME_HEIGHT = 220
 
     def __init__(self):
         super().__init__()
@@ -39,6 +39,7 @@ class WyborBramy(QMainWindow):
         main_layout.setStretch(0, 1)
         main_layout.setStretch(1, 0)
 
+
     def add_frame(self, title, description, row, column):
         """Adds a frame with given title and description to the specified row and column in the grid layout."""
         frame = self.create_inner_frame(title, description)
@@ -64,8 +65,8 @@ class WyborBramy(QMainWindow):
         frame_inner = QFrame(frame)
         horizontal_layout = QHBoxLayout(frame_inner)
 
-        graphics_view = QGraphicsView(frame_inner)
-        graphics_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        graphics_view = QListWidget(frame_inner)
+        graphics_view.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         horizontal_layout.addWidget(graphics_view)
 
         button = QPushButton("Wybierz", frame_inner)

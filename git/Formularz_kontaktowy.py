@@ -11,8 +11,8 @@ class ContactForm(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
-        self.setGeometry(100, 100, 800, 600)
-        self.setMinimumSize(800, 600)  # Ustawienie minimalnego rozmiaru okna
+        self.setGeometry(100, 100, 834, 559)
+        self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
         # Setup the main interface
         self.setup_ui()
