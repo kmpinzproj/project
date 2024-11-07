@@ -1,9 +1,13 @@
 import os
 from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
-    QListWidget, QVBoxLayout, QHBoxLayout
+    QListWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem
 )
 from button import StyledButton
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon, QColor
+from CustomListWidgetItem import CustomListWidgetItem
+
 
 class OknoStartowe(QMainWindow):
     # Constants for window and panel dimensions
@@ -20,6 +24,9 @@ class OknoStartowe(QMainWindow):
         self._setup_ui()
         # Load project files into the project list
         self._load_project_files()
+
+        # Track selected item to toggle selection
+        self.selected_item = None
 
     def _setup_ui(self):
         """Configures the main layout and divides it into left and right panels."""
@@ -57,12 +64,31 @@ class OknoStartowe(QMainWindow):
         return left_widget
 
     def _create_right_panel(self):
-        """Creates the right panel with a project list."""
+        """Creates the right panel with a project list in icon mode."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # Project list widget
+        # Project list widget in icon mode
         self.project_list = QListWidget()
+        self.project_list.setViewMode(QListWidget.IconMode)  # Icon mode
+        self.project_list.setIconSize(QSize(64, 64))  # Set icon size
+        self.project_list.setSpacing(10)  # Space between icons
+        self.project_list.setSelectionMode(QListWidget.SingleSelection)  # Single selection only
+
+        # Remove default blue selection highlight
+        self.project_list.setStyleSheet("""
+            QListWidget::item:selected {
+                background-color: transparent;  /* Usuwa niebieskie tło przy zaznaczeniu */
+                border: none;                   /* Usuwa domyślną ramkę */
+            }
+            QListWidget::item {
+                selection-background-color: transparent;  /* Usuwa domyślne podświetlenie */
+            }
+        """)
+
+        # Connect click event to custom selection logic
+        self.project_list.itemClicked.connect(self._toggle_item_selection)
+
         right_layout.addWidget(self.project_list)
 
         return right_widget
@@ -73,23 +99,45 @@ class OknoStartowe(QMainWindow):
 
     def _load_project_files(self):
         """Loads .txt project files from the 'project/zapisane_projekty' directory into the project list."""
-        # Ustaw ścieżkę względną do folderu zapisaen_projekty
         base_dir = os.path.dirname(os.path.abspath(__file__))
         projects_dir = os.path.join(base_dir, '..', 'zapisane_projekty')
 
-        # Sprawdź, czy katalog istnieje, a jeśli nie, utwórz go
         if not os.path.exists(projects_dir):
             os.makedirs(projects_dir)
 
         # Wyczyść listę projektów
         self.project_list.clear()
 
-        # Przeszukaj folder i dodaj pliki .txt do listy projektów
+        # List all .txt files in the projects directory
         project_files = [f for f in os.listdir(projects_dir) if f.endswith(".txt")]
 
-        # Wyświetl pliki na liście projektów lub komunikat o braku plików
+        # Dodaj każdy plik jako element z ikoną
+        icon_path = "icon.png"  # Zmień na rzeczywistą ścieżkę do ikony
         if project_files:
             for file_name in project_files:
-                self.project_list.addItem(file_name)
+                custom_widget = CustomListWidgetItem(file_name, icon_path)
+                list_item = QListWidgetItem(self.project_list)
+                list_item.setSizeHint(custom_widget.sizeHint())
+                self.project_list.addItem(list_item)
+                self.project_list.setItemWidget(list_item, custom_widget)
         else:
-            self.project_list.addItem("Brak zapisanych projektów")
+            list_item = QListWidgetItem("Brak zapisanych projektów")
+            list_item.setFlags(Qt.NoItemFlags)  # Make it unselectable
+            self.project_list.addItem(list_item)
+
+    def _toggle_item_selection(self, item):
+        """Toggle selection state and apply red border for selected item."""
+        widget = self.project_list.itemWidget(item)
+
+        if self.selected_item == widget:  # Item is already selected
+            # Deselect the item
+            widget.set_selected(False)
+            self.selected_item = None
+        else:
+            # Deselect the previous item if any
+            if self.selected_item:
+                self.selected_item.set_selected(False)
+
+            # Select the new item
+            widget.set_selected(True)
+            self.selected_item = widget
