@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QMainWindow, QWidget, QFormLayout, QFrame,
+from PySide6.QtWidgets import (QMainWindow, QWidget, QGridLayout, QFrame,
                                QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
                                QGraphicsView, QSizePolicy)
 from PySide6.QtCore import QSize, Qt
@@ -22,35 +22,32 @@ class WyborBramy(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
-        # Form layout setup
-        self.form_layout = QFormLayout()
-        main_layout.addLayout(self.form_layout)
+        # Grid layout for frames
+        self.grid_layout = QGridLayout()
+        main_layout.addLayout(self.grid_layout)
 
         # Frames setup
-        self.add_frame("Brama Rozwierana", "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolnego naproża...", 0,
-                       QFormLayout.LabelRole)
-        self.add_frame("Brama Roletowa", "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność...", 0,
-                       QFormLayout.FieldRole)
-        self.add_frame("Brama Uchylna", "Prostota, tradycja i nowoczesność...", 1, QFormLayout.LabelRole)
-        self.add_frame("Brama Segmentowa", "Najbardziej komfortowe rozwiązanie do garażu...", 1, QFormLayout.FieldRole)
+        self.add_frame("Brama Rozwierana", "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolnego naproża...", 0, 0)
+        self.add_frame("Brama Roletowa", "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność...", 0, 1)
+        self.add_frame("Brama Uchylna", "Prostota, tradycja i nowoczesność...", 1, 0)
+        self.add_frame("Brama Segmentowa", "Najbardziej komfortowe rozwiązanie do garażu...", 1, 1)
 
         # Button section
         self.setup_buttons(main_layout)
 
-        # Rozciąganie form layout
+        # Rozciąganie grid layout
         main_layout.setStretch(0, 1)
         main_layout.setStretch(1, 0)
 
-    def add_frame(self, title, description, row, role):
-        """Adds a frame with given title and description to the specified row and role."""
+    def add_frame(self, title, description, row, column):
+        """Adds a frame with given title and description to the specified row and column in the grid layout."""
         frame = self.create_inner_frame(title, description)
-        self.form_layout.setWidget(row, role, frame)
+        self.grid_layout.addWidget(frame, row, column)
 
     def create_inner_frame(self, title, description):
         """Creates an individual frame for each door type with a title, description, and selection button."""
         frame = QFrame()
-        frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))  # Zachowanie minimalnego rozmiaru dla ramki
-        frame.setMaximumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))  # Dodano ograniczenie maksymalnego rozmiaru
+        frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
         frame.setStyleSheet("background-color: rgb(255, 249, 218);")
 
         vertical_layout = QVBoxLayout(frame)
@@ -108,4 +105,4 @@ class WyborBramy(QMainWindow):
         buttons_layout.addWidget(self.accept_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(buttons_widget)
-        buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # Przyciski mogą się rozciągać w poziomie
+        buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
