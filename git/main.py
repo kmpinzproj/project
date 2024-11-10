@@ -1,5 +1,7 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt
 from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
@@ -18,6 +20,12 @@ class MainApplication(QMainWindow):
         super().__init__()
         self.setWindowTitle("Main Application")
 
+        self.background_label = QLabel(self)
+        self.background_label.setScaledContents(True)
+
+        self.original_pixmap = QPixmap("tło.jpg")  # Wczytaj obraz oryginalny
+        self.resize_background()
+
         # Initialize QStackedWidget and set it as central widget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -28,6 +36,31 @@ class MainApplication(QMainWindow):
 
         # Set up connections for buttons
         self._setup_connections()
+
+    def resizeEvent(self, event):
+        """Dostosowuje obraz tła do rozmiaru okna przy zmianie jego rozmiaru."""
+        super().resizeEvent(event)
+        self.resize_background()
+
+    def resize_background(self):
+        """Skaluje tło, aby dopasować je do rozmiaru okna, zachowując proporcje i przycinając nadmiar."""
+        # Ustaw QLabel na pełny rozmiar okna
+        self.background_label.setGeometry(self.rect())
+
+        # Oblicz proporcje okna i obrazu
+        window_ratio = self.width() / self.height()
+        pixmap_ratio = self.original_pixmap.width() / self.original_pixmap.height()
+
+        # Dopasowanie szerokości lub wysokości, zachowując proporcje obrazu
+        if window_ratio > pixmap_ratio:
+            # Okno jest szersze niż obraz - dostosuj szerokość
+            scaled_pixmap = self.original_pixmap.scaledToHeight(self.height(), Qt.SmoothTransformation)
+        else:
+            # Okno jest wyższe niż obraz - dostosuj wysokość
+            scaled_pixmap = self.original_pixmap.scaledToWidth(self.width(), Qt.SmoothTransformation)
+
+        # Ustaw przeskalowany obraz jako tło
+        self.background_label.setPixmap(scaled_pixmap)
 
     def _initialize_views(self):
         """Initializes all views used in the application."""
