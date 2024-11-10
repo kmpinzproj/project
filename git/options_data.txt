@@ -1,0 +1,32 @@
+[Brama Segmentowa]
+Rodzaj przetłoczenia: Bez przetłoczenia, Średnie, Niskie, Kasetony
+Struktura powierzchni: Silkgrain, Woodgrain, Smoothgrain
+Kolor Standardowy: Biały, Brąz, Złoty dąb, Orzech, Mahoń, Dąb antyczny, Macore, Dąb ciemny, Dąb Bagienny, Tabasco, Siena rosso, Winchester, Kremowy biały, Dark Green, Metbrush silver, Silbergrau, Sapeli, Siena pl
+Kolor RAL: RAL 1015, RAL 1023, RAL 3000, RAL 3003, RAL5003, RAL 5010, RAL 5011, RAL 5014, RAL 6005, RAL 6009, RAL 6010, RAL 7016, RAL 7030, RAL 7040, RAL 8001, RAL 8003, RAL 8028, RAL 9006
+Sposób otwierania drzwi: Ręczne, Automatyczne
+Opcje dodatkowe: Przeszklenie, Wzór 1, Wzór 2, Wzór 3, Drzwi w bramie, Samozamykacz, Zamykane ręcznie, Klamka do bramy, Klamka 1, Klamka 2, Klamka 3, Klamka 4, Kratka wentylacyjna, Lewa, Prawa, Obustronna, Rygiel
+
+[Brama Roletowa]
+Wysokość profili: 77 mm, 100 mm
+Kolor Standardowy: Złoty dąb, Ciemny dąb, Niebieski RAL 5010, Jasnoniebieski RAL 5012, Popielaty RAL 7012, Ciemnobrązowy RAL 8019, Srebrny RAL 9006, Biały RAL 9010, Ciemny srebrny RAL 9007
+Kolor RAL: RAL 5010
+Sposób otwierania bramy: Automatycznie (kluczyk), Zdalne sterowanie, Fotokomórka
+Przeszklenia: Wzór 1, Wzór 2, Wzór 3
+
+[Brama Rozwierana]
+Ilość skrzydeł: Dwuskrzydłowe, Jednoskrzydłowe prawe, Jednoskrzydłowe lewe
+Ocieplenie: Brama ocieplana, Brama nieocieplana
+Układ wypełnienia: Poziome, Pionowe, Jodełka w górę, Jodełka w dół
+Kolor Standardowy: Biały RAL 9010, Złoty dąb, Orzech, Ciemnobrązowy RAL 8017, Srebrny RAL 9006, Antracyt RAL 7016, Brązowy RAL 8014, Bordo RAL 2701, RAL
+Kolor RAL: RAL 1015, RAL 1023, RAL 3000, RAL 3003, RAL5003, RAL 5010, RAL 5011, RAL 5014, RAL 6005, RAL 6009, RAL 6010, RAL 7016, RAL 7030, RAL 7040, RAL 8001, RAL 8003, RAL 8028, RAL 9006
+Przeszklenia: Tak, Okna poziome, Okna pionowe
+Opcje dodatkowe: Rygiel trzypunktowy, Kratki wentylacyjne, Dodatkowe zamknięcie na kłódkę
+
+[Brama Uchylna]
+Układ wypełnienia: Pionowe, Poziome, Jodełka w górę
+Kolor Standardowy: Złoty dąb, Orzech, Biały RAL 9010, Antracyt RAL 7016, Ciemnobrązowy RAL 8017, Brązowy RAL 8014, Srebrny RAL 9006, Szary RAL 7035, Zielony RAL 6005, Bordo RAL 2701, RAL
+Kolor RAL: RAL 1015, RAL 1023, RAL 3000, RAL 3003, RAL5003, RAL 5010, RAL 5011, RAL 5014, RAL 6005, RAL 6009, RAL 6010, RAL 7016, RAL 7030, RAL 7040, RAL 8001, RAL 8003, RAL 8028, RAL 9006
+Sposób otwierania drzwi: Ręczne, Automatyczne
+Przeszklenia: Tak, Okna poziome, Okna pionowe
+Drzwi przejściowe: Tak, Samozamykacz
+Opcje dodatkowe: Rygiel trzypunktowy, Kratki wentylacyjne, Dodatkowy rygiel
