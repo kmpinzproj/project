@@ -16,6 +16,9 @@ class ScrollableMenu(QWidget):
         self.setWindowTitle("Przewijane menu")
         self.resize(400, 600)
 
+        # Przechowujemy typ bramy, aby załadować odpowiednie opcje
+        self.gate_type = "Brama Segmentowa"
+
         # Ustawienie głównego layoutu
         layout = QVBoxLayout(self)
 
@@ -27,26 +30,54 @@ class ScrollableMenu(QWidget):
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
 
-        # Lista pól z opcjami
-        options_data = {
-            "Układ wypełnienia": ["Pionowe", "Poziome", "Jodełka w górę"],
-            "Kolor": ["Biały", "Brąz", "Złoty dąb", "Orzech", "Mahoń", "Dąb antyczny", "Dąb ciemny"],
-            "Sposób otwierania drzwi": ["Ręczne", "Automatyczne"],
-            "Przeszklenia": ["Tak", "Okna poziome", "Okna pionowe"],
-            "Drzwi przejściowe": ["Tak"],
-            "Opcje dodatkowe": ["Rygiel trzypunktowy", "Kratki wentylacyjne", "Dodatkowy rygiel"]
-        }
+        # Wczytaj dane z pliku
+        options_data = self.load_options_data("options_data.txt")
 
-        # Tworzenie pól na podstawie danych
-        for field_name, options in options_data.items():
-            field_group = self._create_field_group(field_name, options)
-            content_layout.addWidget(field_group)
+        # Tworzenie pól na podstawie danych dla wybranej bramy
+        if self.gate_type in options_data:
+            for field_name, options in options_data[self.gate_type].items():
+                field_group = self._create_field_group(field_name, options)
+                content_layout.addWidget(field_group)
+        else:
+            # W przypadku braku danych dla wybranej bramy wyświetl komunikat
+            no_data_label = QLabel(f"Brak danych dla bramy typu: {self.gate_type}")
+            content_layout.addWidget(no_data_label)
 
         scroll_area.setWidget(content_widget)
         layout.addWidget(scroll_area)
 
+    def load_options_data(self, filename):
+        """Wczytuje dane z pliku txt i zwraca jako słownik z opcjami dla różnych bram."""
+        options_data = {}
+        current_gate = None
+
+        with open(filename, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # Rozpoznaj nową bramę na podstawie nagłówka w nawiasach kwadratowych
+                if line.startswith('[') and line.endswith(']'):
+                    current_gate = line[1:-1]  # Nazwa bramy
+                    options_data[current_gate] = {}
+                elif current_gate:
+                    # Rozdziel kategorię opcji i wartości
+                    if line.startswith("Kolor Standardowy"):
+                        field_name, colors = line.split(": ", 1)
+                        options_data[current_gate].setdefault("Kolor", {}).update(
+                            {"Kolor Standardowy": colors.split(", ")})
+                    elif line.startswith("Kolor RAL"):
+                        field_name, colors = line.split(": ", 1)
+                        options_data[current_gate].setdefault("Kolor", {}).update({"Kolor RAL": colors.split(", ")})
+                    elif ': ' in line:
+                        field_name, options = line.split(': ', 1)
+                        options_data[current_gate][field_name] = options.split(', ')
+
+        return options_data
+
     def _create_field_group(self, field_name, options):
-        """Creates a group of options with a toggle button and checkboxes."""
+        """Creates a group of options with a toggle button and checkboxes, with support for nested options."""
         field_group = QGroupBox()
         field_group.setFixedHeight(self.FIELD_HEIGHT)
         field_layout = QVBoxLayout(field_group)
@@ -64,8 +95,12 @@ class ScrollableMenu(QWidget):
         # Add header and options
         field_layout.addLayout(header_layout)
 
-        # Hidden options widget
-        options_widget = self._create_options_widget(options)
+        # Tworzenie zagnieżdżonej struktury dla opcji Kolor
+        if "Kolor" in field_name:
+            options_widget = self._create_color_options_widget(options)
+        else:
+            options_widget = self._create_options_widget(options)
+
         options_widget.setVisible(False)
         field_layout.addWidget(options_widget)
 
@@ -73,6 +108,27 @@ class ScrollableMenu(QWidget):
         toggle_button.clicked.connect(lambda: self.toggle_options(field_group, options_widget, toggle_button))
 
         return field_group
+
+    def _create_color_options_widget(self, options):
+        """Creates a nested options widget for color selection."""
+        color_widget = QWidget()
+        color_layout = QVBoxLayout(color_widget)
+
+        # Dodanie opcji "Kolor Standardowy"
+        standard_group = QGroupBox("Kolor Standardowy")
+        standard_layout = QVBoxLayout(standard_group)
+        for color in options.get("Kolor Standardowy", []):
+            standard_layout.addWidget(QCheckBox(color))
+        color_layout.addWidget(standard_group)
+
+        # Dodanie opcji "Kolor RAL"
+        ral_group = QGroupBox("Kolor RAL")
+        ral_layout = QVBoxLayout(ral_group)
+        for color in options.get("Kolor RAL", []):
+            ral_layout.addWidget(QCheckBox(color))
+        color_layout.addWidget(ral_group)
+
+        return color_widget
 
     def _create_toggle_button(self):
         """Creates a toggle button for expanding/collapsing options."""

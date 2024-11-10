@@ -27,10 +27,10 @@ class WyborBramy(QMainWindow):
         main_layout.addLayout(self.grid_layout)
 
         # Frames setup
-        self.add_frame("Brama Rozwierana", "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolnego naproża...", 0, 0)
-        self.add_frame("Brama Roletowa", "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność...", 0, 1)
-        self.add_frame("Brama Uchylna", "Prostota, tradycja i nowoczesność...", 1, 0)
-        self.add_frame("Brama Segmentowa", "Najbardziej komfortowe rozwiązanie do garażu...", 1, 1)
+        self.add_frame("Brama Rozwierana", "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolego naproża. Można zamontować je praktycznie w każdym garażu. Ekonomiczne rozwiązanie za rozsądną cenę.", 0, 0)
+        self.add_frame("Brama Roletowa", "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność. Oszczędność miejsca w garażu i na podjeździe, a zarazem napęd elektryczny w standardzie.", 0, 1)
+        self.add_frame("Brama Uchylna", "Prostota , tradycja i nowoczesność. Najczęściej stosowane w nieocieplonych garażach wolnostojących lub w budynkach wielomieszkaniowych.", 1, 0)
+        self.add_frame("Brama Segmentowa", "Najbardziej komfortowe rozwiązanie do garażu. Otwierane pionowo w górę oszczędzają miejsce przed i wewnątrz garażu. Ciepłe i ciche polecane do garaży ogrzewanych.", 1, 1)
 
         # Button section
         self.setup_buttons(main_layout)
@@ -49,7 +49,7 @@ class WyborBramy(QMainWindow):
         """Creates an individual frame for each door type with a title, description, and selection button."""
         frame = QFrame()
         frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
-        frame.setStyleSheet("background-color: rgb(255, 249, 218);")
+        frame.setStyleSheet("background-color: rgb(121, 121, 121);")
 
         vertical_layout = QVBoxLayout(frame)
 
@@ -65,11 +65,11 @@ class WyborBramy(QMainWindow):
         frame_inner = QFrame(frame)
         horizontal_layout = QHBoxLayout(frame_inner)
 
-        graphics_view = QListWidget(frame_inner)
-        graphics_view.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        horizontal_layout.addWidget(graphics_view)
+        # graphics_view = QListWidget(frame_inner)
+        # graphics_view.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        # horizontal_layout.addWidget(graphics_view)
 
-        button = QPushButton("Wybierz", frame_inner)
+        button = StyledButton("Wybierz", frame_inner)
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         horizontal_layout.addWidget(button)
 

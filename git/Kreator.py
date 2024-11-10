@@ -45,6 +45,7 @@ class Kreator(QMainWindow):
 
         openGLWidget = QOpenGLWidget()
         openGLWidget.setObjectName("openGLWidget")
+        openGLWidget.setMinimumSize(400,400)
         right_layout.addWidget(openGLWidget)
 
         buttons_widget = QWidget()

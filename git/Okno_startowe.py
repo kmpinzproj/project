@@ -77,8 +77,12 @@ class OknoStartowe(QMainWindow):
         self.project_list.setSpacing(10)  # Space between icons
         self.project_list.setSelectionMode(QListWidget.SingleSelection)  # Single selection only
 
-        # Remove default blue selection highlight
+        # Ustawienie przezroczystości tła
         self.project_list.setStyleSheet("""
+            QListWidget {
+                background-color: rgba(80, 80, 80, 0.8);  /* Białe tło z przezroczystością 80% */
+                border: none;
+            }
             QListWidget::item:selected {
                 background-color: transparent;  /* Usuwa niebieskie tło przy zaznaczeniu */
                 border: none;                   /* Usuwa domyślną ramkę */

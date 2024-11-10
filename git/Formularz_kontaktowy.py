@@ -31,7 +31,7 @@ class ContactForm(QMainWindow):
         main_layout.addWidget(view_panel)
 
         # Ustaw rozciąganie, aby lewy panel był szerszy
-        main_layout.setStretch(0, 3)
+        main_layout.setStretch(0, 2)
         main_layout.setStretch(1, 2)
 
     def create_navigation_panel(self):
@@ -41,15 +41,25 @@ class ContactForm(QMainWindow):
 
         # Title and subtitle
         title_label = QLabel("Segmentowe. Wyślij zapytanie.")
-        title_label.setFont(QFont("Arial", 14, QFont.Bold))
+        title_label.setFont(QFont("Arial", 16, QFont.Bold))
         subtitle_label = QLabel("Wypełnij formularz kontaktowy. Nasz konsultant skontaktuje się z Tobą.")
 
         layout.addWidget(title_label)
         layout.addWidget(subtitle_label)
 
-        # Form layout for contact information fields
-        form_layout = QFormLayout()
-        form_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)  # Responsywność pól formularza
+        # Nowy layout dla formularza z etykietami nad polami
+        form_layout = QVBoxLayout()
+
+        # Funkcja pomocnicza do tworzenia pól z etykietami nad nimi
+        def create_field(label_text, widget):
+            field_layout = QVBoxLayout()
+            label = QLabel(label_text)
+            label.setFont(QFont("Arial", 14))
+            field_layout.addWidget(label)
+            field_layout.addWidget(widget)
+            return field_layout
+
+        # Create input fields
         name_input = QLineEdit()
         email_input = QLineEdit()
         phone_input = QLineEdit()
@@ -61,14 +71,32 @@ class ContactForm(QMainWindow):
         phone_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         comments_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        form_layout.addRow("Imię i nazwisko*", name_input)
-        form_layout.addRow("Twój e-mail*", email_input)
-        form_layout.addRow("Telefon*", phone_input)
-        form_layout.addRow("Dodatkowe uwagi", comments_input)
+        # Dodanie pól z etykietami nad nimi do układu formularza
+        form_layout.addLayout(create_field("Imię i nazwisko*", name_input))
+        form_layout.addLayout(create_field("Twój e-mail*", email_input))
+        form_layout.addLayout(create_field("Telefon*", phone_input))
+        form_layout.addLayout(create_field("Dodatkowe uwagi", comments_input))
 
         # Button layout centered at the bottom
         button_layout = QHBoxLayout()
         button_layout.setAlignment(Qt.AlignCenter)
+
+        # Define buttons
+        self.back_button = StyledButton("Cofnij")
+        self.submit_button = StyledButton("Wyślij")
+
+        # Add buttons to the button layout
+        button_layout.addWidget(self.back_button)
+        button_layout.addWidget(self.submit_button)
+
+        # Adding layouts and widgets to the left layout
+        layout.addLayout(form_layout)
+        layout.addLayout(button_layout)  # Add centered button layout
+
+        # Ustawienie polityki rozmiaru dla panelu nawigacyjnego
+        panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        return panel
 
         # Define buttons
         self.back_button = StyledButton("Cofnij")
