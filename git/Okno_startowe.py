@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
     QListWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem
@@ -16,155 +17,126 @@ class OknoStartowe(QMainWindow):
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
-        # Setup UI
+        # Ustawienia główne i UI
+        self.selected_item = None
         self._setup_ui()
-        # Load project files into the project list
         self._load_project_files()
 
-        # Track selected item to toggle selection
-        self.selected_item = None
-
     def _setup_ui(self):
-        """Configures the main layout and divides it into left and right panels."""
+        """Konfiguruje główny layout i dzieli na panele lewe i prawe."""
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
-
         main_layout = QHBoxLayout(central_widget)
 
-        # Create and add left and right panels
+        # Tworzenie paneli lewego i prawego
         left_panel = self._create_left_panel()
         right_panel = self._create_right_panel()
 
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
 
-        # Ustaw rozciąganie: lewy panel będzie bardziej sztywny, prawy bardziej elastyczny
         main_layout.setStretch(0, 2)  # Lewy panel
         main_layout.setStretch(1, 2)  # Prawy panel
 
     def _create_left_panel(self):
-        """Creates the left panel with buttons for creating or opening projects."""
+        """Tworzy lewy panel z przyciskami do zarządzania projektami."""
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
-        # Spacer to push content lower
+        # Dodanie odstępów
         self._add_spacer(left_layout)
 
-        # Buttons for creating and opening projects
+        # Przycisk tworzenia i otwierania projektów
         self.create_new_button = StyledButton("Stwórz nowy")
         self.open_saved_button = StyledButton("Otwórz zapisany")
-
         left_layout.addWidget(self.create_new_button)
         left_layout.addWidget(self.open_saved_button)
 
-        # Spacer to keep buttons vertically centered
+        # Dodatkowy odstęp dla wyśrodkowania
         self._add_spacer(left_layout)
-
-        # Ustaw politykę rozmiaru na Expanding, aby był elastyczny
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         return left_widget
 
     def _create_right_panel(self):
-        """Creates the right panel with a project list in icon mode."""
+        """Tworzy prawy panel z listą projektów w trybie ikon."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # Project list widget in icon mode
+        # Lista projektów w trybie ikon
         self.project_list = QListWidget()
-        self.project_list.setViewMode(QListWidget.IconMode)  # Icon mode
-        self.project_list.setIconSize(QSize(64, 64))  # Set icon size
-        self.project_list.setSpacing(10)  # Space between icons
-        self.project_list.setSelectionMode(QListWidget.SingleSelection)  # Single selection only
+        self._configure_project_list_style()
+        self.project_list.itemClicked.connect(self._toggle_item_selection)
+        right_layout.addWidget(self.project_list)
+        self.project_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        return right_widget
 
-        # Ustawienie przezroczystości tła
+    def _configure_project_list_style(self):
+        """Ustawienia stylu i trybu dla QListWidget z projektami."""
+        self.project_list.setViewMode(QListWidget.IconMode)
+        self.project_list.setIconSize(QSize(64, 64))
+        self.project_list.setSpacing(10)
+        self.project_list.setSelectionMode(QListWidget.SingleSelection)
         self.project_list.setStyleSheet("""
             QListWidget {
-                background-color: rgba(80, 80, 80, 0.8);  /* Białe tło z przezroczystością 80% */
+                background-color: rgba(80, 80, 80, 0.8);
                 border: none;
             }
             QListWidget::item:selected {
-                background-color: transparent;  /* Usuwa niebieskie tło przy zaznaczeniu */
-                border: none;                   /* Usuwa domyślną ramkę */
+                background-color: transparent;
+                border: none;
             }
             QListWidget::item {
-                selection-background-color: transparent;  /* Usuwa domyślne podświetlenie */
+                selection-background-color: transparent;
             }
         """)
 
-        # Connect click event to custom selection logic
-        self.project_list.itemClicked.connect(self._toggle_item_selection)
-
-        right_layout.addWidget(self.project_list)
-
-        # Ustaw politykę rozmiaru, aby projekt list mógł się elastycznie rozszerzać
-        self.project_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        return right_widget
-
     def _add_spacer(self, layout):
-        """Adds a vertical spacer to adjust vertical positioning of content."""
+        """Dodaje odstęp pionowy do ustawienia pozycji elementów."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def resizeEvent(self, event):
-        """Adjust grid size in the project list dynamically."""
+        """Dostosowuje rozmiar siatki ikon dynamicznie przy zmianie rozmiaru."""
         super().resizeEvent(event)
         self._adjust_grid_size()
 
     def _adjust_grid_size(self):
-        """Adjusts the grid size of QListWidget items based on available width."""
+        """Dostosowuje rozmiar siatki elementów QListWidget na podstawie dostępnej szerokości."""
         available_width = self.project_list.viewport().width()
         icon_width = self.project_list.iconSize().width()
         spacing = self.project_list.spacing()
-
-        # Calculate how many items fit in a row
         items_per_row = max(1, available_width // (icon_width + spacing))
-
-        # Set grid size to distribute items evenly across the available width
         self.project_list.setGridSize(QSize(available_width // items_per_row, icon_width + 30))
 
     def _load_project_files(self):
-        """Loads .txt project files from the 'project/zapisane_projekty' directory into the project list."""
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        projects_dir = os.path.join(base_dir, '..', 'zapisane_projekty')
+        """Ładuje pliki projektów .txt z katalogu 'zapisane_projekty' do listy projektów."""
+        base_dir = Path(__file__).resolve().parent
+        projects_dir = base_dir / '..' / 'zapisane_projekty'
+        projects_dir.mkdir(exist_ok=True)
 
-        if not os.path.exists(projects_dir):
-            os.makedirs(projects_dir)
-
-        # Wyczyść listę projektów
         self.project_list.clear()
+        project_files = list(projects_dir.glob("*.txt"))
+        icon_path = "icon.png"  # Ścieżka do ikony
 
-        # List all .txt files in the projects directory
-        project_files = [f for f in os.listdir(projects_dir) if f.endswith(".txt")]
-
-        # Dodaj każdy plik jako element z ikoną
-        icon_path = "icon.png"  # Zmień na rzeczywistą ścieżkę do ikony
         if project_files:
-            for file_name in project_files:
-                custom_widget = CustomListWidgetItem(file_name, icon_path)
+            for file_path in project_files:
+                custom_widget = CustomListWidgetItem(file_path.stem, icon_path)
                 list_item = QListWidgetItem(self.project_list)
                 list_item.setSizeHint(custom_widget.sizeHint())
                 self.project_list.addItem(list_item)
                 self.project_list.setItemWidget(list_item, custom_widget)
         else:
             list_item = QListWidgetItem("Brak zapisanych projektów")
-            list_item.setFlags(Qt.NoItemFlags)  # Make it unselectable
+            list_item.setFlags(Qt.NoItemFlags)
             self.project_list.addItem(list_item)
 
     def _toggle_item_selection(self, item):
-        """Toggle selection state and apply red border for selected item."""
+        """Przełącza stan zaznaczenia elementu i stosuje czerwoną ramkę dla zaznaczonego."""
         widget = self.project_list.itemWidget(item)
-
-        if self.selected_item == widget:  # Item is already selected
-            # Deselect the item
+        if self.selected_item == widget:
             widget.set_selected(False)
             self.selected_item = None
         else:
-            # Deselect the previous item if any
             if self.selected_item:
                 self.selected_item.set_selected(False)
-
-            # Select the new item
             widget.set_selected(True)
             self.selected_item = widget
-
