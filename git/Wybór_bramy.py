@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import (QMainWindow, QWidget, QGridLayout, QFrame,
-                               QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-                               QGraphicsView, QSizePolicy, QListWidget)
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QGridLayout, QFrame, QVBoxLayout,
+    QHBoxLayout, QLabel, QPushButton, QSizePolicy
+)
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
 from button import StyledButton
@@ -28,11 +29,18 @@ class WyborBramy(QMainWindow):
         self.grid_layout = QGridLayout()
         main_layout.addLayout(self.grid_layout)
 
-        # Frames setup
-        self.add_frame("Brama Rozwierana", "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolego naproża. Można zamontować je praktycznie w każdym garażu. Ekonomiczne rozwiązanie za rozsądną cenę.", 0, 0)
-        self.add_frame("Brama Roletowa", "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność. Oszczędność miejsca w garażu i na podjeździe, a zarazem napęd elektryczny w standardzie.", 0, 1)
-        self.add_frame("Brama Uchylna", "Prostota , tradycja i nowoczesność. Najczęściej stosowane w nieocieplonych garażach wolnostojących lub w budynkach wielomieszkaniowych.", 1, 0)
-        self.add_frame("Brama Segmentowa", "Najbardziej komfortowe rozwiązanie do garażu. Otwierane pionowo w górę oszczędzają miejsce przed i wewnątrz garażu. Ciepłe i ciche polecane do garaży ogrzewanych.", 1, 1)
+        # Frames setup with dictionary for easier updates
+        gates = {
+            "Brama Rozwierana": "Nie wymagają wolnego miejsca wewnątrz garażu oraz wolego naproża. Można zamontować je praktycznie w każdym garażu. Ekonomiczne rozwiązanie za rozsądną cenę.",
+            "Brama Roletowa": "Odpowiednie rozwiązanie dla osób, które cenią funkcjonalność. Oszczędność miejsca w garażu i na podjeździe, a zarazem napęd elektryczny w standardzie.",
+            "Brama Uchylna": "Prostota , tradycja i nowoczesność. Najczęściej stosowane w nieocieplonych garażach wolnostojących lub w budynkach wielomieszkaniowych.",
+            "Brama Segmentowa": "Najbardziej komfortowe rozwiązanie do garażu. Otwierane pionowo w górę oszczędzają miejsce przed i wewnątrz garażu. Ciepłe i ciche polecane do garaży ogrzewanych."
+        }
+
+        # Dynamically add frames from the gates dictionary
+        for index, (title, description) in enumerate(gates.items()):
+            row, column = divmod(index, 2)  # Determine row and column
+            self.add_frame(title, description, row, column)
 
         # Button section
         self.setup_buttons(main_layout)
@@ -40,7 +48,6 @@ class WyborBramy(QMainWindow):
         # Rozciąganie grid layout
         main_layout.setStretch(0, 1)
         main_layout.setStretch(1, 0)
-
 
     def add_frame(self, title, description, row, column):
         """Adds a frame with given title and description to the specified row and column in the grid layout."""
@@ -63,13 +70,13 @@ class WyborBramy(QMainWindow):
         label_description = self.create_description_label(description)
         vertical_layout.addWidget(label_description)
 
-        # Inner frame with graphics view and button
+        # Inner frame with selection button
         frame_inner = QFrame(frame)
         horizontal_layout = QHBoxLayout(frame_inner)
 
         button = StyledButton("Wybierz", frame_inner)
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        button.clicked.connect(lambda _, g=title: self.select_gate(g))  # Dodane połączenie przycisku z metodą select_gate
+        button.clicked.connect(lambda _, g=title: self.select_gate(g))  # Connect button to select_gate method
         horizontal_layout.addWidget(button)
 
         vertical_layout.addWidget(frame_inner)
@@ -108,6 +115,6 @@ class WyborBramy(QMainWindow):
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def select_gate(self, gate_type):
-        """Wywołuje przekazaną funkcję, aby zapisać wybrany typ bramy, i zamyka widok."""
+        """Calls the provided function to save the selected gate type and closes the view."""
         self.set_gate_type_func(gate_type)
         self.close()
