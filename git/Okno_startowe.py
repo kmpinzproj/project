@@ -1,13 +1,13 @@
-import os
 from pathlib import Path
+
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
     QListWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem
 )
-from button import StyledButton
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
+
 from CustomListWidgetItem import CustomListWidgetItem
+from button import StyledButton
 
 
 class OknoStartowe(QMainWindow):
@@ -90,7 +90,8 @@ class OknoStartowe(QMainWindow):
             }
         """)
 
-    def _add_spacer(self, layout):
+    @staticmethod
+    def _add_spacer(layout):
         """Dodaje odstęp pionowy do ustawienia pozycji elementów."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 

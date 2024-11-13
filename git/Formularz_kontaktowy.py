@@ -9,11 +9,17 @@ from button import StyledButton
 class ContactForm(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.submit_button = None
+        self.back_button = None
+        self.comments_input = None
+        self.email_input = None
+        self.name_input = None
+        self.phone_input = None
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
 
-        # Setup the main interface
+        # Set up the main interface
         self.setup_ui()
 
     def setup_ui(self):
@@ -69,7 +75,8 @@ class ContactForm(QMainWindow):
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return panel
 
-    def _create_form_field(self, label_text, widget, layout):
+    @staticmethod
+    def _create_form_field(label_text, widget, layout):
         """Helper function to add a labeled form field to a layout."""
         field_layout = QVBoxLayout()
         label = QLabel(label_text)
@@ -80,7 +87,8 @@ class ContactForm(QMainWindow):
         layout.addLayout(field_layout)
         return widget
 
-    def create_view_panel(self):
+    @staticmethod
+    def create_view_panel():
         """Creates the right panel placeholder for a 3D view."""
         panel = QWidget()
         layout = QVBoxLayout(panel)

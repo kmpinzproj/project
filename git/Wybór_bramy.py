@@ -1,9 +1,10 @@
-from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QGridLayout, QFrame, QVBoxLayout,
-    QHBoxLayout, QLabel, QPushButton, QSizePolicy
-)
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QGridLayout, QFrame, QVBoxLayout,
+    QHBoxLayout, QLabel, QSizePolicy
+)
+
 from button import StyledButton
 
 
@@ -14,6 +15,8 @@ class WyborBramy(QMainWindow):
 
     def __init__(self, set_gate_type_func):
         super().__init__()
+        self.back_button = None
+        self.accept_button = None
         self.set_gate_type_func = set_gate_type_func  # Przechowuje funkcję zapisywania typu bramy
 
         self.setWindowTitle("Wybór bramy")
@@ -82,7 +85,8 @@ class WyborBramy(QMainWindow):
         vertical_layout.addWidget(frame_inner)
         return frame
 
-    def create_title_label(self, title):
+    @staticmethod
+    def create_title_label(title):
         """Creates a title label with bold styling."""
         label_title = QLabel(title)
         font = QFont()
@@ -92,7 +96,8 @@ class WyborBramy(QMainWindow):
         label_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         return label_title
 
-    def create_description_label(self, description):
+    @staticmethod
+    def create_description_label(description):
         """Creates a description label with word wrapping and styled color."""
         label_description = QLabel(description)
         label_description.setStyleSheet("color: rgb(74,68,61);")

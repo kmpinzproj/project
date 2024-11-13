@@ -1,12 +1,15 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel, QWidget
-from PySide6.QtGui import QPixmap
+
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel
+
+from Formularz_kontaktowy import ContactForm
+from Kreator import Kreator
 from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
-from Kreator import Kreator
-from Formularz_kontaktowy import ContactForm
+
 
 class MainApplication(QMainWindow):
     VIEW_INDICES = {
@@ -19,8 +22,10 @@ class MainApplication(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Main Application")
+        self.gate_creator_view = None
         self.selected_gate_type = None  # Stores the selected gate type
+
+        self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
         self.original_pixmap = QPixmap("tło.jpg")

@@ -60,13 +60,13 @@ class ScrollableMenu(QWidget):
 
         return options_data
 
-    def _parse_line(self, line):
+    @staticmethod
+    def _parse_line(line):
         """Parses a line of the options file and returns a field name and options dictionary."""
         if ': ' not in line:
             return None, None
 
         field_name, options = line.split(': ', 1)
-        options_dict = {}
         if field_name in ["Kolor Standardowy", "Kolor RAL"]:
             color_type = "Kolor Standardowy" if field_name == "Kolor Standardowy" else "Kolor RAL"
             options_dict = {color_type: options.split(", ")}
@@ -102,7 +102,8 @@ class ScrollableMenu(QWidget):
 
         return field_group
 
-    def _create_color_options_widget(self, options):
+    @staticmethod
+    def _create_color_options_widget(options):
         """Creates a nested options widget for color selection."""
         color_widget = QWidget()
         color_layout = QVBoxLayout(color_widget)
@@ -116,14 +117,16 @@ class ScrollableMenu(QWidget):
 
         return color_widget
 
-    def _create_toggle_button(self):
+    @staticmethod
+    def _create_toggle_button():
         """Creates a toggle button for expanding/collapsing options."""
         button = QPushButton("↓")
         button.setFixedSize(24, 24)
         button.setFlat(True)
         return button
 
-    def _create_options_widget(self, options):
+    @staticmethod
+    def _create_options_widget(options):
         """Creates a widget with checkboxes for the provided options."""
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)

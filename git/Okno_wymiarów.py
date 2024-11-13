@@ -58,7 +58,8 @@ class OknoWymiarow(QMainWindow):
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return left_widget
 
-    def _create_right_panel(self):
+    @staticmethod
+    def _create_right_panel():
         """Creates the right panel with measurement instructions."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
@@ -76,7 +77,8 @@ class OknoWymiarow(QMainWindow):
         right_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return right_widget
 
-    def _create_int_input(self, label_text, layout):
+    @staticmethod
+    def _create_int_input(label_text, layout):
         """Creates an input field with an integer validator and adds it to the specified layout with a label."""
         label = QLabel(label_text)
         input_field = QLineEdit()
@@ -96,6 +98,7 @@ class OknoWymiarow(QMainWindow):
         buttons_layout.addWidget(self.accept_button)
         layout.addLayout(buttons_layout)
 
-    def _add_spacer(self, layout):
+    @staticmethod
+    def _add_spacer(layout):
         """Adds a vertical spacer to center content vertically."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))

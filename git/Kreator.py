@@ -51,8 +51,8 @@ class Kreator(QMainWindow):
         right_layout = QVBoxLayout(right_widget)
 
         # OpenGL widget for 3D visualization
-        openGLWidget = self._create_opengl_widget()
-        right_layout.addWidget(openGLWidget)
+        open_gl_widget = self._create_opengl_widget()
+        right_layout.addWidget(open_gl_widget)
 
         # Navigation buttons at the bottom
         buttons_widget = self._create_navigation_buttons()
@@ -62,10 +62,10 @@ class Kreator(QMainWindow):
 
     def _create_opengl_widget(self):
         """Creates and configures the OpenGL widget."""
-        openGLWidget = QOpenGLWidget()
-        openGLWidget.setObjectName("openGLWidget")
-        openGLWidget.setMinimumSize(self.OPENGL_WIDGET_MIN_SIZE, self.OPENGL_WIDGET_MIN_SIZE)
-        return openGLWidget
+        open_gl_widget = QOpenGLWidget()
+        open_gl_widget.setObjectName("openGLWidget")
+        open_gl_widget.setMinimumSize(self.OPENGL_WIDGET_MIN_SIZE, self.OPENGL_WIDGET_MIN_SIZE)
+        return open_gl_widget
 
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back' and 'Save' buttons."""
