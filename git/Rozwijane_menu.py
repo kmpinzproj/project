@@ -11,35 +11,28 @@ class ScrollableMenu(QWidget):
 
     def __init__(self, gate_type):
         super().__init__()
-
-        # Główna konfiguracja okna
         self.setWindowTitle("Przewijane menu")
         self.resize(400, 600)
 
-        # Przechowujemy typ bramy, aby załadować odpowiednie opcje
+        # Typ bramy dla załadowania odpowiednich opcji
         self.gate_type = gate_type
 
         # Ustawienie głównego layoutu
         layout = QVBoxLayout(self)
-
-        # Tworzenie scroll area
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
 
-        # Kontener na pola
+        # Kontener na pola opcji
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
 
-        # Wczytaj dane z pliku
+        # Wczytaj i utwórz pola na podstawie danych dla wybranej bramy
         options_data = self.load_options_data("options_data.txt")
-
-        # Tworzenie pól na podstawie danych dla wybranej bramy
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 field_group = self._create_field_group(field_name, options)
                 content_layout.addWidget(field_group)
         else:
-            # W przypadku braku danych dla wybranej bramy wyświetl komunikat
             no_data_label = QLabel(f"Brak danych dla bramy typu: {self.gate_type}")
             content_layout.addWidget(no_data_label)
 
@@ -57,27 +50,33 @@ class ScrollableMenu(QWidget):
                 if not line:
                     continue
 
-                # Rozpoznaj nową bramę na podstawie nagłówka w nawiasach kwadratowych
                 if line.startswith('[') and line.endswith(']'):
-                    current_gate = line[1:-1]  # Nazwa bramy
+                    current_gate = line[1:-1]
                     options_data[current_gate] = {}
                 elif current_gate:
-                    # Rozdziel kategorię opcji i wartości
-                    if line.startswith("Kolor Standardowy"):
-                        field_name, colors = line.split(": ", 1)
-                        options_data[current_gate].setdefault("Kolor", {}).update(
-                            {"Kolor Standardowy": colors.split(", ")})
-                    elif line.startswith("Kolor RAL"):
-                        field_name, colors = line.split(": ", 1)
-                        options_data[current_gate].setdefault("Kolor", {}).update({"Kolor RAL": colors.split(", ")})
-                    elif ': ' in line:
-                        field_name, options = line.split(': ', 1)
-                        options_data[current_gate][field_name] = options.split(', ')
+                    field_name, options = self._parse_line(line)
+                    if field_name:
+                        options_data[current_gate].setdefault(field_name, {}).update(options)
 
         return options_data
 
+    def _parse_line(self, line):
+        """Parses a line of the options file and returns a field name and options dictionary."""
+        if ': ' not in line:
+            return None, None
+
+        field_name, options = line.split(': ', 1)
+        options_dict = {}
+        if field_name in ["Kolor Standardowy", "Kolor RAL"]:
+            color_type = "Kolor Standardowy" if field_name == "Kolor Standardowy" else "Kolor RAL"
+            options_dict = {color_type: options.split(", ")}
+        else:
+            options_dict = {field_name: options.split(", ")}
+
+        return field_name.split(" ")[0] if "Kolor" in field_name else field_name, options_dict
+
     def _create_field_group(self, field_name, options):
-        """Creates a group of options with a toggle button and checkboxes, with support for nested options."""
+        """Creates a group of options with a toggle button and checkboxes."""
         field_group = QGroupBox()
         field_group.setFixedHeight(self.FIELD_HEIGHT)
         field_layout = QVBoxLayout(field_group)
@@ -88,23 +87,17 @@ class ScrollableMenu(QWidget):
         label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         header_layout.addWidget(label)
 
-        # Toggle button setup
+        # Toggle button
         toggle_button = self._create_toggle_button()
         header_layout.addWidget(toggle_button, alignment=Qt.AlignRight)
-
-        # Add header and options
         field_layout.addLayout(header_layout)
 
-        # Tworzenie zagnieżdżonej struktury dla opcji Kolor
-        if "Kolor" in field_name:
-            options_widget = self._create_color_options_widget(options)
-        else:
-            options_widget = self._create_options_widget(options)
-
+        # Opcje dla pola (standardowe lub kolor)
+        options_widget = self._create_color_options_widget(options) if "Kolor" in field_name else self._create_options_widget(options)
         options_widget.setVisible(False)
         field_layout.addWidget(options_widget)
 
-        # Toggle visibility of options on button click
+        # Toggle visibility on button click
         toggle_button.clicked.connect(lambda: self.toggle_options(field_group, options_widget, toggle_button))
 
         return field_group
@@ -114,19 +107,12 @@ class ScrollableMenu(QWidget):
         color_widget = QWidget()
         color_layout = QVBoxLayout(color_widget)
 
-        # Dodanie opcji "Kolor Standardowy"
-        standard_group = QGroupBox("Kolor Standardowy")
-        standard_layout = QVBoxLayout(standard_group)
-        for color in options.get("Kolor Standardowy", []):
-            standard_layout.addWidget(QCheckBox(color))
-        color_layout.addWidget(standard_group)
-
-        # Dodanie opcji "Kolor RAL"
-        ral_group = QGroupBox("Kolor RAL")
-        ral_layout = QVBoxLayout(ral_group)
-        for color in options.get("Kolor RAL", []):
-            ral_layout.addWidget(QCheckBox(color))
-        color_layout.addWidget(ral_group)
+        for color_type, colors in options.items():
+            group_box = QGroupBox(color_type)
+            group_layout = QVBoxLayout(group_box)
+            for color in colors:
+                group_layout.addWidget(QCheckBox(color))
+            color_layout.addWidget(group_box)
 
         return color_widget
 
@@ -150,12 +136,7 @@ class ScrollableMenu(QWidget):
 
     def toggle_options(self, field_group, options_widget, toggle_button):
         """Toggles the visibility of options and adjusts the group height."""
-        if options_widget.isVisible():
-            options_widget.setVisible(False)
-            field_group.setFixedHeight(self.FIELD_HEIGHT)
-            toggle_button.setText("↓")
-        else:
-            options_widget.setVisible(True)
-            expanded_height = self.FIELD_HEIGHT + options_widget.sizeHint().height()
-            field_group.setFixedHeight(expanded_height)
-            toggle_button.setText("↑")
+        is_visible = options_widget.isVisible()
+        options_widget.setVisible(not is_visible)
+        field_group.setFixedHeight(self.FIELD_HEIGHT if is_visible else self.FIELD_HEIGHT + options_widget.sizeHint().height())
+        toggle_button.setText("↓" if is_visible else "↑")
