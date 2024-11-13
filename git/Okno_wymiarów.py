@@ -6,15 +6,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from button import StyledButton
 
-
 class OknoWymiarow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
-        self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
+        self.setMinimumSize(834, 559)
 
-        # Setup UI
+        # Initialize UI
         self._setup_ui()
 
     def _setup_ui(self):
@@ -31,16 +30,14 @@ class OknoWymiarow(QMainWindow):
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
 
-        # Ustawienie rozciągania: lewy panel nieco szerszy
-        main_layout.setStretch(0, 3)  # Lewy panel
-        main_layout.setStretch(1, 2)  # Prawy panel
+        main_layout.setStretch(0, 3)  # Left panel is wider
+        main_layout.setStretch(1, 2)  # Right panel
 
     def _create_left_panel(self):
-        """Creates the left panel with input fields and buttons."""
+        """Creates the left panel with input fields and navigation buttons."""
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
-        # Spacer to push content lower on the panel
         self._add_spacer(left_layout)
 
         # Title label
@@ -48,24 +45,17 @@ class OknoWymiarow(QMainWindow):
         dimensions_label.setAlignment(Qt.AlignCenter)
         left_layout.addWidget(dimensions_label)
 
-        # Input fields with labels
-        self._add_input_field(left_layout, "Szerokość", self._create_int_input())
-        self._add_input_field(left_layout, "Wysokość", self._create_int_input())
+        # Input fields for dimensions
+        self.width_input = self._create_int_input("Szerokość", left_layout)
+        self.height_input = self._create_int_input("Wysokość", left_layout)
 
         # Spacer to center input fields vertically
         self._add_spacer(left_layout)
 
-        # Buttons at the bottom
-        buttons_layout = QHBoxLayout()
-        self.back_button = StyledButton("Cofnij")
-        self.accept_button = StyledButton("Akceptuj")
-        buttons_layout.addWidget(self.back_button)
-        buttons_layout.addWidget(self.accept_button)
-        left_layout.addLayout(buttons_layout)
+        # Add navigation buttons at the bottom
+        self._add_navigation_buttons(left_layout)
 
-        # Ustaw politykę rozmiaru na Expanding, aby był elastyczny
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         return left_widget
 
     def _create_right_panel(self):
@@ -83,22 +73,28 @@ class OknoWymiarow(QMainWindow):
         instruction_label.setWordWrap(True)
         right_layout.addWidget(instruction_label)
 
-        # Ustaw politykę rozmiaru, aby prawy panel mógł się elastycznie rozszerzać
         right_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         return right_widget
 
-    def _add_input_field(self, layout, label_text, input_field):
-        """Adds a labeled input field to the specified layout."""
+    def _create_int_input(self, label_text, layout):
+        """Creates an input field with an integer validator and adds it to the specified layout with a label."""
         label = QLabel(label_text)
+        input_field = QLineEdit()
+        input_field.setValidator(QIntValidator())  # Integer validation for dimensions
         layout.addWidget(label)
         layout.addWidget(input_field)
-
-    def _create_int_input(self):
-        """Creates an input field with an integer validator."""
-        input_field = QLineEdit()
-        input_field.setValidator(QIntValidator())
         return input_field
+
+    def _add_navigation_buttons(self, layout):
+        """Adds navigation buttons to the layout at the bottom of the panel."""
+        buttons_layout = QHBoxLayout()
+        self.back_button = StyledButton("Cofnij")
+        self.accept_button = StyledButton("Akceptuj")
+
+        # Add buttons with centered alignment
+        buttons_layout.addWidget(self.back_button)
+        buttons_layout.addWidget(self.accept_button)
+        layout.addLayout(buttons_layout)
 
     def _add_spacer(self, layout):
         """Adds a vertical spacer to center content vertically."""
