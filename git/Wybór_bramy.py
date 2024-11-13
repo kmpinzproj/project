@@ -11,9 +11,11 @@ class WyborBramy(QMainWindow):
     FRAME_WIDTH = 390
     FRAME_HEIGHT = 220
 
-    def __init__(self):
+    def __init__(self, set_gate_type_func):
         super().__init__()
-        self.setWindowTitle("Garage Door Designer")
+        self.set_gate_type_func = set_gate_type_func  # Przechowuje funkcję zapisywania typu bramy
+
+        self.setWindowTitle("Wybór bramy")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)  # Zachowanie minimalnego rozmiaru
 
@@ -65,12 +67,9 @@ class WyborBramy(QMainWindow):
         frame_inner = QFrame(frame)
         horizontal_layout = QHBoxLayout(frame_inner)
 
-        # graphics_view = QListWidget(frame_inner)
-        # graphics_view.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        # horizontal_layout.addWidget(graphics_view)
-
         button = StyledButton("Wybierz", frame_inner)
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        button.clicked.connect(lambda _, g=title: self.select_gate(g))  # Dodane połączenie przycisku z metodą select_gate
         horizontal_layout.addWidget(button)
 
         vertical_layout.addWidget(frame_inner)
@@ -107,3 +106,8 @@ class WyborBramy(QMainWindow):
 
         layout.addWidget(buttons_widget)
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def select_gate(self, gate_type):
+        """Wywołuje przekazaną funkcję, aby zapisać wybrany typ bramy, i zamyka widok."""
+        self.set_gate_type_func(gate_type)
+        self.close()

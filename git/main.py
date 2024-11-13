@@ -20,6 +20,9 @@ class MainApplication(QMainWindow):
         super().__init__()
         self.setWindowTitle("Main Application")
 
+        # Dodany atrybut do przechowania wybranego typu bramy
+        self.selected_gate_type = None
+
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
 
@@ -65,9 +68,9 @@ class MainApplication(QMainWindow):
     def _initialize_views(self):
         """Initializes all views used in the application."""
         self.start_view = OknoStartowe()
-        self.gate_selection_view = WyborBramy()
+        self.gate_selection_view = WyborBramy(self.set_selected_gate_type)
         self.dimension_view = OknoWymiarow()
-        self.gate_creator_view = Kreator()
+        self.gate_creator_view = Kreator("Brama segmentowa")
         self.connect_form_view = ContactForm()
 
     def _add_views_to_stack(self):
@@ -103,8 +106,6 @@ class MainApplication(QMainWindow):
     def navigate_to_start_view(self):
         """Navigates to the start view."""
         self.stack.setCurrentIndex(self.START_VIEW)
-        print("Wymiary okna:", self.size())
-
 
     def navigate_to_gate_selection_view(self):
         """Navigates to the gate selection view."""
@@ -115,12 +116,31 @@ class MainApplication(QMainWindow):
         self.stack.setCurrentIndex(self.DIMENSION_VIEW)
 
     def navigate_to_gate_creator_view(self):
-        """Navigates to the gate creator view."""
-        self.stack.setCurrentIndex(self.GATE_CREATOR_VIEW)
+        """Otwiera kreator z odpowiednimi opcjami na podstawie wybranego typu bramy."""
+        if self.selected_gate_type:
+            # Tworzy widok Kreatora na podstawie wybranego typu bramy
+            self.gate_creator_view = Kreator(self.selected_gate_type)
+            self.stack.addWidget(self.gate_creator_view)  # Dodaje widok kreatora do stosu widoków
+            self.stack.setCurrentWidget(self.gate_creator_view)  # Przechodzi do widoku kreatora
+
+            self.gate_creator_view.back_button.clicked.connect(self.navigate_to_dimension_view)
+            self.gate_creator_view.save_button.clicked.connect(self.navigate_to_contact_form_view)
 
     def navigate_to_contact_form_view(self):
         """Navigates to the contact form view."""
         self.stack.setCurrentIndex(self.CONTACT_FORM_VIEW)
+
+    # Nowe metody dla wyboru i otwarcia kreatora z wybranym typem bramy
+    def set_selected_gate_type(self, gate_type):
+        """Zapisuje wybrany typ bramy."""
+        self.selected_gate_type = gate_type
+        self.stack.setCurrentWidget(self.dimension_view)  # Przechodzi do Okno_wymiarów
+
+    def open_gate_creator(self):
+        """Inicjalizuje kreator z wybranym typem bramy po wprowadzeniu wymiarów."""
+        if self.selected_gate_type:
+            self.gate_creator_view = Kreator(self.selected_gate_type)
+            self.gate_creator_view.show()
 
 
 if __name__ == "__main__":

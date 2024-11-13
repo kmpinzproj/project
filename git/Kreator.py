@@ -10,9 +10,11 @@ from button import StyledButton
 class Kreator(QMainWindow):
     LEFT_PANEL_WIDTH = 400
 
-    def __init__(self):
+    def __init__(self, gate_type):
         super().__init__()
-        self.setWindowTitle("Garage Door Designer")
+        self.gate_type = gate_type
+
+        self.setWindowTitle(f"Kreator - {self.gate_type}")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
@@ -34,7 +36,7 @@ class Kreator(QMainWindow):
         left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
 
-        navigation_menu = ScrollableMenu()
+        navigation_menu = ScrollableMenu(self.gate_type)
         left_layout.addWidget(navigation_menu)
 
         return left_widget

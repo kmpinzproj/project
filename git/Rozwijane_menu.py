@@ -9,7 +9,7 @@ class ScrollableMenu(QWidget):
     # Constants for layout
     FIELD_HEIGHT = 100  # Default height for fields
 
-    def __init__(self):
+    def __init__(self, gate_type):
         super().__init__()
 
         # Główna konfiguracja okna
@@ -17,7 +17,7 @@ class ScrollableMenu(QWidget):
         self.resize(400, 600)
 
         # Przechowujemy typ bramy, aby załadować odpowiednie opcje
-        self.gate_type = "Brama Segmentowa"
+        self.gate_type = gate_type
 
         # Ustawienie głównego layoutu
         layout = QVBoxLayout(self)
