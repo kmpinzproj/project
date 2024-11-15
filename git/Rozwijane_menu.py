@@ -1,44 +1,54 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea, QGroupBox, QLabel, QHBoxLayout, QGridLayout, QCheckBox, QPushButton, QSizePolicy
+    QWidget, QVBoxLayout, QScrollArea, QGroupBox, QLabel, QHBoxLayout, QGridLayout, QPushButton, QCheckBox
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QPixmap
 import os
 
 
 class ScrollableMenu(QWidget):
     FIELD_HEIGHT = 100  # Default height for fields
+
     def __init__(self, gate_type):
         super().__init__()
         self.setWindowTitle("Przewijane menu")
-        self.resize(400, 600)
         self.setMinimumWidth(400)
 
         self.gate_type = gate_type
+        self.category_widgets = {}
+        self.option_items = []
+
         layout = QVBoxLayout(self)
 
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(5)
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setSpacing(5)
 
-        # Dodanie danych do content_layout
+        # Load data into content_layout
         options_data = self.load_options_data("options_data.txt")
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 field_group = self._create_field_group(field_name, options)
-                content_layout.addWidget(field_group)
+                self.content_layout.addWidget(field_group)
+                self.category_widgets[field_name] = field_group
         else:
             no_data_label = QLabel(f"Brak danych dla bramy typu: {self.gate_type}")
-            content_layout.addWidget(no_data_label)
+            self.content_layout.addWidget(no_data_label)
 
-        scroll_area.setWidget(content_widget)
-        layout.addWidget(scroll_area)
+        self.scroll_area.setWidget(self.content_widget)
+        layout.addWidget(self.scroll_area)
+
+        # Update the grid layout on initialization
+        self._update_grid_columns()
+
+        # Monitor resize events of the parent window (Kreator)
+        self.installEventFilter(self)
 
     def load_options_data(self, filename):
         options_data = {}
@@ -62,7 +72,6 @@ class ScrollableMenu(QWidget):
 
     def _create_field_group(self, field_name, options):
         field_group = QGroupBox()
-        field_group.setFixedHeight(self.FIELD_HEIGHT)
         field_layout = QVBoxLayout(field_group)
 
         header_layout = QHBoxLayout()
@@ -88,62 +97,78 @@ class ScrollableMenu(QWidget):
         return field_group
 
     def _create_image_options_widget(self, category, options):
-        options_widget = QWidget()
-        options_layout = QGridLayout(options_widget)
+        self.options_widget = QWidget()
+        self.options_layout = QGridLayout(self.options_widget)
 
-        # Ustawienie szerokości siatki na sztywno
-        options_layout.setContentsMargins(0, 0, 0, 0)
-        options_layout.setSpacing(5)  # Odstęp między elementami
+        self.options_layout.setContentsMargins(5, 5, 5, 5)
+        self.options_layout.setSpacing(10)
 
         folder_path = os.path.abspath(os.path.join("../jpg", category.replace(" ", "_")))
 
-        for i, option in enumerate(options):
+        self.option_items = []
+        for option in options:
             image_path = os.path.join(folder_path, f"{option}.png")
             option_widget = self._create_image_option(option, image_path)
-            options_layout.addWidget(option_widget, i // 3, i % 3)  # Siatka o szerokości 3
+            self.option_items.append(option_widget)
+            self.options_layout.addWidget(option_widget)
 
-        options_widget.setFixedWidth(325)  # Ustaw szerokość na całą siatkę
-        return options_widget
+        return self.options_widget
 
     def _create_image_option(self, option_name, image_path):
         option_widget = QWidget()
         layout = QVBoxLayout(option_widget)
         layout.setAlignment(Qt.AlignCenter)
 
-        # Kontener dla obrazka
-        image_container = QWidget()
-        image_layout = QVBoxLayout(image_container)
-        image_layout.setAlignment(Qt.AlignCenter)
-        image_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Obrazek
         image_label = QLabel()
         pixmap = QPixmap(image_path)
 
         if pixmap.isNull():
             pixmap = QPixmap("../jpg/placeholder.jpg")
 
-        # Ustawienie rozmiaru obrazka bez zmiany proporcji
         pixmap = pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         image_label.setPixmap(pixmap)
 
-        image_layout.addWidget(image_label)
-        image_container.setFixedSize(80, 80)  # Stały rozmiar kontenera dla obrazka
-        layout.addWidget(image_container)
-
-        # Tekst
         text_label = QLabel(option_name)
         text_label.setAlignment(Qt.AlignCenter)
         text_label.setWordWrap(True)
         text_label.setFixedWidth(80)
-        text_label.setFixedHeight(
-            40)  # Stała wysokość dla tekstu, aby zawijał się w dwóch wierszach bez wpływu na obrazek
+        text_label.setFixedHeight(40)
 
+        layout.addWidget(image_label)
         layout.addWidget(text_label)
 
-        # Ustawienie stałego rozmiaru widgetu opcji
-        option_widget.setFixedSize(100, 140)  # Dopasowanie rozmiaru do większych obrazków i tekstu
+        option_widget.setFixedSize(100, 140)
         return option_widget
+
+    def eventFilter(self, source, event):
+        """Monitor resize events of the parent (main window) to dynamically update columns."""
+        if event.type() == QEvent.Resize:
+            self._update_grid_columns()
+        return super().eventFilter(source, event)
+
+    def _update_grid_columns(self):
+        """Dynamically adjusts the number of columns in the grid based on the width."""
+        available_width = self.scroll_area.viewport().width()  # Available width in the scroll area
+        option_width = 100  # Width of each option widget
+        spacing = 10  # Spacing between widgets
+
+        # Determine the number of columns based on the available width, with a minimum of 3 columns
+        columns = max(3, available_width // (option_width + spacing))
+
+        # Remove all widgets from the layout
+        for i in reversed(range(self.options_layout.count())):
+            widget = self.options_layout.itemAt(i).widget()
+            if widget is not None:
+                self.options_layout.removeWidget(widget)
+
+        # Re-add widgets to the grid layout with the new column count
+        for index, widget in enumerate(self.option_items):
+            row = index // columns
+            column = index % columns
+            self.options_layout.addWidget(widget, row, column)
+
+        # Force layout to update
+        self.options_widget.updateGeometry()
 
     def _create_options_widget(self, options):
         options_widget = QWidget()
@@ -168,6 +193,7 @@ class ScrollableMenu(QWidget):
             toggle_button.setText("↓")
         else:
             options_widget.setVisible(True)
+            self._update_grid_columns()  # Update grid layout on toggle
             expanded_height = self.FIELD_HEIGHT + options_widget.sizeHint().height()
             field_group.setFixedHeight(expanded_height)
             toggle_button.setText("↑")
