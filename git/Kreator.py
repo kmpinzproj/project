@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy
 )
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from Rozwijane_menu import ScrollableMenu
@@ -25,30 +25,26 @@ class Kreator(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
 
-        # Remove margins and spacing to avoid horizontal scrolling
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-
-        # Create panels
+        # Tworzenie lewego i prawego panelu
         left_panel = self._create_left_panel()
         right_panel = self._create_right_panel()
 
-        # Add panels to the main layout
+        # Dodaj panele do głównego układu
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)
+
+        # Ustaw proporcje rozciągania dla lewego i prawego panelu
+        main_layout.setStretch(0, 1)  # Lewy panel
+        main_layout.setStretch(1, 1)  # Prawy panel, równomierna proporcja do lewego panelu
 
     def _create_left_panel(self):
         """Creates the left panel with the scrollable menu based on gate type."""
         left_widget = QWidget()
-        left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
-
-        # Remove margins and spacing for the scrollable menu
-        left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setSpacing(0)
 
         # Add scrollable navigation menu
         navigation_menu = ScrollableMenu(self.gate_type)
+        navigation_menu.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Ustawienie na elastyczny rozmiar
         left_layout.addWidget(navigation_menu)
 
         return left_widget
