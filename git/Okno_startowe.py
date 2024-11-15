@@ -116,7 +116,7 @@ class OknoStartowe(QMainWindow):
 
         self.project_list.clear()
         project_files = list(projects_dir.glob("*.txt"))
-        icon_path = "icon.png"  # Ścieżka do ikony
+        icon_path = "../jpg/icon.png"  # Ścieżka do ikony
 
         if project_files:
             for file_path in project_files:

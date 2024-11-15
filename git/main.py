@@ -28,7 +28,7 @@ class MainApplication(QMainWindow):
         self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
-        self.original_pixmap = QPixmap("tło.jpg")
+        self.original_pixmap = QPixmap("../jpg/tło.jpg")
         self.resize_background()
 
         # Initialize QStackedWidget
