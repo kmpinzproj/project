@@ -11,28 +11,34 @@ class ScrollableMenu(QWidget):
 
     def __init__(self, gate_type):
         super().__init__()
+
         self.setWindowTitle("Przewijane menu")
         self.resize(400, 600)
 
-        # Typ bramy dla załadowania odpowiednich opcji
+        # Przechowujemy typ bramy, aby załadować odpowiednie opcje
         self.gate_type = gate_type
 
         # Ustawienie głównego layoutu
         layout = QVBoxLayout(self)
+
+        # Tworzenie scroll area
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
 
-        # Kontener na pola opcji
+        # Kontener na pola
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
 
-        # Wczytaj i utwórz pola na podstawie danych dla wybranej bramy
+        # Wczytaj dane z pliku
         options_data = self.load_options_data("options_data.txt")
+
+        # Tworzenie pól na podstawie danych dla wybranej bramy
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 field_group = self._create_field_group(field_name, options)
                 content_layout.addWidget(field_group)
         else:
+            # W przypadku braku danych dla wybranej bramy wyświetl komunikat
             no_data_label = QLabel(f"Brak danych dla bramy typu: {self.gate_type}")
             content_layout.addWidget(no_data_label)
 
@@ -50,33 +56,22 @@ class ScrollableMenu(QWidget):
                 if not line:
                     continue
 
+                # Rozpoznaj nową bramę na podstawie nagłówka w nawiasach kwadratowych
                 if line.startswith('[') and line.endswith(']'):
                     current_gate = line[1:-1]
                     options_data[current_gate] = {}
                 elif current_gate:
-                    field_name, options = self._parse_line(line)
-                    if field_name:
-                        options_data[current_gate].setdefault(field_name, {}).update(options)
+                    if ': ' in line:
+                        field_name, options = line.split(': ', 1)
+                        if ',' in options:
+                            options_data[current_gate][field_name] = options.split(', ')
+                        else:
+                            options_data[current_gate][field_name] = [options]
 
         return options_data
 
-    @staticmethod
-    def _parse_line(line):
-        """Parses a line of the options file and returns a field name and options dictionary."""
-        if ': ' not in line:
-            return None, None
-
-        field_name, options = line.split(': ', 1)
-        if field_name in ["Kolor Standardowy", "Kolor RAL"]:
-            color_type = "Kolor Standardowy" if field_name == "Kolor Standardowy" else "Kolor RAL"
-            options_dict = {color_type: options.split(", ")}
-        else:
-            options_dict = {field_name: options.split(", ")}
-
-        return field_name.split(" ")[0] if "Kolor" in field_name else field_name, options_dict
-
     def _create_field_group(self, field_name, options):
-        """Creates a group of options with a toggle button and checkboxes."""
+        """Creates a group of options with a toggle button and checkboxes, supporting nested options."""
         field_group = QGroupBox()
         field_group.setFixedHeight(self.FIELD_HEIGHT)
         field_layout = QVBoxLayout(field_group)
@@ -87,46 +82,46 @@ class ScrollableMenu(QWidget):
         label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         header_layout.addWidget(label)
 
-        # Toggle button
+        # Toggle button setup
         toggle_button = self._create_toggle_button()
         header_layout.addWidget(toggle_button, alignment=Qt.AlignRight)
+
+        # Add header and options
         field_layout.addLayout(header_layout)
 
-        # Opcje dla pola (standardowe lub kolor)
-        options_widget = self._create_color_options_widget(options) if "Kolor" in field_name else self._create_options_widget(options)
+        # Tworzenie widgetu opcji
+        if field_name == "Kolor":
+            options_widget = self._create_color_options_widget(options)
+        else:
+            options_widget = self._create_options_widget(options)
+
         options_widget.setVisible(False)
         field_layout.addWidget(options_widget)
 
-        # Toggle visibility on button click
+        # Toggle visibility of options on button click
         toggle_button.clicked.connect(lambda: self.toggle_options(field_group, options_widget, toggle_button))
 
         return field_group
 
-    @staticmethod
-    def _create_color_options_widget(options):
+    def _create_color_options_widget(self, options):
         """Creates a nested options widget for color selection."""
         color_widget = QWidget()
         color_layout = QVBoxLayout(color_widget)
 
-        for color_type, colors in options.items():
-            group_box = QGroupBox(color_type)
-            group_layout = QVBoxLayout(group_box)
-            for color in colors:
-                group_layout.addWidget(QCheckBox(color))
-            color_layout.addWidget(group_box)
+        for color in options:
+            checkbox = QCheckBox(color)
+            color_layout.addWidget(checkbox)
 
         return color_widget
 
-    @staticmethod
-    def _create_toggle_button():
+    def _create_toggle_button(self):
         """Creates a toggle button for expanding/collapsing options."""
         button = QPushButton("↓")
         button.setFixedSize(24, 24)
         button.setFlat(True)
         return button
 
-    @staticmethod
-    def _create_options_widget(options):
+    def _create_options_widget(self, options):
         """Creates a widget with checkboxes for the provided options."""
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
@@ -139,7 +134,12 @@ class ScrollableMenu(QWidget):
 
     def toggle_options(self, field_group, options_widget, toggle_button):
         """Toggles the visibility of options and adjusts the group height."""
-        is_visible = options_widget.isVisible()
-        options_widget.setVisible(not is_visible)
-        field_group.setFixedHeight(self.FIELD_HEIGHT if is_visible else self.FIELD_HEIGHT + options_widget.sizeHint().height())
-        toggle_button.setText("↓" if is_visible else "↑")
+        if options_widget.isVisible():
+            options_widget.setVisible(False)
+            field_group.setFixedHeight(self.FIELD_HEIGHT)
+            toggle_button.setText("↓")
+        else:
+            options_widget.setVisible(True)
+            expanded_height = self.FIELD_HEIGHT + options_widget.sizeHint().height()
+            field_group.setFixedHeight(expanded_height)
+            toggle_button.setText("↑")
