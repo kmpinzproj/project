@@ -25,6 +25,10 @@ class Kreator(QMainWindow):
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
 
+        # Remove margins and spacing to avoid horizontal scrolling
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
         # Create panels
         left_panel = self._create_left_panel()
         right_panel = self._create_right_panel()
@@ -38,6 +42,10 @@ class Kreator(QMainWindow):
         left_widget = QWidget()
         left_widget.setFixedWidth(self.LEFT_PANEL_WIDTH)
         left_layout = QVBoxLayout(left_widget)
+
+        # Remove margins and spacing for the scrollable menu
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(0)
 
         # Add scrollable navigation menu
         navigation_menu = ScrollableMenu(self.gate_type)
@@ -78,5 +86,9 @@ class Kreator(QMainWindow):
 
         buttons_layout.addWidget(self.back_button)
         buttons_layout.addWidget(self.save_button)
+
+        # Remove margins and spacing for navigation buttons
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(10)
 
         return buttons_widget

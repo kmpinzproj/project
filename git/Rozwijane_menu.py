@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea, QGroupBox, QPushButton, QCheckBox,
-    QLabel, QHBoxLayout
+    QWidget, QVBoxLayout, QScrollArea, QGroupBox, QLabel, QHBoxLayout, QGridLayout, QCheckBox, QPushButton
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
+import os
 
 
 class ScrollableMenu(QWidget):
-    # Constants for layout
     FIELD_HEIGHT = 100  # Default height for fields
 
     def __init__(self, gate_type):
@@ -15,30 +15,26 @@ class ScrollableMenu(QWidget):
         self.setWindowTitle("Przewijane menu")
         self.resize(400, 600)
 
-        # Przechowujemy typ bramy, aby załadować odpowiednie opcje
         self.gate_type = gate_type
 
-        # Ustawienie głównego layoutu
         layout = QVBoxLayout(self)
-
-        # Tworzenie scroll area
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # Wyłącz przewijanie poziome
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-        # Kontener na pola
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(0, 0, 0, 0)  # Usuń marginesy
+        content_layout.setSpacing(5)
 
-        # Wczytaj dane z pliku
-        options_data = self.load_options_data("options_data.txt")
+        options_data = self.load_options_data("options_data.txt")  # Zmiana ścieżki do pliku tekstowego
 
-        # Tworzenie pól na podstawie danych dla wybranej bramy
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 field_group = self._create_field_group(field_name, options)
                 content_layout.addWidget(field_group)
         else:
-            # W przypadku braku danych dla wybranej bramy wyświetl komunikat
             no_data_label = QLabel(f"Brak danych dla bramy typu: {self.gate_type}")
             content_layout.addWidget(no_data_label)
 
@@ -46,7 +42,6 @@ class ScrollableMenu(QWidget):
         layout.addWidget(scroll_area)
 
     def load_options_data(self, filename):
-        """Wczytuje dane z pliku txt i zwraca jako słownik z opcjami dla różnych bram."""
         options_data = {}
         current_gate = None
 
@@ -56,73 +51,102 @@ class ScrollableMenu(QWidget):
                 if not line:
                     continue
 
-                # Rozpoznaj nową bramę na podstawie nagłówka w nawiasach kwadratowych
                 if line.startswith('[') and line.endswith(']'):
                     current_gate = line[1:-1]
                     options_data[current_gate] = {}
                 elif current_gate:
                     if ': ' in line:
                         field_name, options = line.split(': ', 1)
-                        if ',' in options:
-                            options_data[current_gate][field_name] = options.split(', ')
-                        else:
-                            options_data[current_gate][field_name] = [options]
+                        options_data[current_gate][field_name] = options.split(', ')
 
         return options_data
 
     def _create_field_group(self, field_name, options):
-        """Creates a group of options with a toggle button and checkboxes, supporting nested options."""
         field_group = QGroupBox()
         field_group.setFixedHeight(self.FIELD_HEIGHT)
         field_layout = QVBoxLayout(field_group)
 
-        # Header with label and toggle button
         header_layout = QHBoxLayout()
         label = QLabel(field_name)
         label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         header_layout.addWidget(label)
 
-        # Toggle button setup
         toggle_button = self._create_toggle_button()
         header_layout.addWidget(toggle_button, alignment=Qt.AlignRight)
 
-        # Add header and options
         field_layout.addLayout(header_layout)
 
-        # Tworzenie widgetu opcji
-        if field_name == "Kolor":
-            options_widget = self._create_color_options_widget(options)
+        if field_name == "Układ wypełnienia":
+            options_widget = self._create_image_options_widget(field_name, options)
         else:
             options_widget = self._create_options_widget(options)
 
         options_widget.setVisible(False)
         field_layout.addWidget(options_widget)
 
-        # Toggle visibility of options on button click
         toggle_button.clicked.connect(lambda: self.toggle_options(field_group, options_widget, toggle_button))
 
         return field_group
 
-    def _create_color_options_widget(self, options):
-        """Creates a nested options widget for color selection."""
-        color_widget = QWidget()
-        color_layout = QVBoxLayout(color_widget)
+    def _create_image_options_widget(self, category, options):
+        options_widget = QWidget()
+        options_layout = QGridLayout(options_widget)
 
-        for color in options:
-            checkbox = QCheckBox(color)
-            color_layout.addWidget(checkbox)
+        # Ustawienie szerokości siatki na sztywno
+        options_layout.setContentsMargins(0, 0, 0, 0)
+        options_layout.setSpacing(5)  # Odstęp między elementami
 
-        return color_widget
+        folder_path = os.path.abspath(os.path.join("../jpg", category.replace(" ", "_")))
 
-    def _create_toggle_button(self):
-        """Creates a toggle button for expanding/collapsing options."""
-        button = QPushButton("↓")
-        button.setFixedSize(24, 24)
-        button.setFlat(True)
-        return button
+        for i, option in enumerate(options):
+            image_path = os.path.join(folder_path, f"{option}.png")
+            option_widget = self._create_image_option(option, image_path)
+            options_layout.addWidget(option_widget, i // 3, i % 3)  # Siatka o szerokości 3
+
+        options_widget.setFixedWidth(325)  # Ustaw szerokość na całą siatkę
+        return options_widget
+
+    def _create_image_option(self, option_name, image_path):
+        option_widget = QWidget()
+        layout = QVBoxLayout(option_widget)
+        layout.setAlignment(Qt.AlignCenter)
+
+        # Kontener dla obrazka
+        image_container = QWidget()
+        image_layout = QVBoxLayout(image_container)
+        image_layout.setAlignment(Qt.AlignCenter)
+        image_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Obrazek
+        image_label = QLabel()
+        pixmap = QPixmap(image_path)
+
+        if pixmap.isNull():
+            pixmap = QPixmap("../jpg/placeholder.jpg")
+
+        # Ustawienie rozmiaru obrazka bez zmiany proporcji
+        pixmap = pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        image_label.setPixmap(pixmap)
+
+        image_layout.addWidget(image_label)
+        image_container.setFixedSize(80, 80)  # Stały rozmiar kontenera dla obrazka
+        layout.addWidget(image_container)
+
+        # Tekst
+        text_label = QLabel(option_name)
+        text_label.setAlignment(Qt.AlignCenter)
+        text_label.setWordWrap(True)
+        text_label.setFixedWidth(80)
+        text_label.setFixedHeight(
+            40)  # Stała wysokość dla tekstu, aby zawijał się w dwóch wierszach bez wpływu na obrazek
+
+        layout.addWidget(text_label)
+
+        # Ustawienie stałego rozmiaru widgetu opcji
+        option_widget.setFixedSize(100, 140)  # Dopasowanie rozmiaru do większych obrazków i tekstu
+        return option_widget
 
     def _create_options_widget(self, options):
-        """Creates a widget with checkboxes for the provided options."""
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
 
@@ -132,8 +156,13 @@ class ScrollableMenu(QWidget):
 
         return options_widget
 
+    def _create_toggle_button(self):
+        button = QPushButton("↓")
+        button.setFixedSize(24, 24)
+        button.setFlat(True)
+        return button
+
     def toggle_options(self, field_group, options_widget, toggle_button):
-        """Toggles the visibility of options and adjusts the group height."""
         if options_widget.isVisible():
             options_widget.setVisible(False)
             field_group.setFixedHeight(self.FIELD_HEIGHT)
