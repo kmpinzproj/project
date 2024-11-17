@@ -1,13 +1,12 @@
 from pathlib import Path
-
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
-    QListWidget, QVBoxLayout, QHBoxLayout, QListWidgetItem
+    QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QHeaderView
 )
-
-from CustomListWidgetItem import CustomListWidgetItem
+from PySide6.QtGui import QIcon, QFont, QPixmap
 from button import StyledButton
+from git.DatabaseManager import DatabaseManager
 
 
 class OknoStartowe(QMainWindow):
@@ -36,7 +35,7 @@ class OknoStartowe(QMainWindow):
         main_layout.addWidget(right_panel)
 
         main_layout.setStretch(0, 2)  # Lewy panel
-        main_layout.setStretch(1, 2)  # Prawy panel
+        main_layout.setStretch(1, 3)  # Prawy panel
 
     def _create_left_panel(self):
         """Tworzy lewy panel z przyciskami do zarządzania projektami."""
@@ -57,38 +56,84 @@ class OknoStartowe(QMainWindow):
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return left_widget
 
+    from PySide6.QtWidgets import QHeaderView
+
     def _create_right_panel(self):
-        """Tworzy prawy panel z listą projektów w trybie ikon."""
+        """Tworzy prawy panel z tabelką projektów."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # Lista projektów w trybie ikon
-        self.project_list = QListWidget()
-        self._configure_project_list_style()
-        self.project_list.itemClicked.connect(self._toggle_item_selection)
-        right_layout.addWidget(self.project_list)
-        self.project_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        return right_widget
-
-    def _configure_project_list_style(self):
-        """Ustawienia stylu i trybu dla QListWidget z projektami."""
-        self.project_list.setViewMode(QListWidget.IconMode)
-        self.project_list.setIconSize(QSize(64, 64))
-        self.project_list.setSpacing(10)
-        self.project_list.setSelectionMode(QListWidget.SingleSelection)
-        self.project_list.setStyleSheet("""
-            QListWidget {
-                background-color: rgba(80, 80, 80, 0.8);
-                border: none;
-            }
-            QListWidget::item:selected {
+        # Tabela z projektami
+        self.project_table = QTableWidget()
+        self.project_table.setColumnCount(3)  # Trzy kolumny: obraz, nazwa, data
+        self.project_table.setHorizontalHeaderLabels(["Typ", "Nazwa Projektu", "Data Zapisu"])
+        self.project_table.setSelectionBehavior(QTableWidget.SelectRows)  # Zaznaczanie całych wierszy
+        self.project_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Wyłącz edytowanie pól
+        self.project_table.setShowGrid(False)  # Ukrycie siatki
+        self.project_table.verticalHeader().setVisible(False)  # Ukrycie nagłówków wierszy
+        self.project_table.setStyleSheet("""
+            QTableWidget {
                 background-color: transparent;
                 border: none;
+                color: white;
             }
-            QListWidget::item {
-                selection-background-color: transparent;
+            QHeaderView::section {
+                background-color: #333333;
+                color: white;
+                border: 1px solid #444444;
+                padding: 5px;
+                font-weight: bold;
+                font-size: 12px;
+            }
+            QTableWidget::item:selected {
+                background-color: rgba(100, 100, 100, 0.8);
+                color: red;
+            }
+            QScrollBar:vertical {
+                background: transparent;
+                width: 8px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: rgba(128, 128, 128, 0.6);
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 8px;
+                margin: 2px;
+            }
+            QScrollBar::handle:horizontal {
+                background: rgba(128, 128, 128, 0.6);
+                min-width: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                border: none;
+                background: none;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
             }
         """)
+
+        # Konfiguracja nagłówków
+        header = self.project_table.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignCenter)
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # Kolumna z obrazem dopasowana do zawartości
+        header.setSectionResizeMode(1, QHeaderView.Stretch)  # Kolumna z nazwą projektu dynamiczna
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Kolumna z datą dopasowana do zawartości
+
+        right_layout.addWidget(self.project_table)
+        return right_widget
 
     @staticmethod
     def _add_spacer(layout):
@@ -96,48 +141,51 @@ class OknoStartowe(QMainWindow):
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def resizeEvent(self, event):
-        """Dostosowuje rozmiar siatki ikon dynamicznie przy zmianie rozmiaru."""
+        """Dostosowuje widok przy zmianie rozmiaru."""
         super().resizeEvent(event)
-        self._adjust_grid_size()
-
-    def _adjust_grid_size(self):
-        """Dostosowuje rozmiar siatki elementów QListWidget na podstawie dostępnej szerokości."""
-        available_width = self.project_list.viewport().width()
-        icon_width = self.project_list.iconSize().width()
-        spacing = self.project_list.spacing()
-        items_per_row = max(1, available_width // (icon_width + spacing))
-        self.project_list.setGridSize(QSize(available_width // items_per_row, icon_width + 30))
 
     def _load_project_files(self):
-        """Ładuje pliki projektów .txt z katalogu 'zapisane_projekty' do listy projektów."""
-        base_dir = Path(__file__).resolve().parent
-        projects_dir = base_dir / '..' / 'zapisane_projekty'
-        projects_dir.mkdir(exist_ok=True)
+        """Ładuje projekty z bazy danych do tabelki z obrazem JPG, nazwą i datą zapisu."""
+        db_manager = DatabaseManager()
 
-        self.project_list.clear()
-        project_files = list(projects_dir.glob("*.txt"))
-        icon_path = "../jpg/icon.png"  # Ścieżka do ikony
+        # Czyszczenie tabeli
+        self.project_table.clearContents()
+        projects = db_manager.list_projects()
+        image_path = "../jpg/icon.png"  # Ścieżka do domyślnego obrazu
 
-        if project_files:
-            for file_path in project_files:
-                custom_widget = CustomListWidgetItem(file_path.stem, icon_path)
-                list_item = QListWidgetItem(self.project_list)
-                list_item.setSizeHint(custom_widget.sizeHint())
-                self.project_list.addItem(list_item)
-                self.project_list.setItemWidget(list_item, custom_widget)
+        if projects:
+            self.project_table.setRowCount(len(projects))
+
+            for row, project in enumerate(projects):
+                project_name = project[1]  # Nazwa projektu (kolumna 1)
+                project_date = project[2]  # Data zapisu (kolumna 2)
+
+                # Dodanie obrazu do pierwszej kolumny
+                image_label = QLabel()
+                pixmap = QPixmap(image_path)
+                scaled_pixmap = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                image_label.setPixmap(scaled_pixmap)
+                image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+                self.project_table.setCellWidget(row, 0, image_label)
+                self.project_table.setRowHeight(row, 80)  # Dopasowanie wysokości wiersza
+
+                # Dodanie nazwy projektu
+                name_item = QTableWidgetItem(project_name)
+                name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                name_item.setFont(QFont("Arial", 12))
+                name_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie nazwy
+                self.project_table.setItem(row, 1, name_item)
+
+                # Dodanie daty zapisu
+                date_item = QTableWidgetItem(project_date)
+                date_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                date_item.setFont(QFont("Arial", 10))
+                date_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie daty
+                self.project_table.setItem(row, 2, date_item)
+
         else:
-            list_item = QListWidgetItem("Brak zapisanych projektów")
-            list_item.setFlags(Qt.NoItemFlags)
-            self.project_list.addItem(list_item)
-
-    def _toggle_item_selection(self, item):
-        """Przełącza stan zaznaczenia elementu i stosuje czerwoną ramkę dla zaznaczonego."""
-        widget = self.project_list.itemWidget(item)
-        if self.selected_item == widget:
-            widget.set_selected(False)
-            self.selected_item = None
-        else:
-            if self.selected_item:
-                self.selected_item.set_selected(False)
-            widget.set_selected(True)
-            self.selected_item = widget
+            self.project_table.setRowCount(1)
+            empty_item = QTableWidgetItem("Brak zapisanych projektów")
+            empty_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            empty_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie komunikatu
+            self.project_table.setItem(0, 1, empty_item)
