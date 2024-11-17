@@ -41,11 +41,11 @@ if __name__ == "__main__":
     db_manager = DatabaseManager()
 
     # Dodanie nowego projektu
-    db_manager.add_project("Projekt B", "Brama Segmentowa")
-    db_manager.add_project("Projekt C", "Brama Roletowa")
-    db_manager.add_project("Projekt D", "Brama Uchylna")
-    db_manager.add_project("Projekt E", "Brama Rozwierana")
-    db_manager.add_project("Projekt F", "Brama Uchylna")
+    db_manager.add_project("Projekt G", "Brama Segmentowa")
+    db_manager.add_project("Projekt H", "Brama Roletowa")
+    db_manager.add_project("Projekt I", "Brama Uchylna")
+    db_manager.add_project("Projekt J", "Brama Rozwierana")
+    db_manager.add_project("Projekt K", "Brama Uchylna")
 
     # Listowanie projektów
     projekty = db_manager.list_projects()

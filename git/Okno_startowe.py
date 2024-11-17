@@ -89,6 +89,40 @@ class OknoStartowe(QMainWindow):
                 background-color: rgba(100, 100, 100, 0.8);
                 color: red;
             }
+            QScrollBar:vertical {
+                background: transparent;
+                width: 8px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: rgba(128, 128, 128, 0.6);
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 8px;
+                margin: 2px;
+            }
+            QScrollBar::handle:horizontal {
+                background: rgba(128, 128, 128, 0.6);
+                min-width: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                border: none;
+                background: none;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
         """)
 
         # Konfiguracja nagłówków
