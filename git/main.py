@@ -1,4 +1,6 @@
 import sys
+import os
+import sqlite3
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
@@ -19,6 +21,7 @@ class MainApplication(QMainWindow):
         "gate_creator": 3,
         "contact_form": 4,
     }
+    DB_FILE = "../resources/project_db.db"
 
     def __init__(self):
         super().__init__()
@@ -132,8 +135,25 @@ class MainApplication(QMainWindow):
         self.selected_gate_type = gate_type
         self.navigate_to_dimension_view()
 
+    def initialize_database(self):
+        """Initializes the database if it does not already exist."""
+        if not os.path.exists(self.DB_FILE):
+            print("Baza danych nie istnieje. Tworzenie bazy...")
+            try:
+                conn = sqlite3.connect(self.DB_FILE)
+                with open('../models/db-model.sql', 'r', encoding='utf-8') as file:
+                    sql_commands = file.read()
+                    conn.executescript(sql_commands)
+                conn.close()
+                print("Baza danych została utworzona pomyślnie.")
+            except (sqlite3.Error, IOError) as e:
+                print(f"Błąd podczas tworzenia bazy danych: {e}")
+        else:
+            print("Baza danych już istnieje.")
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_app = MainApplication()
+    main_app.initialize_database()
     main_app.show()
     sys.exit(app.exec())
