@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 
 from CustomListWidgetItem import CustomListWidgetItem
 from button import StyledButton
+from git.DatabaseManager import DatabaseManager
 
 
 class OknoStartowe(QMainWindow):
@@ -109,18 +110,17 @@ class OknoStartowe(QMainWindow):
         self.project_list.setGridSize(QSize(available_width // items_per_row, icon_width + 30))
 
     def _load_project_files(self):
-        """Ładuje pliki projektów .txt z katalogu 'zapisane_projekty' do listy projektów."""
-        base_dir = Path(__file__).resolve().parent
-        projects_dir = base_dir / '..' / 'zapisane_projekty'
-        projects_dir.mkdir(exist_ok=True)
+        """Ładuje projekty z bazy danych do listy projektów."""
+        db_manager = DatabaseManager()  # Podaj właściwą ścieżkę do pliku bazy danych
 
         self.project_list.clear()
-        project_files = list(projects_dir.glob("*.txt"))
+        projects = db_manager.list_projects()
         icon_path = "../jpg/icon.png"  # Ścieżka do ikony
 
-        if project_files:
-            for file_path in project_files:
-                custom_widget = CustomListWidgetItem(file_path.stem, icon_path)
+        if projects:
+            for project in projects:
+                project_name = project[1]  # Zakładam, że nazwa projektu jest w drugiej kolumnie
+                custom_widget = CustomListWidgetItem(project_name, icon_path)
                 list_item = QListWidgetItem(self.project_list)
                 list_item.setSizeHint(custom_widget.sizeHint())
                 self.project_list.addItem(list_item)
