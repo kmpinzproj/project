@@ -3,7 +3,7 @@ import os
 import sqlite3
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel
 
 from Formularz_kontaktowy import ContactForm
@@ -12,6 +12,7 @@ from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
 
+QApplication.setStyle("Fusion")
 
 class MainApplication(QMainWindow):
     VIEW_INDICES = {
@@ -151,8 +152,10 @@ class MainApplication(QMainWindow):
         else:
             print("Baza danych już istnieje.")
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setFont(QFont("Arial"))
     main_app = MainApplication()
     main_app.initialize_database()
     main_app.show()

@@ -54,7 +54,7 @@ class ScrollableMenu(QWidget):
         options_data = {}
         current_gate = None
 
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
                 if not line:
@@ -84,7 +84,7 @@ class ScrollableMenu(QWidget):
 
         field_layout.addLayout(header_layout)
 
-        if field_name == "Układ wypełnienia":
+        if field_name == "Kolor RAL":
             options_widget = self._create_image_options_widget(field_name, options)
         else:
             options_widget = self._create_options_widget(options)
