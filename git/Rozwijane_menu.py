@@ -16,7 +16,8 @@ class ScrollableMenu(QWidget):
 
         self.gate_type = gate_type
         self.category_widgets = {}
-        self.option_items = []
+        self.option_items_by_category = {}
+        self.options_layout_by_category = {}
 
         layout = QVBoxLayout(self)
 
@@ -43,9 +44,6 @@ class ScrollableMenu(QWidget):
 
         self.scroll_area.setWidget(self.content_widget)
         layout.addWidget(self.scroll_area)
-
-        # Update the grid layout on initialization
-        self._update_grid_columns()
 
         # Monitor resize events of the parent window (Kreator)
         self.installEventFilter(self)
@@ -84,7 +82,8 @@ class ScrollableMenu(QWidget):
 
         field_layout.addLayout(header_layout)
 
-        if field_name == "Kolor RAL":
+        # Check if the field is for color options with images
+        if field_name in ["Kolor Standardowy", "Kolor RAL"]:
             options_widget = self._create_image_options_widget(field_name, options)
         else:
             options_widget = self._create_options_widget(options)
@@ -97,22 +96,31 @@ class ScrollableMenu(QWidget):
         return field_group
 
     def _create_image_options_widget(self, category, options):
-        self.options_widget = QWidget()
-        self.options_layout = QGridLayout(self.options_widget)
+        options_widget = QWidget()
+        options_layout = QGridLayout(options_widget)
 
-        self.options_layout.setContentsMargins(5, 5, 5, 5)
-        self.options_layout.setSpacing(10)
+        options_layout.setContentsMargins(5, 5, 5, 5)
+        options_layout.setSpacing(10)
 
         folder_path = os.path.abspath(os.path.join("../jpg", category.replace(" ", "_")))
 
-        self.option_items = []
+        option_items = []
         for option in options:
             image_path = os.path.join(folder_path, f"{option}.png")
             option_widget = self._create_image_option(option, image_path)
-            self.option_items.append(option_widget)
-            self.options_layout.addWidget(option_widget)
+            option_items.append(option_widget)
 
-        return self.options_widget
+        # Store layout and items for the category
+        self.option_items_by_category[category] = option_items
+        self.options_layout_by_category[category] = options_layout
+
+        # Add widgets to the grid layout
+        for index, widget in enumerate(option_items):
+            row = index // 3
+            column = index % 3
+            options_layout.addWidget(widget, row, column)
+
+        return options_widget
 
     def _create_image_option(self, option_name, image_path):
         option_widget = QWidget()
@@ -123,7 +131,7 @@ class ScrollableMenu(QWidget):
         pixmap = QPixmap(image_path)
 
         if pixmap.isNull():
-            pixmap = QPixmap("../jpg/placeholder.jpg")
+            pixmap = QPixmap("../jpg/placeholder.jpg")  # Default image if not found
 
         pixmap = pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         image_label.setPixmap(pixmap)
@@ -147,40 +155,42 @@ class ScrollableMenu(QWidget):
         return super().eventFilter(source, event)
 
     def _update_grid_columns(self):
-        """Dynamically adjusts the number of columns in the grid based on the width."""
-        available_width = self.scroll_area.viewport().width()  # Available width in the scroll area
-        option_width = 100  # Width of each option widget
-        spacing = 10  # Spacing between widgets
+        available_width = self.scroll_area.viewport().width()
+        option_width = 100
+        spacing = 10
 
-        # Determine the number of columns based on the available width, with a minimum of 3 columns
         columns = max(3, available_width // (option_width + spacing))
 
-        # Remove all widgets from the layout
-        for i in reversed(range(self.options_layout.count())):
-            widget = self.options_layout.itemAt(i).widget()
-            if widget is not None:
-                self.options_layout.removeWidget(widget)
+        for category, option_items in self.option_items_by_category.items():
+            layout = self.options_layout_by_category[category]
 
-        # Re-add widgets to the grid layout with the new column count
-        for index, widget in enumerate(self.option_items):
-            row = index // columns
-            column = index % columns
-            self.options_layout.addWidget(widget, row, column)
+            # Remove all widgets from the layout
+            for i in reversed(range(layout.count())):
+                widget = layout.itemAt(i).widget()
+                if widget:
+                    layout.removeWidget(widget)
 
-        # Adjust the height of the options widget based on the number of rows
-        self._adjust_widget_height(columns)
+            # Re-add widgets to the grid layout with the new column count
+            for index, widget in enumerate(option_items):
+                row = index // columns
+                column = index % columns
+                layout.addWidget(widget, row, column)
 
-    def _adjust_widget_height(self, columns):
-        """Adjusts the height of the options widget based on the number of rows."""
-        total_items = len(self.option_items)
+            # Adjust the height of the widget for this category
+            self._adjust_widget_height(option_items, columns, layout)
+
+    def _adjust_widget_height(self, option_items, columns, layout):
+        total_items = len(option_items)
         rows = (total_items + columns - 1) // columns  # Ceiling division
-        option_height = 140  # Height of each option widget
-        spacing = 10  # Spacing between rows
+        option_height = 140
+        spacing = 10
 
-        # Calculate the new height
-        new_height = rows * (option_height + spacing) - spacing
-        self.options_widget.setFixedHeight(new_height)
-        self.options_widget.updateGeometry()
+        new_height = max(0, rows * (option_height + spacing) - spacing)
+        parent_widget = layout.parentWidget()
+        parent_widget.setFixedHeight(new_height)
+        parent_widget.setVisible(False)  # Force refresh
+        parent_widget.setVisible(True)
+        parent_widget.updateGeometry()
 
     def _create_options_widget(self, options):
         options_widget = QWidget()
@@ -205,7 +215,6 @@ class ScrollableMenu(QWidget):
             toggle_button.setText("↓")
         else:
             options_widget.setVisible(True)
-            self._update_grid_columns()  # Update grid layout on toggle
-            expanded_height = self.FIELD_HEIGHT + options_widget.sizeHint().height()
-            field_group.setFixedHeight(expanded_height)
-            toggle_button.setText("↑")
+            self._update_grid_columns()
+            field_group.setFixedHeight(options_widget.sizeHint().height())
+            field_group.updateGeometry()
