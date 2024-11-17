@@ -187,10 +187,16 @@ class ScrollableMenu(QWidget):
 
         new_height = max(0, rows * (option_height + spacing) - spacing)
         parent_widget = layout.parentWidget()
-        parent_widget.setFixedHeight(new_height)
-        parent_widget.setVisible(False)  # Force refresh
-        parent_widget.setVisible(True)
-        parent_widget.updateGeometry()
+
+        # Debugowanie
+        print(f"Adjusting height for category {parent_widget}:")
+        print(f"Total items: {total_items}, Columns: {columns}, Rows: {rows}, New height: {new_height}")
+
+        if parent_widget.isVisible():
+            parent_widget.setFixedHeight(new_height)
+            # parent_widget.setVisible(False)  # Force refresh
+            parent_widget.setVisible(True)
+            parent_widget.updateGeometry()
 
     def _create_options_widget(self, options):
         options_widget = QWidget()
