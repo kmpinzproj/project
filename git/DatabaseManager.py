@@ -1,62 +1,53 @@
 import sqlite3
-from sqlite3 import Error
 
 class DatabaseManager:
-    def __init__(self, db_file):
-        """
-        Inicjalizuje obiekt klasy DatabaseManager i tworzy połączenie z bazą danych.
-        :param db_file: ścieżka do pliku bazy danych SQLite
-        """
-        self.db_file = db_file
-        self.conn = None
-        self.connect()
+
+    DB_PATH = '../resources/project_db.db'
 
     def connect(self):
-        """
-        Nawiązuje połączenie z bazą danych.
+        """Nawiązuje połączenie z bazą danych."""
+        return sqlite3.connect(self.DB_PATH)
+
+    def list_projects(self):
+        """Wyświetla wszystkie rekordy z tabeli Projekt."""
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM Projekt")
+            projects = cursor.fetchall()
+            conn.close()
+            return projects
+        except sqlite3.Error as e:
+            print(f"Błąd podczas listowania danych: {e}")
+            return []
+
+    def add_project(self, nazwa, typ_bramy):
+        """Dodaje nowy rekord do tabeli Projekt.
+        :param nazwa: Nazwa projektu.
+        :param typ_bramy: Typ bramy projektu.
         """
         try:
-            self.conn = sqlite3.connect(self.db_file)
-            print("Połączono z bazą danych.")
-        except Error as e:
-            print(f"Błąd podczas łączenia z bazą danych: {e}")
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO Projekt (nazwa, typ_bramy, data_zapisu) VALUES (?, ?, CURRENT_TIMESTAMP)", (nazwa, typ_bramy))
+            conn.commit()
+            conn.close()
+            print("Dodano nowy projekt.")
+        except sqlite3.Error as e:
+            print(f"Błąd podczas dodawania rekordu: {e}")
 
-    def execute_query(self, query, params=None):
-        """
-        Wykonuje zapytanie SQL.
-        :param query: zapytanie SQL do wykonania
-        :param params: opcjonalne parametry do zapytania
-        :return: wynik zapytania (jeśli dotyczy)
-        """
-        try:
-            cursor = self.conn.cursor()
-            if params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
-            self.conn.commit()
-            print("Zapytanie wykonane pomyślnie.")
-            return cursor
-        except Error as e:
-            print(f"Błąd podczas wykonywania zapytania: {e}")
-            return None
+# Przykład użycia klasy
+if __name__ == "__main__":
+    db_manager = DatabaseManager()
 
-    def fetch_all(self, query, params=None):
-        """
-        Pobiera wszystkie wiersze z wyniku zapytania.
-        :param query: zapytanie SQL
-        :param params: opcjonalne parametry do zapytania
-        :return: lista wyników
-        """
-        cursor = self.execute_query(query, params)
-        if cursor:
-            return cursor.fetchall()
-        return []
+    # Dodanie nowego projektu
+    db_manager.add_project("Projekt B", "Brama Segmentowa")
+    db_manager.add_project("Projekt C", "Brama Roletowa")
+    db_manager.add_project("Projekt D", "Brama Uchylna")
+    db_manager.add_project("Projekt E", "Brama Rozwierana")
+    db_manager.add_project("Projekt F", "Brama Uchylna")
 
-    def close(self):
-        """
-        Zamyka połączenie z bazą danych.
-        """
-        if self.conn:
-            self.conn.close()
-            print("Połączenie z bazą danych zostało zamknięte.")
+    # Listowanie projektów
+    projekty = db_manager.list_projects()
+    for projekt in projekty:
+        print(projekt)
