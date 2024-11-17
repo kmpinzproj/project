@@ -167,7 +167,19 @@ class ScrollableMenu(QWidget):
             column = index % columns
             self.options_layout.addWidget(widget, row, column)
 
-        # Force layout to update
+        # Adjust the height of the options widget based on the number of rows
+        self._adjust_widget_height(columns)
+
+    def _adjust_widget_height(self, columns):
+        """Adjusts the height of the options widget based on the number of rows."""
+        total_items = len(self.option_items)
+        rows = (total_items + columns - 1) // columns  # Ceiling division
+        option_height = 140  # Height of each option widget
+        spacing = 10  # Spacing between rows
+
+        # Calculate the new height
+        new_height = rows * (option_height + spacing) - spacing
+        self.options_widget.setFixedHeight(new_height)
         self.options_widget.updateGeometry()
 
     def _create_options_widget(self, options):
