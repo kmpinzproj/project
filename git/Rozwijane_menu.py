@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QScrollArea, QGroupBox, QLabel, QHBoxLayout, QGridLayout, QPushButton, QCheckBox
 )
 from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QPalette, QColor
 import os
 
 
@@ -19,6 +19,7 @@ class ScrollableMenu(QWidget):
         self.category_widgets = {}  # Store field group, options widget, and toggle button for each category
         self.option_items_by_category = {}  # Store option items per category
         self.options_layout_by_category = {}  # Store grid layouts per category
+        self.selected_options = {}  # Track selected options by category
 
         self._setup_ui()
 
@@ -117,7 +118,7 @@ class ScrollableMenu(QWidget):
 
         for option in options:
             image_path = os.path.join(folder_path, f"{option}.png")
-            option_widget = self._create_image_option(option, image_path)
+            option_widget = self._create_image_option(option, image_path, category)  # Pass category here
             option_items.append(option_widget)
 
         # Store layout and items for this category
@@ -129,11 +130,11 @@ class ScrollableMenu(QWidget):
 
         return options_widget
 
-    def _create_image_option(self, option_name, image_path):
-        """Create a single image option widget with centered text."""
+    def _create_image_option(self, option_name, image_path, category):
+        """Create a single image option widget with selectable functionality and centered text."""
         option_widget = QWidget()
         layout = QVBoxLayout(option_widget)
-        layout.setAlignment(Qt.AlignTop)  # Align items to the top of the layout to prevent overlap
+        layout.setAlignment(Qt.AlignCenter)  # Center align the items vertically and horizontally
 
         # Image
         image_label = QLabel()
@@ -142,22 +143,38 @@ class ScrollableMenu(QWidget):
             pixmap = QPixmap("../jpg/placeholder.jpg")
         image_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         image_label.setAlignment(Qt.AlignCenter)  # Ensure the image is centered
+        image_label.setObjectName("image_label")  # Assign a unique object name for styling
+
+        # Set consistent size for the image label
+        image_label.setFixedSize(70, 70)
+
+        # Connect image click event
+        image_label.mousePressEvent = lambda event: self._on_option_click(category, image_label)
 
         # Text
         text_label = QLabel(option_name)
-        text_label.setAlignment(Qt.AlignCenter)  # Ensure the text is centered
-        text_label.setWordWrap(True)
-
-        # Set consistent fixed size for the option widget
-        option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], self.OPTION_WIDGET_SIZE[1])
+        text_label.setAlignment(Qt.AlignCenter)  # Center-align the text
+        text_label.setWordWrap(True)  # Allow the text to wrap if it’s too long
 
         # Add widgets to layout
         layout.addWidget(image_label)
         layout.addWidget(text_label)
 
-        # Add margins to prevent text overlap
-        layout.setContentsMargins(0, 10, 0, 10)
+        # Set consistent fixed size for the option widget
+        option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], self.OPTION_WIDGET_SIZE[1])
+
         return option_widget
+
+    def _on_option_click(self, category, image_label):
+        """Handle click on an image option."""
+        # Remove red border from all images in this category
+        for option_widget in self.option_items_by_category[category]:
+            img_label = option_widget.findChild(QLabel, "image_label")  # Find QLabel with objectName
+            if img_label:
+                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+
+        # Add red border to the clicked image
+        image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
 
     def _create_checkbox_options_widget(self, options):
         """Create a widget with checkboxes for options."""
@@ -236,12 +253,10 @@ class ScrollableMenu(QWidget):
         toggle_button = data["toggle_button"]
 
         if options_widget.isVisible():
-            # Collapse the field
             options_widget.setVisible(False)
             field_group.setFixedHeight(self.FIELD_HEIGHT)
             toggle_button.setText("↓")
         else:
-            # Expand the field
             options_widget.setVisible(True)
 
             # For image options (grid layout), update the grid dynamically
@@ -259,11 +274,5 @@ class ScrollableMenu(QWidget):
             total_height = options_widget.sizeHint().height()
             expanded_height = self.FIELD_HEIGHT + total_height
             field_group.setFixedHeight(expanded_height)
-
-            # Force updates to refresh the layout
-            options_widget.adjustSize()
-            field_group.adjustSize()
-            self.scroll_area.widget().adjustSize()
-            self.scroll_area.updateGeometry()
 
             toggle_button.setText("↑")
