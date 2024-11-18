@@ -110,11 +110,9 @@ class WyborBramy(QMainWindow):
         buttons_layout = QHBoxLayout(buttons_widget)
 
         self.back_button = StyledButton("Cofnij")
-        self.accept_button = StyledButton("Akceptuj")
 
         # Add buttons with centered alignment
         buttons_layout.addWidget(self.back_button, alignment=Qt.AlignmentFlag.AlignCenter)
-        buttons_layout.addWidget(self.accept_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(buttons_widget)
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
