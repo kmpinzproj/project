@@ -177,15 +177,35 @@ class ScrollableMenu(QWidget):
         image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
 
     def _create_checkbox_options_widget(self, options):
-        """Create a widget with checkboxes for options."""
+        """Create a widget with checkboxes for options with single selection per category."""
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
 
+        category_checkboxes = []  # Store references to checkboxes in this category
+
         for option in options:
             checkbox = QCheckBox(option)
+            checkbox.toggled.connect(lambda state, cb=checkbox: self._on_checkbox_click(options_widget, cb))
             options_layout.addWidget(checkbox)
+            category_checkboxes.append(checkbox)
+
+        # Store checkboxes for this category
+        self.option_items_by_category[options_widget] = category_checkboxes
 
         return options_widget
+
+    def _on_checkbox_click(self, category, clicked_checkbox):
+        """Ensure only one checkbox is selected per category."""
+        if clicked_checkbox.isChecked():
+            # Odznacz wszystkie inne checkboxy w tej kategorii
+            for checkbox in self.option_items_by_category[category]:
+                if checkbox != clicked_checkbox:
+                    checkbox.blockSignals(True)  # Blokuj sygnały, aby uniknąć wywoływania zdarzeń
+                    checkbox.setChecked(False)
+                    checkbox.blockSignals(False)  # Odblokuj sygnały
+        else:
+            # Jeśli checkbox został odznaczony, nie rób nic
+            pass
 
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""
