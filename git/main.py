@@ -35,6 +35,7 @@ class MainApplication(QMainWindow):
         self.original_pixmap = QPixmap("../jpg/tło.jpg")
         self.resize_background()
 
+
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
