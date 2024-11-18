@@ -1,0 +1,85 @@
+# Ignorowanie katalogów i plików wygenerowanych przez PyCharm
+.idea/
+
+# Ignorowanie wirtualnych środowisk
+venv/
+env/
+.venv/
+.env/
+
+# Ignorowanie plików i katalogów systemowych
+.DS_Store
+Thumbs.db
+
+# Ignorowanie plików Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Ignorowanie plików logów
+*.log
+
+# Ignorowanie plików testowych
+.coverage
+.tox/
+.nox/
+.cache/
+
+# Ignorowanie plików i katalogów tymczasowych
+*.tmp
+*.swp
+*.swo
+*.~*
+*.bak
+
+# Ignorowanie zależności
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.lock
+
+# Ignorowanie plików tworzonych przez edytory
+*.iml
+*.idea/
+
+# Ignorowanie plików tworzonych przez narzędzia lintera/formatowania
+mypy_cache/
+pylint-report.txt
+pylint.log
+flake8.log
+
+# Ignorowanie plików konfiguracyjnych IDE
+.vscode/
+
+# Ignorowanie plików tworzonych przez testy
+htmlcov/
+*.cover
+*.hypothesis/
+
+# Ignorowanie wyników kompilacji Cython
+*.c
+*.so
+
+# Ignorowanie plików danych
+*.sqlite3
+*.db
+
+# Ignorowanie buildów
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Ignorowanie plików konfiguracji docker/ci
+docker-compose.override.yml
+.envrc
+.env.local
+.env.test
+
+# Ignorowanie plików Jupyter
+.ipynb_checkpoints/
+
+# Ignorowanie plików Python w starszych wersjach
+*.pyo
+*.egg
+*.egg-info
