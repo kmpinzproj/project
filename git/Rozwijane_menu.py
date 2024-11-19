@@ -103,6 +103,10 @@ class ScrollableMenu(QWidget):
             "toggle_button": toggle_button,
         }
 
+        # Set the initial fixed height to FIELD_HEIGHT
+        field_group.setFixedHeight(self.FIELD_HEIGHT)
+
+        # Connect toggle button
         toggle_button.clicked.connect(lambda: self.toggle_options(field_name))
         return field_group
 
