@@ -6,7 +6,10 @@ def generate_render(width, height, depth, output_path):
     Generuje sześcian 3D w Blenderze i renderuje go jako PNG z jasnym tłem oraz niebieskim kolorem.
     """
     # Ścieżka do Blendera
-    blender_path = "C:/Program Files/Blender Foundation/Blender 4.1/blender.exe"  # Upewnij się, że ta ścieżka jest poprawna
+    if os.name == 'nt':
+        blender_path = "C:/Program Files/Blender Foundation/Blender 4.1/blender.exe"  # Upewnij się, że ta ścieżka jest poprawna
+    elif os.name == 'posix':
+        blender_path = "/Applications/Blender.app/Contents/MacOS/Blender"  # Upewnij się, że ta ścieżka jest poprawna
 
     # Skrypt do uruchomienia w Blenderze
     blender_script = f"""
