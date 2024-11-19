@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox
 )
 from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
@@ -21,10 +21,16 @@ class Kreator(QMainWindow):
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
         self.required_fields = self.load_required_fields("wymagane.txt").get(gate_type, [])
+        self.default_options = self.load_selected_options("selected_options.txt").get(gate_type, {})
+
+        self.selected_options = {}
 
 
         # Initialize UI
         self._setup_ui()
+
+        # Ustaw domyślne opcje
+        self.set_default_options()
 
     def _setup_ui(self):
         """Sets up the main layout and divides it into left and right panels."""
@@ -118,12 +124,16 @@ class Kreator(QMainWindow):
         return buttons_widget
 
     def validate_and_proceed(self):
-        """Validates required fields in the ScrollableMenu."""
+        """Validates required fields and triggers the transition if valid."""
+        if self.validate_fields():
+            # Pobierz zaznaczone opcje z ScrollableMenu
+            self.selected_options = self.navigation_menu.get_selected_options()
 
-        if self.navigation_menu.validate_required_fields(self.required_fields):
-            print("Wszystkie wymagane opcje zostały poprawnie zaznaczone.")
-        else:
-            print("Nie wszystkie wymagane opcje zostały wybrane!")
+            # Zapisz zaznaczone opcje do pliku
+            print(f"Zaznaczone opcje: {self.selected_options}")
+            self.save_selected_options("selected_options.txt", self.gate_type, self.selected_options)
+            print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
+
 
     def validate_fields(self):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
@@ -151,3 +161,77 @@ class Kreator(QMainWindow):
                     required_fields[current_gate_type].append(line)
 
         return required_fields
+
+    @staticmethod
+    def load_selected_options(file_path):
+        """Loads selected options for a specific gate type from a file."""
+        selected_options = {}
+        current_gate_type = None
+
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+
+                if not line:
+                    continue  # Pomiń puste linie
+
+                if line.startswith('[') and line.endswith(']'):
+                    # Nowy typ bramy
+                    current_gate_type = line[1:-1]
+                elif current_gate_type:
+                    # Dodaj wybraną opcję do aktualnego typu bramy
+                    if ': ' in line:
+                        category, value = line.split(': ', 1)
+                        if current_gate_type not in selected_options:
+                            selected_options[current_gate_type] = {}
+                        selected_options[current_gate_type][category] = value
+
+        return selected_options
+
+    @staticmethod
+    def save_selected_options(file_path, gate_type, selected_options):
+        """Saves selected options for the current gate type to a file."""
+        # Otwórz plik w trybie 'w', co automatycznie usuwa jego zawartość przed zapisem
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(f"[{gate_type}]\n")
+            for category, value in selected_options.items():
+                file.write(f"{category}: {value}\n")
+            print(f"Zapisano dane dla {gate_type}: {selected_options}")
+
+    def set_default_options(self):
+        """Sets default options based on loaded data."""
+        for category, value in self.default_options.items():
+            # Obsługa dla opcji checkbox
+            if category in self.navigation_menu.option_items_by_category:
+                for item in self.navigation_menu.option_items_by_category[category]:
+                    if isinstance(item, QCheckBox) and item.text() == value:
+                        item.setChecked(True)
+
+            # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
+            if category in self.navigation_menu.option_items_by_category:
+                for option_widget in self.navigation_menu.option_items_by_category[category]:
+                    text_label = option_widget.findChild(QLabel, "text_label")
+                    if text_label and text_label.text() == value:
+                        img_label = option_widget.findChild(QLabel, "image_label")
+                        if img_label:
+                            # Zaznacz opcję poprzez obramowanie
+                            img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+                            # Aktualizuj zaznaczoną opcję w selected_options
+                            self.navigation_menu.selected_options[category] = value
+
+        # Specjalna obsługa dla kategorii "Kolor"
+        if "Kolor" in self.default_options:
+            kolor_value = self.default_options["Kolor"]
+
+            # Szukaj w "Kolor Standardowy" i "Kolor RAL"
+            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                if color_category in self.navigation_menu.option_items_by_category:
+                    for option_widget in self.navigation_menu.option_items_by_category[color_category]:
+                        text_label = option_widget.findChild(QLabel, "text_label")
+                        if text_label and text_label.text() == kolor_value:
+                            img_label = option_widget.findChild(QLabel, "image_label")
+                            if img_label:
+                                # Zaznacz opcję w odpowiedniej kategorii
+                                img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+                                # Zaktualizuj klucz "Kolor" w selected_options
+                                self.navigation_menu.selected_options["Kolor"] = kolor_value

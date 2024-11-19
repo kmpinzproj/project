@@ -202,18 +202,13 @@ class ScrollableMenu(QWidget):
         if selected_text:
             if category in ["Kolor Standardowy", "Kolor RAL"]:
                 self.selected_options["Kolor"] = selected_text
-                # Usuń czerwone ramki z obu pól, jeśli którykolwiek kolor został wybrany
-                for color_category in ["Kolor Standardowy", "Kolor RAL"]:
-                    if color_category in self.category_widgets:
-                        field_group = self.category_widgets[color_category]["field_group"]
-                        field_group.setStyleSheet("")  # Usuń stylizację
             else:
                 self.selected_options[category] = selected_text
 
-                # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
-                if category in self.category_widgets:
-                    field_group = self.category_widgets[category]["field_group"]
-                    field_group.setStyleSheet("")  # Usuń stylizację (przywróć domyślny wygląd)
+            # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
+            if category in self.category_widgets:
+                field_group = self.category_widgets[category]["field_group"]
+                field_group.setStyleSheet("")  # Usuń stylizację (przywróć domyślny wygląd)
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
@@ -396,3 +391,7 @@ class ScrollableMenu(QWidget):
                         field_group.setStyleSheet("")
 
         return all_valid
+
+    def get_selected_options(self):
+        """Returns the currently selected options."""
+        return self.selected_options
