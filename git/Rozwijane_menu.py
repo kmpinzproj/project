@@ -20,6 +20,7 @@ class ScrollableMenu(QWidget):
         self.option_items_by_category = {}  # Store option items per category
         self.options_layout_by_category = {}  # Store grid layouts per category
         self.selected_options = {}  # Track selected options by category
+        self.last_selected_color = None  # Przechowuje ostatnio zaznaczoną opcję z dwóch kategorii
 
         self._setup_ui()
 
@@ -167,14 +168,27 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Remove red border from all images in this category
-        for option_widget in self.option_items_by_category[category]:
-            img_label = option_widget.findChild(QLabel, "image_label")  # Find QLabel with objectName
-            if img_label:
-                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+        # Sprawdź, czy kliknięta opcja należy do Kolor Standardowy lub Kolor RAL
+        if category in ["Kolor Standardowy", "Kolor RAL"]:
+            # Jeśli istnieje wcześniej zaznaczona opcja, odznacz ją
+            if self.last_selected_color:
+                self.last_selected_color.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-        # Add red border to the clicked image
-        image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+            # Ustaw obramowanie dla nowo wybranej opcji
+            image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+
+            # Zaktualizuj ostatnio zaznaczoną opcję
+            self.last_selected_color = image_label
+        else:
+            # Standardowe zachowanie dla innych kategorii
+            for option_widget in self.option_items_by_category[category]:
+                img_label = option_widget.findChild(QLabel, "image_label")  # Find QLabel with objectName
+                if img_label:
+                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+
+            # Add red border to the clicked image
+            image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+        print(self.selected_options)
 
     def _create_checkbox_options_widget(self, options):
         """Create a widget with checkboxes for options with single selection per category."""
