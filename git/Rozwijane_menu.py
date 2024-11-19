@@ -202,8 +202,18 @@ class ScrollableMenu(QWidget):
         if selected_text:
             if category in ["Kolor Standardowy", "Kolor RAL"]:
                 self.selected_options["Kolor"] = selected_text
+                # Usuń czerwone ramki z obu pól, jeśli którykolwiek kolor został wybrany
+                for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                    if color_category in self.category_widgets:
+                        field_group = self.category_widgets[color_category]["field_group"]
+                        field_group.setStyleSheet("")  # Usuń stylizację
             else:
                 self.selected_options[category] = selected_text
+
+                # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet("")  # Usuń stylizację (przywróć domyślny wygląd)
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
@@ -249,6 +259,11 @@ class ScrollableMenu(QWidget):
 
                 # Zaktualizuj wybraną opcję
                 self.selected_options[category] = clicked_checkbox.text()
+
+                # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet("")  # Usuń stylizację (przywróć domyślny wygląd)
             else:
                 # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
                 self.selected_options.pop(category, None)
@@ -350,22 +365,34 @@ class ScrollableMenu(QWidget):
         all_valid = True
 
         for category in required_fields:
-            if category not in self.selected_options or not self.selected_options[category]:
-                # Jeśli kategoria jest niewypełniona, podświetl tylko zewnętrzną ramkę QGroupBox
-                if category in self.category_widgets:
-                    field_group = self.category_widgets[category]["field_group"]
-                    field_group.setStyleSheet(
-                        "QGroupBox { border: 2px solid red; border-radius: 5px; padding: 10px; }"
-                        "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 3px; }"
-                    )
-                all_valid = False
+            if category == "Kolor":
+                # Specjalna obsługa dla kategorii "Kolor"
+                kolor_selected = self.selected_options.get("Kolor", None)
+                if not kolor_selected:
+                    # Jeśli żaden kolor nie jest zaznaczony, podświetl oba pola
+                    for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                        if color_category in self.category_widgets:
+                            field_group = self.category_widgets[color_category]["field_group"]
+                            field_group.setStyleSheet("QGroupBox { border: 2px solid red; border-radius: 5px; }")
+                    all_valid = False
+                else:
+                    # Jeśli którykolwiek kolor jest zaznaczony, usuń podświetlenie
+                    for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                        if color_category in self.category_widgets:
+                            field_group = self.category_widgets[color_category]["field_group"]
+                            field_group.setStyleSheet("")
             else:
-                # Usuń podświetlenie, jeśli opcja jest zaznaczona
-                if category in self.category_widgets:
-                    field_group = self.category_widgets[category]["field_group"]
-                    field_group.setStyleSheet(
-                        "QGroupBox { border: none; padding: 10px; }"
-                        "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 3px; }"
-                    )
+                # Walidacja dla innych kategorii
+                if category not in self.selected_options or not self.selected_options[category]:
+                    # Jeśli kategoria jest niewypełniona, podświetl cały QGroupBox na czerwono
+                    if category in self.category_widgets:
+                        field_group = self.category_widgets[category]["field_group"]
+                        field_group.setStyleSheet("QGroupBox { border: 2px solid red; border-radius: 5px; }")
+                    all_valid = False
+                else:
+                    # Przywróć domyślny styl Qt
+                    if category in self.category_widgets:
+                        field_group = self.category_widgets[category]["field_group"]
+                        field_group.setStyleSheet("")
 
         return all_valid

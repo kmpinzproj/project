@@ -20,6 +20,8 @@ class Kreator(QMainWindow):
         self.setWindowTitle(f"Kreator - {self.gate_type}")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
+        self.required_fields = self.load_required_fields("wymagane.txt").get(gate_type, [])
+
 
         # Initialize UI
         self._setup_ui()
@@ -116,13 +118,36 @@ class Kreator(QMainWindow):
         return buttons_widget
 
     def validate_and_proceed(self):
-        """Validates required fields in the ScrollableMenu and proceeds if valid."""
-        required_fields = ["Kolor", "Układ wypełnienia", "Przeszklenia"]  # Lista wymaganych kategorii
+        """Validates required fields in the ScrollableMenu."""
 
-        if self.navigation_menu.validate_required_fields(required_fields):
-            # Jeśli wszystkie wymagane opcje są zaznaczone, przejdź dalej
-            print("Wszystkie wymagane opcje zostały poprawnie zaznaczone. Przechodzimy dalej.")
-            self.trigger_next_view()
+        if self.navigation_menu.validate_required_fields(self.required_fields):
+            print("Wszystkie wymagane opcje zostały poprawnie zaznaczone.")
         else:
-            # Wyświetl komunikat o brakujących opcjach
             print("Nie wszystkie wymagane opcje zostały wybrane!")
+
+    def validate_fields(self):
+        """Validates required fields in the ScrollableMenu and returns True if all are valid."""
+        return self.navigation_menu.validate_required_fields(self.required_fields)
+
+    @staticmethod
+    def load_required_fields(file_path):
+        """Loads required fields for each gate type from a text file."""
+        required_fields = {}
+        current_gate_type = None
+
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+
+                if not line:
+                    continue  # Pomijamy puste linie
+
+                if line.startswith('[') and line.endswith(']'):
+                    # Nowy typ bramy
+                    current_gate_type = line[1:-1]
+                    required_fields[current_gate_type] = []
+                elif current_gate_type:
+                    # Dodaj opcję do bieżącego typu bramy
+                    required_fields[current_gate_type].append(line)
+
+        return required_fields

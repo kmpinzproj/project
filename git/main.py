@@ -129,7 +129,14 @@ class MainApplication(QMainWindow):
         self.gate_creator_view.save_button.clicked.connect(self.navigate_to_contact_form_view)
 
     def navigate_to_contact_form_view(self):
-        self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
+        """Navigates to the contact form view if all required fields in the gate creator are valid."""
+        if self.gate_creator_view.validate_fields():
+            # Jeśli wszystkie pola są poprawnie wypełnione, przejdź do formularza kontaktowego
+            self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
+            print("Przejście do widoku formularza kontaktowego.")
+        else:
+            # Jeśli walidacja nie powiodła się, wyświetl komunikat w konsoli
+            print("Nie wszystkie wymagane opcje zostały wybrane!")
 
     def set_selected_gate_type(self, gate_type):
         """Stores selected gate type and navigates to dimension view."""

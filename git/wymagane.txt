@@ -1,0 +1,18 @@
+[Brama Segmentowa]
+Rodzaj przetłoczenia
+Struktura powierzchni
+Kolor
+
+[Brama Roletowa]
+Wysokość profili
+Kolor
+
+[Brama Rozwierana]
+Ilość skrzydeł
+Ocieplenie
+Układ wypełnienia
+Kolor
+
+[Brama Uchylna]
+Układ wypełnienia
+Kolor
