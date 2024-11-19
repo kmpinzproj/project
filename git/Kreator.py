@@ -48,9 +48,9 @@ class Kreator(QMainWindow):
         left_layout = QVBoxLayout(left_widget)
 
         # Add scrollable navigation menu
-        navigation_menu = ScrollableMenu(self.gate_type)
-        navigation_menu.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Ustawienie na elastyczny rozmiar
-        left_layout.addWidget(navigation_menu)
+        self.navigation_menu = ScrollableMenu(self.gate_type)
+        self.navigation_menu.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Ustawienie na elastyczny rozmiar
+        left_layout.addWidget(self.navigation_menu)
 
         return left_widget
 
@@ -104,6 +104,8 @@ class Kreator(QMainWindow):
         self.back_button = StyledButton("Cofnij")
         self.save_button = StyledButton("Zapisz")
 
+        self.save_button.clicked.connect(self.validate_and_proceed)
+
         buttons_layout.addWidget(self.back_button)
         buttons_layout.addWidget(self.save_button)
 
@@ -112,3 +114,15 @@ class Kreator(QMainWindow):
         buttons_layout.setSpacing(10)
 
         return buttons_widget
+
+    def validate_and_proceed(self):
+        """Validates required fields in the ScrollableMenu and proceeds if valid."""
+        required_fields = ["Kolor", "Układ wypełnienia", "Przeszklenia"]  # Lista wymaganych kategorii
+
+        if self.navigation_menu.validate_required_fields(required_fields):
+            # Jeśli wszystkie wymagane opcje są zaznaczone, przejdź dalej
+            print("Wszystkie wymagane opcje zostały poprawnie zaznaczone. Przechodzimy dalej.")
+            self.trigger_next_view()
+        else:
+            # Wyświetl komunikat o brakujących opcjach
+            print("Nie wszystkie wymagane opcje zostały wybrane!")

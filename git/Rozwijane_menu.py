@@ -344,3 +344,28 @@ class ScrollableMenu(QWidget):
             field_group.setFixedHeight(expanded_height)
 
             toggle_button.setText("↑")
+
+    def validate_required_fields(self, required_fields):
+        """Validates that all required fields from the given list have selected options."""
+        all_valid = True
+
+        for category in required_fields:
+            if category not in self.selected_options or not self.selected_options[category]:
+                # Jeśli kategoria jest niewypełniona, podświetl tylko zewnętrzną ramkę QGroupBox
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet(
+                        "QGroupBox { border: 2px solid red; border-radius: 5px; padding: 10px; }"
+                        "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 3px; }"
+                    )
+                all_valid = False
+            else:
+                # Usuń podświetlenie, jeśli opcja jest zaznaczona
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet(
+                        "QGroupBox { border: none; padding: 10px; }"
+                        "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 3px; }"
+                    )
+
+        return all_valid
