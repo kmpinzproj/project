@@ -156,6 +156,7 @@ class ScrollableMenu(QWidget):
         text_label = QLabel(option_name)
         text_label.setAlignment(Qt.AlignCenter)  # Center-align the text
         text_label.setWordWrap(True)  # Allow the text to wrap if it’s too long
+        text_label.setObjectName("text_label")  # Add an object name for identification
 
         # Add widgets to layout
         layout.addWidget(image_label)
@@ -168,34 +169,39 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Obsługa tylko dla kategorii Kolor Standardowy i Kolor RAL
+        # Usuń zaznaczenie poprzednich opcji
         if category in ["Kolor Standardowy", "Kolor RAL"]:
-            # Usuń poprzednie zaznaczenie
-            if self.last_selected_color:
-                self.last_selected_color.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-
-            # Ustaw nowe zaznaczenie z czerwoną ramką
-            image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-            self.last_selected_color = image_label
-
-            # Zaktualizuj zaznaczoną opcję
-            selected_text = image_label.parent().findChild(QLabel).text()
-            selected_color = "red"  # Ustawienie koloru jako czerwoną ramkę
-            self.selected_options["Kolor"] = {"text": selected_text, "color": selected_color}
+            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                if color_category in self.option_items_by_category:
+                    for option_widget in self.option_items_by_category[color_category]:
+                        img_label = option_widget.findChild(QLabel, "image_label")
+                        if img_label:
+                            img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
         else:
-            # Obsługa dla innych kategorii
-            for option_widget in self.option_items_by_category[category]:
-                img_label = option_widget.findChild(QLabel, "image_label")
-                if img_label:
-                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+            if category in self.option_items_by_category:
+                for option_widget in self.option_items_by_category[category]:
+                    img_label = option_widget.findChild(QLabel, "image_label")
+                    if img_label:
+                        img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-            image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+        # Zaznacz klikniętą opcję
+        image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
 
-            # Zaktualizuj zaznaczoną opcję dla tej kategorii
-            selected_text = image_label.parent().findChild(QLabel).text()
-            selected_color = "red"  # Możesz dynamicznie zmieniać kolor w zależności od potrzeb
-            self.selected_options[category] = {"text": selected_text, "color": selected_color}
-            print(selected_text)
+        # Pobierz tekst opcji
+        parent_widget = image_label.parent()
+        text_label = parent_widget.findChild(QLabel, "text_label")  # Znajdź QLabel z nazwą opcji
+        if text_label:
+            selected_text = text_label.text()
+        else:
+            selected_text = None  # Jeśli nie znaleziono, ustaw na None
+
+        if selected_text:
+            if category in ["Kolor Standardowy", "Kolor RAL"]:
+                self.selected_options["Kolor"] = selected_text
+            else:
+                self.selected_options[category] = selected_text
+        else:
+            print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
         print(self.selected_options)
 
