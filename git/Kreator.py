@@ -1,17 +1,22 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel
 )
-from PySide6.QtOpenGLWidgets import QOpenGLWidget
+from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
 from button import StyledButton
+import os
+
 
 class Kreator(QMainWindow):
     LEFT_PANEL_WIDTH = 400
-    OPENGL_WIDGET_MIN_SIZE = 400  # Minimum size for OpenGL widget
+    IMAGE_WIDGET_MIN_SIZE = 400  # Minimum size for image widget
 
-    def __init__(self, gate_type):
+    def __init__(self, gate_type, image_path="cube_render.png"):
         super().__init__()
         self.gate_type = gate_type
+        # Poprawiona ścieżka
+        self.image_path = os.path.abspath(image_path) if image_path else None
         self.setWindowTitle(f"Kreator - {self.gate_type}")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
@@ -50,13 +55,13 @@ class Kreator(QMainWindow):
         return left_widget
 
     def _create_right_panel(self):
-        """Creates the right panel with OpenGL widget and navigation buttons."""
+        """Creates the right panel with QLabel for image display and navigation buttons."""
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # OpenGL widget for 3D visualization
-        open_gl_widget = self._create_opengl_widget()
-        right_layout.addWidget(open_gl_widget)
+        # QLabel widget for image display
+        image_widget = self._create_image_widget()
+        right_layout.addWidget(image_widget)
 
         # Navigation buttons at the bottom
         buttons_widget = self._create_navigation_buttons()
@@ -64,12 +69,31 @@ class Kreator(QMainWindow):
 
         return right_widget
 
-    def _create_opengl_widget(self):
-        """Creates and configures the OpenGL widget."""
-        open_gl_widget = QOpenGLWidget()
-        open_gl_widget.setObjectName("openGLWidget")
-        open_gl_widget.setMinimumSize(self.OPENGL_WIDGET_MIN_SIZE, self.OPENGL_WIDGET_MIN_SIZE)
-        return open_gl_widget
+    def _create_image_widget(self):
+        """Creates and configures the QLabel widget for image display."""
+        image_label = QLabel()
+        image_label.setObjectName("imageLabel")
+        image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
+        image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+
+        # Ładowanie obrazka
+        if self.image_path and os.path.exists(self.image_path):
+            pixmap = QPixmap(self.image_path)
+
+            if not pixmap.isNull():
+                # Dopasowanie obrazu z zachowaniem proporcji
+                scaled_pixmap = pixmap.scaled(
+                    self.IMAGE_WIDGET_MIN_SIZE,
+                    self.IMAGE_WIDGET_MIN_SIZE,
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+                image_label.setPixmap(scaled_pixmap)
+        else:
+            image_label.setText("Nie znaleziono obrazka")
+            image_label.setAlignment(Qt.AlignCenter)
+
+        return image_label
 
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back' and 'Save' buttons."""
