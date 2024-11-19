@@ -91,7 +91,7 @@ class ScrollableMenu(QWidget):
                           "Struktura powierzchni", "Rodzaj przetłoczenia", "Przeszklenia"]:
             options_widget = self._create_image_options_widget(field_name, options)
         else:
-            options_widget = self._create_checkbox_options_widget(options)
+            options_widget = self._create_checkbox_options_widget(options, field_name)
 
         options_widget.setVisible(False)
         field_layout.addWidget(options_widget)
@@ -168,29 +168,38 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Sprawdź, czy kliknięta opcja należy do Kolor Standardowy lub Kolor RAL
+        # Obsługa tylko dla kategorii Kolor Standardowy i Kolor RAL
         if category in ["Kolor Standardowy", "Kolor RAL"]:
-            # Jeśli istnieje wcześniej zaznaczona opcja, odznacz ją
+            # Usuń poprzednie zaznaczenie
             if self.last_selected_color:
                 self.last_selected_color.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-            # Ustaw obramowanie dla nowo wybranej opcji
+            # Ustaw nowe zaznaczenie z czerwoną ramką
             image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-
-            # Zaktualizuj ostatnio zaznaczoną opcję
             self.last_selected_color = image_label
+
+            # Zaktualizuj zaznaczoną opcję
+            selected_text = image_label.parent().findChild(QLabel).text()
+            selected_color = "red"  # Ustawienie koloru jako czerwoną ramkę
+            self.selected_options["Kolor"] = {"text": selected_text, "color": selected_color}
         else:
-            # Standardowe zachowanie dla innych kategorii
+            # Obsługa dla innych kategorii
             for option_widget in self.option_items_by_category[category]:
-                img_label = option_widget.findChild(QLabel, "image_label")  # Find QLabel with objectName
+                img_label = option_widget.findChild(QLabel, "image_label")
                 if img_label:
                     img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-            # Add red border to the clicked image
             image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+
+            # Zaktualizuj zaznaczoną opcję dla tej kategorii
+            selected_text = image_label.parent().findChild(QLabel).text()
+            selected_color = "red"  # Możesz dynamicznie zmieniać kolor w zależności od potrzeb
+            self.selected_options[category] = {"text": selected_text, "color": selected_color}
+            print(selected_text)
+
         print(self.selected_options)
 
-    def _create_checkbox_options_widget(self, options):
+    def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
@@ -199,27 +208,42 @@ class ScrollableMenu(QWidget):
 
         for option in options:
             checkbox = QCheckBox(option)
-            checkbox.toggled.connect(lambda state, cb=checkbox: self._on_checkbox_click(options_widget, cb))
+            checkbox.toggled.connect(lambda state, cb=checkbox: self._on_checkbox_click(category, cb))
             options_layout.addWidget(checkbox)
             category_checkboxes.append(checkbox)
 
-        # Store checkboxes for this category
-        self.option_items_by_category[options_widget] = category_checkboxes
+        # Store checkboxes for this category using the category name as key
+        self.option_items_by_category[category] = category_checkboxes
 
         return options_widget
 
     def _on_checkbox_click(self, category, clicked_checkbox):
-        """Ensure only one checkbox is selected per category."""
-        if clicked_checkbox.isChecked():
-            # Odznacz wszystkie inne checkboxy w tej kategorii
-            for checkbox in self.option_items_by_category[category]:
-                if checkbox != clicked_checkbox:
-                    checkbox.blockSignals(True)  # Blokuj sygnały, aby uniknąć wywoływania zdarzeń
-                    checkbox.setChecked(False)
-                    checkbox.blockSignals(False)  # Odblokuj sygnały
+        """Handle checkbox clicks. Allow multiple selection for specific categories."""
+        if category == "Opcje dodatkowe":
+            # Dla "Opcje dodatkowe" zapisuj stan każdego checkboxa
+            selected_options = [
+                checkbox.text()
+                for checkbox in self.option_items_by_category[category]
+                if checkbox.isChecked()
+            ]
+            self.selected_options[category] = selected_options
         else:
-            # Jeśli checkbox został odznaczony, nie rób nic
-            pass
+            # Dla innych kategorii zachowaj jedno zaznaczenie
+            if clicked_checkbox.isChecked():
+                # Odznacz wszystkie inne checkboxy w tej kategorii
+                for checkbox in self.option_items_by_category[category]:
+                    if checkbox != clicked_checkbox:
+                        checkbox.blockSignals(True)
+                        checkbox.setChecked(False)
+                        checkbox.blockSignals(False)
+
+                # Zaktualizuj wybraną opcję
+                self.selected_options[category] = clicked_checkbox.text()
+            else:
+                # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
+                self.selected_options.pop(category, None)
+
+        print(self.selected_options)
 
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""
@@ -293,10 +317,10 @@ class ScrollableMenu(QWidget):
         else:
             options_widget.setVisible(True)
 
-            # For image options (grid layout), update the grid dynamically
-            if category in self.option_items_by_category:
-                option_items = self.option_items_by_category[category]
-                layout = self.options_layout_by_category[category]
+            # Sprawdź, czy kategoria posiada układ siatki
+            if category in self.options_layout_by_category:
+                option_items = self.option_items_by_category.get(category)
+                layout = self.options_layout_by_category.get(category)
                 available_width = self.scroll_area.viewport().width()
                 option_width = self.OPTION_WIDGET_SIZE[0]
                 spacing = 10
