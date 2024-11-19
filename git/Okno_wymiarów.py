@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from button import StyledButton
+from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtCore import QRegularExpression
 
 class OknoWymiarow(QMainWindow):
     def __init__(self):
@@ -12,6 +14,8 @@ class OknoWymiarow(QMainWindow):
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
+
+        self.dimensions = {}  # Zmienna do przechowywania wymiarów
 
         # Initialize UI
         self._setup_ui()
@@ -46,8 +50,12 @@ class OknoWymiarow(QMainWindow):
         left_layout.addWidget(dimensions_label)
 
         # Input fields for dimensions
-        self.width_input = self._create_int_input("Szerokość", left_layout)
-        self.height_input = self._create_int_input("Wysokość", left_layout)
+        self.width_input = self._create_int_input("Szerokość", left_layout, 2200, 9999)
+        self.height_input = self._create_int_input("Wysokość", left_layout, 2000, 9999)
+
+        # Podłącz sygnały `textChanged` do walidacji
+        self.width_input.textChanged.connect(self.validate_inputs)
+        self.height_input.textChanged.connect(self.validate_inputs)
 
         # Spacer to center input fields vertically
         self._add_spacer(left_layout)
@@ -78,11 +86,15 @@ class OknoWymiarow(QMainWindow):
         return right_widget
 
     @staticmethod
-    def _create_int_input(label_text, layout):
+    def _create_int_input(label_text, layout, min_value, max_value):
         """Creates an input field with an integer validator and adds it to the specified layout with a label."""
         label = QLabel(label_text)
         input_field = QLineEdit()
-        input_field.setValidator(QIntValidator())  # Integer validation for dimensions
+
+        # Walidator ograniczający wartości do podanego zakresu
+        validator = QIntValidator(min_value, max_value)
+        input_field.setValidator(validator)
+
         layout.addWidget(label)
         layout.addWidget(input_field)
         return input_field
@@ -93,6 +105,12 @@ class OknoWymiarow(QMainWindow):
         self.back_button = StyledButton("Cofnij")
         self.accept_button = StyledButton("Akceptuj")
 
+        # Początkowo przycisk „Akceptuj” jest wyłączony
+        self.accept_button.setEnabled(False)
+
+        # Obsługa kliknięcia przycisku „Akceptuj”
+        self.accept_button.clicked.connect(self.save_dimensions)
+
         # Add buttons with centered alignment
         buttons_layout.addWidget(self.back_button)
         buttons_layout.addWidget(self.accept_button)
@@ -102,3 +120,30 @@ class OknoWymiarow(QMainWindow):
     def _add_spacer(layout):
         """Adds a vertical spacer to center content vertically."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+    def save_dimensions(self):
+        """Reads the dimensions from input fields and saves them to self.dimensions."""
+        width = self.width_input.text()
+        height = self.height_input.text()
+
+        # Zapisz wymiary jako liczby całkowite
+        self.dimensions['width'] = int(width)
+        self.dimensions['height'] = int(height)
+
+
+    def validate_inputs(self):
+        """Enable or disable the accept button based on whether the inputs are filled and valid."""
+        width = self.width_input.text()
+        height = self.height_input.text()
+
+        # Sprawdzamy, czy oba pola są wypełnione i czy wartości są w odpowiednim zakresie
+        if width.isdigit() and height.isdigit():  # Dodatkowa weryfikacja, czy są to liczby
+            width = int(width)
+            height = int(height)
+
+            if width >= 2200 and height >= 2000:
+                self.accept_button.setEnabled(True)
+                return
+
+        # Jeśli wartości są nieprawidłowe, przycisk pozostaje wyłączony
+        self.accept_button.setEnabled(False)
