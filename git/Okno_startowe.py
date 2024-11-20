@@ -157,7 +157,7 @@ class OknoStartowe(QMainWindow):
 
     def clear_selected_options(self):
         """Clears the contents of the JSON file or creates it if it doesn't exist."""
-        file_path = "selected_options.json"
+        file_path = "../resources/selected_options.json"
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump({}, file, ensure_ascii=False, indent=4)

@@ -37,7 +37,7 @@ class ScrollableMenu(QWidget):
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(5)
 
-        options_data = self.load_options_data("options_data.txt")
+        options_data = self.load_options_data("../resources/options_data.txt")
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 self.content_layout.addWidget(self._create_field_group(field_name, options))

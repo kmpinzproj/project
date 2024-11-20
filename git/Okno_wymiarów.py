@@ -158,8 +158,9 @@ class OknoWymiarow(QMainWindow):
         # Jeśli wartości są nieprawidłowe, przycisk pozostaje wyłączony
         self.accept_button.setEnabled(False)
 
-    def save_dimensions_to_file(self, file_path="selected_options.json"):
+    def save_dimensions_to_file(self):
         """Saves the gate dimensions to a JSON file."""
+        file_path = "../resources/selected_options.json"
         try:
             # Ensure the file exists; if not, create an empty JSON structure
             if not os.path.exists(file_path):

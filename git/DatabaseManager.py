@@ -421,7 +421,7 @@ if __name__ == "__main__":
     # Załadowanie JSON jako słownika Python
     import json
 
-    with open("selected_options.json", "r", encoding="utf-8") as file:
+    with open("../resources/selected_options.json", "r", encoding="utf-8") as file:
         project_json = json.load(file)
 
     # Dodanie projektu do bazy danych

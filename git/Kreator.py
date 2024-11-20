@@ -13,7 +13,7 @@ class Kreator(QMainWindow):
     LEFT_PANEL_WIDTH = 400
     IMAGE_WIDGET_MIN_SIZE = 400  # Minimum size for image widget
 
-    def __init__(self, test, image_path="cube_render.png"):
+    def __init__(self, test, image_path="../tworzenie_bramy_demo/cube_render.png"):
         super().__init__()
         self.image_path = os.path.abspath(image_path) if image_path else None
         self.setWindowTitle("Garage Door Designer")
@@ -21,10 +21,10 @@ class Kreator(QMainWindow):
         self.setMinimumSize(834, 559)
 
         # Wczytanie opcji z pliku JSON, w tym gate_type
-        data = self.load_selected_options("selected_options.json")
+        data = self.load_selected_options("../resources/selected_options.json")
         self.gate_type = data.get("gate_type", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
         self.default_options = {key: value for key, value in data.items() if key != "gate_type"}
-        self.required_fields = self.load_required_fields("wymagane.txt").get(self.gate_type, [])
+        self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
 
         self.selected_options = {}
 
@@ -135,7 +135,7 @@ class Kreator(QMainWindow):
 
             # Zapisz zaznaczone opcje do pliku
             print(f"Zaznaczone opcje: {self.selected_options}")
-            self.save_selected_options("selected_options.json", self.selected_options)
+            self.save_selected_options("../resources/selected_options.json", self.selected_options)
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
 
 

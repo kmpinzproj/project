@@ -128,7 +128,7 @@ class WyborBramy(QMainWindow):
         """
         Saves the gate type to the JSON file. Creates the file if it doesn't exist.
         """
-        file_path = "selected_options.json"
+        file_path = "../resources/selected_options.json"
         try:
             # Sprawdź, czy plik istnieje; jeśli nie, utwórz go z pustym słownikiem
             if not os.path.isfile(file_path):
