@@ -6,6 +6,7 @@ from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
 from button import StyledButton
 import os
+import json
 
 
 class Kreator(QMainWindow):
@@ -21,7 +22,7 @@ class Kreator(QMainWindow):
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
         self.required_fields = self.load_required_fields("wymagane.txt").get(gate_type, [])
-        self.default_options = self.load_selected_options("selected_options.txt").get(gate_type, {})
+        self.default_options = self.load_selected_options("selected_options.json").get(gate_type, {})
 
         self.selected_options = {}
 
@@ -131,7 +132,7 @@ class Kreator(QMainWindow):
 
             # Zapisz zaznaczone opcje do pliku
             print(f"Zaznaczone opcje: {self.selected_options}")
-            self.save_selected_options("selected_options.txt", self.gate_type, self.selected_options)
+            self.save_selected_options("selected_options.json", self.gate_type, self.selected_options)
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
 
 
@@ -164,38 +165,27 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def load_selected_options(file_path):
-        """Loads selected options for a specific gate type from a file."""
-        selected_options = {}
-        current_gate_type = None
+        """Loads selected options for a specific gate type from a JSON file."""
+        if not os.path.exists(file_path):
+            return {}
 
         with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                line = line.strip()
-
-                if not line:
-                    continue  # Pomiń puste linie
-
-                if line.startswith('[') and line.endswith(']'):
-                    # Nowy typ bramy
-                    current_gate_type = line[1:-1]
-                elif current_gate_type:
-                    # Dodaj wybraną opcję do aktualnego typu bramy
-                    if ': ' in line:
-                        category, value = line.split(': ', 1)
-                        if current_gate_type not in selected_options:
-                            selected_options[current_gate_type] = {}
-                        selected_options[current_gate_type][category] = value
+            try:
+                data = json.load(file)
+                return data
+            except json.JSONDecodeError:
+                print(f"Błąd podczas wczytywania pliku {file_path}.")
+                return {}
 
         return selected_options
 
     @staticmethod
     def save_selected_options(file_path, gate_type, selected_options):
-        """Saves selected options for the current gate type to a file."""
-        # Otwórz plik w trybie 'w', co automatycznie usuwa jego zawartość przed zapisem
+        """Saves selected options for the current gate type to a JSON file."""
+        data = {gate_type: selected_options}  # Dane do zapisania
+
         with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(f"[{gate_type}]\n")
-            for category, value in selected_options.items():
-                file.write(f"{category}: {value}\n")
+            json.dump(data, file, ensure_ascii=False, indent=4)
             print(f"Zapisano dane dla {gate_type}: {selected_options}")
 
     def set_default_options(self):
@@ -235,3 +225,7 @@ class Kreator(QMainWindow):
                                 img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
                                 # Zaktualizuj klucz "Kolor" w selected_options
                                 self.navigation_menu.selected_options["Kolor"] = kolor_value
+
+    def get_selected_options(self):
+        """Returns the currently selected options in JSON-friendly format."""
+        return self.selected_options

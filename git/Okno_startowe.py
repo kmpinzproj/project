@@ -7,6 +7,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QFont, QPixmap
 from button import StyledButton
 from git.DatabaseManager import DatabaseManager
+import json
+import os
 
 
 class OknoStartowe(QMainWindow):
@@ -48,6 +50,9 @@ class OknoStartowe(QMainWindow):
         # Przycisk tworzenia i otwierania projektów
         self.create_new_button = StyledButton("Stwórz nowy")
         self.open_saved_button = StyledButton("Otwórz zapisany")
+
+        self.create_new_button.clicked.connect(self.clear_selected_options)
+
         left_layout.addWidget(self.create_new_button)
         left_layout.addWidget(self.open_saved_button)
 
@@ -189,3 +194,30 @@ class OknoStartowe(QMainWindow):
             empty_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             empty_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie komunikatu
             self.project_table.setItem(0, 1, empty_item)
+
+    @staticmethod
+    def clear_selected_options(file_path):
+        """Clears the contents of the JSON file or creates it if it doesn't exist."""
+        try:
+            # Sprawdź, czy plik istnieje
+            if not os.path.isfile(file_path):
+                # Tworzenie nowego pliku, jeśli nie istnieje
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump({}, file, ensure_ascii=False, indent=4)
+                print(f"Plik {file_path} został utworzony.")
+            else:
+                # Wyczyść istniejący plik
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump({}, file, ensure_ascii=False, indent=4)
+                print(f"Plik {file_path} został wyczyszczony.")
+        except OSError as e:
+            print(f"Wystąpił błąd podczas operacji na pliku: {e}")
+        except Exception as e:
+            print(f"Wystąpił niespodziewany błąd: {e}")
+
+    def _clear_and_start_new_project(self):
+        """Czyści plik z opcjami i inicjuje nowy projekt."""
+        file_path = "selected_options.json"  # Ścieżka do pliku JSON
+        self.clear_selected_options(file_path)
+        print("Rozpoczynamy nowy projekt!")
+        # Możesz tutaj dodać logikę przejścia do kolejnego widoku, jeśli to wymagane
