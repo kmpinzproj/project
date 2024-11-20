@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
     QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QHeaderView
 )
-from PySide6.QtGui import QIcon, QFont, QPixmap
+from PySide6.QtGui import QFont, QPixmap
 from button import StyledButton
 from git.DatabaseManager import DatabaseManager
 import json
@@ -19,7 +19,8 @@ class OknoStartowe(QMainWindow):
         self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
         # Ustawienia główne i UI
-        self.selected_item = None
+        self.selected_row = None  # Zmienna przechowująca ID zaznaczonego projektu
+        self.db_manager = DatabaseManager()  # Menedżer bazy danych
         self._setup_ui()
         self._load_project_files()
 
@@ -51,7 +52,9 @@ class OknoStartowe(QMainWindow):
         self.create_new_button = StyledButton("Stwórz nowy")
         self.open_saved_button = StyledButton("Otwórz zapisany")
 
+        # Podłącz akcje przycisków
         self.create_new_button.clicked.connect(self.clear_selected_options)
+        self.open_saved_button.clicked.connect(self.open_selected_project)
 
         left_layout.addWidget(self.create_new_button)
         left_layout.addWidget(self.open_saved_button)
@@ -60,8 +63,6 @@ class OknoStartowe(QMainWindow):
         self._add_spacer(left_layout)
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return left_widget
-
-    from PySide6.QtWidgets import QHeaderView
 
     def _create_right_panel(self):
         """Tworzy prawy panel z tabelką projektów."""
@@ -94,40 +95,6 @@ class OknoStartowe(QMainWindow):
                 background-color: rgba(100, 100, 100, 0.8);
                 color: red;
             }
-            QScrollBar:vertical {
-                background: transparent;
-                width: 8px;
-                margin: 2px;
-            }
-            QScrollBar::handle:vertical {
-                background: rgba(128, 128, 128, 0.6);
-                min-height: 20px;
-                border-radius: 4px;
-            }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                border: none;
-                background: none;
-            }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
-            QScrollBar:horizontal {
-                background: transparent;
-                height: 8px;
-                margin: 2px;
-            }
-            QScrollBar::handle:horizontal {
-                background: rgba(128, 128, 128, 0.6);
-                min-width: 20px;
-                border-radius: 4px;
-            }
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-                border: none;
-                background: none;
-            }
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
-                background: none;
-            }
         """)
 
         # Konfiguracja nagłówków
@@ -137,6 +104,9 @@ class OknoStartowe(QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Kolumna z nazwą projektu dynamiczna
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Kolumna z datą dopasowana do zawartości
 
+        # Obsługa wyboru wiersza
+        self.project_table.itemSelectionChanged.connect(self._handle_row_selection)
+
         right_layout.addWidget(self.project_table)
         return right_widget
 
@@ -145,17 +115,10 @@ class OknoStartowe(QMainWindow):
         """Dodaje odstęp pionowy do ustawienia pozycji elementów."""
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def resizeEvent(self, event):
-        """Dostosowuje widok przy zmianie rozmiaru."""
-        super().resizeEvent(event)
-
     def _load_project_files(self):
         """Ładuje projekty z bazy danych do tabelki z obrazem JPG, nazwą i datą zapisu."""
-        db_manager = DatabaseManager()
-
-        # Czyszczenie tabeli
         self.project_table.clearContents()
-        projects = db_manager.list_projects()
+        projects = self.db_manager.list_projects()
         image_path = "../jpg/icon.png"  # Ścieżka do domyślnego obrazu
 
         if projects:
@@ -177,17 +140,14 @@ class OknoStartowe(QMainWindow):
                 # Dodanie nazwy projektu
                 name_item = QTableWidgetItem(project_name)
                 name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                name_item.setFont(QFont("Arial", 12))
                 name_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie nazwy
                 self.project_table.setItem(row, 1, name_item)
 
                 # Dodanie daty zapisu
                 date_item = QTableWidgetItem(project_date)
                 date_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                date_item.setFont(QFont("Arial", 10))
                 date_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie daty
                 self.project_table.setItem(row, 2, date_item)
-
         else:
             self.project_table.setRowCount(1)
             empty_item = QTableWidgetItem("Brak zapisanych projektów")
@@ -199,18 +159,39 @@ class OknoStartowe(QMainWindow):
         """Clears the contents of the JSON file or creates it if it doesn't exist."""
         file_path = "selected_options.json"
         try:
-            # Sprawdź, czy plik istnieje
-            if not os.path.isfile(file_path):
-                # Tworzenie nowego pliku, jeśli nie istnieje
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    json.dump({}, file, ensure_ascii=False, indent=4)
-                print(f"Plik {file_path} został utworzony.")
-            else:
-                # Wyczyść istniejący plik
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    json.dump({}, file, ensure_ascii=False, indent=4)
-                print(f"Plik {file_path} został wyczyszczony.")
-        except OSError as e:
-            print(f"Wystąpił błąd podczas operacji na pliku: {e}")
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump({}, file, ensure_ascii=False, indent=4)
+            print(f"Plik {file_path} został utworzony lub wyczyszczony.")
         except Exception as e:
-            print(f"Wystąpił niespodziewany błąd: {e}")
+            print(f"Wystąpił błąd podczas operacji na pliku: {e}")
+
+    def open_selected_project(self):
+        """Czyści opcje i pobiera dane zaznaczonego projektu na podstawie nazwy projektu oraz powiązanej bramy."""
+        self.clear_selected_options()
+
+        if self.selected_row is not None:
+            # Pobranie nazwy projektu z tabeli
+            project_name_item = self.project_table.item(self.selected_row, 1)  # Nazwa projektu jest w kolumnie 1
+            print(project_name_item)
+            if project_name_item:
+                project_name = project_name_item.text()
+                # Pobranie danych projektu i powiązanej bramy z bazy na podstawie nazwy projektu
+                project_data = self.db_manager.get_project_by_name(project_name)
+                if project_data:
+                    print(f"Wybrany projekt: {project_data['projekt']}")
+                    print(f"Powiązana brama: {project_data['brama']}")
+                else:
+                    print("Nie udało się pobrać danych projektu.")
+            else:
+                print("Nie można odczytać nazwy projektu z tabeli.")
+        else:
+            print("Nie zaznaczono żadnego projektu.")
+
+    def _handle_row_selection(self):
+        """Obsługuje zaznaczanie wiersza w tabeli."""
+        selected_items = self.project_table.selectedItems()
+        if selected_items:
+            row = self.project_table.row(selected_items[0])
+            self.selected_row = row + 1  # Zakładam, że ID projektu odpowiada numerowi wiersza (zaczyna od 1)
+        else:
+            self.selected_row = None

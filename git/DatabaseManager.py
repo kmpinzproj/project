@@ -25,7 +25,7 @@ class DatabaseManager:
         """
         Dodaje nowy rekord do tabeli Projekt oraz odpowiadającą bramę.
         :param nazwa: Nazwa projektu.
-        :param typ_bramy: Typ bramy projektu.
+        :param typ_bramy: Typ bramy projektu (np. "segmentowa", "roletowa").
         :param gate_data: Słownik z danymi bramy, które będą wstawiane do odpowiedniej tabeli.
         """
         try:
@@ -39,12 +39,13 @@ class DatabaseManager:
             )
             projekt_id = cursor.lastrowid  # Pobierz ID dodanego projektu
 
-            # Dodaj bramę powiązaną z projektem
-            # TODO do zrobienia po ustawieniu przycisków zapisu self.add_gate(cursor, projekt_id, typ_bramy, gate_data)
+            # Dodaj rekord do odpowiedniej tabeli bramy
+            if gate_data:
+                self.add_gate(cursor, projekt_id, typ_bramy, gate_data)
 
             conn.commit()
             conn.close()
-            print("Dodano nowy projekt oraz powiązaną bramę.")
+            print(f"Projekt '{nazwa}' z typem bramy '{typ_bramy}' został dodany wraz z danymi bramy.")
         except sqlite3.Error as e:
             print(f"Błąd podczas dodawania projektu i bramy: {e}")
 
@@ -216,19 +217,213 @@ class DatabaseManager:
             print(f"Błąd podczas pobierania danych projektu: {e}")
             return None
 
+    def add_project_from_json(self, project_json):
+        """
+        Dodaje projekt i powiązaną bramę na podstawie danych z JSON.
+
+        :param project_json: Słownik reprezentujący dane projektu i bramy.
+        :return: None
+        """
+        try:
+            # Pobranie klucza głównego (typu bramy) i danych
+            if len(project_json) != 1:
+                raise ValueError("JSON powinien zawierać dokładnie jeden typ bramy jako klucz główny.")
+
+            gate_type, gate_data = list(project_json.items())[0]  # Klucz: typ bramy, Wartość: dane bramy
+
+            # Dopasowanie typu bramy do bazy danych
+            typ_bramy_map = {
+                "Brama Segmentowa": "segmentowa",
+                "Brama Roletowa": "roletowa",
+                "Brama Rozwierana": "rozwierana",
+                "Brama Uchylna": "uchylna",
+            }
+
+            if gate_type not in typ_bramy_map:
+                raise ValueError(f"Nieznany typ bramy: {gate_type}")
+
+            typ_bramy = typ_bramy_map[gate_type]
+
+            # Tworzenie projektu na podstawie danych
+            project_name = f"Projekt {gate_type}"  # Nazwa generowana na podstawie typu bramy
+            self.add_project(
+                nazwa=project_name,
+                typ_bramy=typ_bramy,
+                gate_data=self._map_gate_data(typ_bramy, gate_data)
+            )
+            print(f"Projekt '{project_name}' z typem bramy '{typ_bramy}' został dodany.")
+        except Exception as e:
+            print(f"Błąd podczas dodawania projektu z JSON: {e}")
+
+    def _map_gate_data(self, typ_bramy, gate_data):
+        """
+        Mapuje dane bramy z JSON na format wymagany przez bazę danych.
+
+        :param typ_bramy: Typ bramy (np. "segmentowa", "roletowa", itp.)
+        :param gate_data: Słownik danych bramy.
+        :return: Słownik dopasowany do struktury bazy danych.
+        """
+        # Mapowanie danych na podstawie typu bramy
+        try:
+            if typ_bramy == "segmentowa":
+                return {
+                    "rodzaj_przetloczenia": gate_data.get("Rodzaj przetłoczenia", None),
+                    "struktura_powierzchni": gate_data.get("Struktura powierzchni", None),
+                    "kolor_standardowy": gate_data.get("Kolor standardowy", None),
+                    "kolor_ral": gate_data.get("Kolor", None),
+                    "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
+                    "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                }
+
+            elif typ_bramy == "roletowa":
+                return {
+                    "wysokosc_profili": gate_data.get("Wysokość profili", None),
+                    "kolor_standardowy": gate_data.get("Kolor standardowy", None),
+                    "kolor_ral": gate_data.get("Kolor", None),
+                    "sposob_otwierania_bramy": gate_data.get("Sposób otwierania bramy", None),
+                    "przeszklenia": gate_data.get("Przeszklenia", None),
+                }
+
+            elif typ_bramy == "rozwierana":
+                return {
+                    "ilosc_skrzydel": gate_data.get("Ilość skrzydeł", None),
+                    "ocieplenie": gate_data.get("Ocieplenie", None),
+                    "uklad_wypelnienia": gate_data.get("Układ wypełnienia", None),
+                    "kolor_standardowy": gate_data.get("Kolor standardowy", None),
+                    "kolor_ral": gate_data.get("Kolor", None),
+                    "przeszklenia": gate_data.get("Przeszklenia", None),
+                    "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                }
+
+            elif typ_bramy == "uchylna":
+                return {
+                    "uklad_wypelnienia": gate_data.get("Układ wypełnienia", None),
+                    "kolor_standardowy": gate_data.get("Kolor standardowy", None),
+                    "kolor_ral": gate_data.get("Kolor", None),
+                    "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
+                    "przeszklenia": gate_data.get("Przeszklenia", None),
+                    "drzwi_przejsciowe": gate_data.get("Drzwi przejściowe", None),
+                    "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                }
+
+            else:
+                raise ValueError(f"Nieobsługiwany typ bramy: {typ_bramy}")
+
+        except Exception as e:
+            print(f"Błąd podczas mapowania danych dla typu '{typ_bramy}': {e}")
+            return {}
+
+    def get_project_by_name(self, project_name):
+        """
+        Pobiera szczegóły projektu oraz powiązaną bramę na podstawie nazwy projektu.
+
+        :param project_name: Nazwa projektu.
+        :return: Słownik zawierający dane projektu oraz powiązanej bramy.
+        """
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        # Pobierz szczegóły projektu na podstawie nazwy
+        cursor.execute("SELECT * FROM Projekt WHERE nazwa = ?", (project_name,))
+        project = cursor.fetchone()
+
+        if not project:
+            conn.close()
+            raise ValueError(f"Projekt o nazwie '{project_name}' nie istnieje.")
+
+        # Słownik na dane wyjściowe
+        project_data = {
+            "projekt": {
+                "id": project[0],
+                "nazwa": project[1],
+                "data_zapisu": project[2],
+                "typ_bramy": project[3]
+            },
+            "brama": None  # Brama zostanie uzupełniona poniżej
+        }
+
+        # Pobierz dane o bramie na podstawie typu bramy
+        typ_bramy = project[3]
+
+        if typ_bramy == "segmentowa":
+            cursor.execute("SELECT * FROM BramaSegmentowa WHERE projekt_id = ?", (project[0],))
+            brama = cursor.fetchone()
+            if brama:
+                project_data["brama"] = {
+                    "rodzaj_przetloczenia": brama[2],
+                    "struktura_powierzchni": brama[3],
+                    "kolor_standardowy": brama[4],
+                    "kolor_ral": brama[5],
+                    "sposob_otwierania_drzwi": brama[6],
+                    "opcje_dodatkowe": brama[7]
+                }
+
+        elif typ_bramy == "roletowa":
+            cursor.execute("SELECT * FROM BramaRoletowa WHERE projekt_id = ?", (project[0],))
+            brama = cursor.fetchone()
+            if brama:
+                project_data["brama"] = {
+                    "wysokosc_profili": brama[2],
+                    "kolor_standardowy": brama[3],
+                    "kolor_ral": brama[4],
+                    "sposob_otwierania_bramy": brama[5],
+                    "przeszklenia": brama[6]
+                }
+
+        elif typ_bramy == "rozwierana":
+            cursor.execute("SELECT * FROM BramaRozwierana WHERE projekt_id = ?", (project[0],))
+            brama = cursor.fetchone()
+            if brama:
+                project_data["brama"] = {
+                    "ilosc_skrzydel": brama[2],
+                    "ocieplenie": brama[3],
+                    "uklad_wypelnienia": brama[4],
+                    "kolor_standardowy": brama[5],
+                    "kolor_ral": brama[6],
+                    "przeszklenia": brama[7],
+                    "opcje_dodatkowe": brama[8]
+                }
+
+        elif typ_bramy == "uchylna":
+            cursor.execute("SELECT * FROM BramaUchylna WHERE projekt_id = ?", (project[0],))
+            brama = cursor.fetchone()
+            if brama:
+                project_data["brama"] = {
+                    "uklad_wypelnienia": brama[2],
+                    "kolor_standardowy": brama[3],
+                    "kolor_ral": brama[4],
+                    "sposob_otwierania_drzwi": brama[5],
+                    "przeszklenia": brama[6],
+                    "drzwi_przejsciowe": brama[7],
+                    "opcje_dodatkowe": brama[8]
+                }
+
+        conn.close()
+        return project_data
+
 
 # TESTOWANIE BAZY DANYCH
 if __name__ == "__main__":
     db_manager = DatabaseManager()
-
-    # Dodanie nowego projektu
-    db_manager.add_project("Projekt G", "Brama Segmentowa")
-    db_manager.add_project("Projekt H", "Brama Roletowa")
-    db_manager.add_project("Projekt I", "Brama Uchylna")
-    db_manager.add_project("Projekt J", "Brama Rozwierana")
-    db_manager.add_project("Projekt K", "Brama Uchylna")
+    #
+    # # Dodanie nowego projektu
+    # db_manager.add_project("Projekt G", "Brama Segmentowa")
+    # db_manager.add_project("Projekt H", "Brama Roletowa")
+    # db_manager.add_project("Projekt I", "Brama Uchylna")
+    # db_manager.add_project("Projekt J", "Brama Rozwierana")
+    # db_manager.add_project("Projekt K", "Brama Uchylna")
 
     # Listowanie projektów
     projekty = db_manager.list_projects()
     for projekt in projekty:
         print(projekt)
+
+    # Załadowanie JSON jako słownika Python
+    import json
+
+    with open("selected_options.json", "r", encoding="utf-8") as file:
+        project_json = json.load(file)
+
+    # Dodanie projektu do bazy danych
+    db_manager = DatabaseManager()
+    db_manager.add_project_from_json(project_json)

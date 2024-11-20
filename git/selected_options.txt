@@ -1,8 +1,0 @@
-[Brama Segmentowa]
--Rodzaj przetłoczenia: Średnie
-Struktura powierzchni: Woodgrain
-Przeszklenia: Wzór 3
-Klamka do bramy: Klamka 3
-Sposób otwierania drzwi: Automatyczne
-Kratka wentylacyjna: Prawa
-Kolor: Złoty dąb
