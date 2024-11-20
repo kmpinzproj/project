@@ -186,8 +186,9 @@ class OknoWymiarow(QMainWindow):
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
 
-    def load_dimensions_from_file(self, file_path="selected_options.json"):
+    def load_dimensions_from_file(self):
         """Loads dimensions from the JSON file and updates the input fields."""
+        file_path = "../resources/selected_options.json"
         if os.path.exists(file_path):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
