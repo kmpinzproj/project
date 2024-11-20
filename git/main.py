@@ -64,21 +64,19 @@ class MainApplication(QMainWindow):
     def _initialize_views(self):
         """Creates and adds all views to the QStackedWidget."""
         self.start_view = OknoStartowe()
-        self.gate_selection_view = WyborBramy(self.set_selected_gate_type)
-        self.dimension_view = OknoWymiarow()
+        self.gate_selection_view = WyborBramy(self.navigate_to_dimension_view)
+        self.dimension_view = None
         self.gate_creator_view = None
         self.contact_form_view = ContactForm()
 
         # Add views to stack
         self.stack.addWidget(self.start_view)
         self.stack.addWidget(self.gate_selection_view)
-        self.stack.addWidget(self.dimension_view)
         self.stack.addWidget(self.contact_form_view)
 
         # Set up connections for each view
         self._setup_connections_start_view()
         self._setup_connections_gate_selection()
-        self._setup_connections_dimension_view()
         self._setup_connections_contact_form()
 
     def _setup_connections_start_view(self):
@@ -106,22 +104,31 @@ class MainApplication(QMainWindow):
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
     def navigate_to_dimension_view(self):
+        if self.dimension_view:
+            self.stack.removeWidget(self.dimension_view)
+            self.dimension_view.deleteLater()
+            self.dimension_view = None
+
+        # Utwórz nową instancję Kreator
+        self.dimension_view = OknoWymiarow()
+        self.stack.insertWidget(self.VIEW_INDICES["dimension"], self.dimension_view)
         self.stack.setCurrentIndex(self.VIEW_INDICES["dimension"])
+        self._setup_connections_dimension_view()
 
     def navigate_to_gate_creator_view(self):
         """Creates a new instance of Kreator with the selected gate type and configures buttons."""
-        if self.selected_gate_type:
-            # Usuń istniejący widok kreatora, jeśli już istnieje
-            if self.gate_creator_view:
-                self.stack.removeWidget(self.gate_creator_view)
-                self.gate_creator_view.deleteLater()
-                self.gate_creator_view = None
+        # if self.selected_gate_type:
+        #     # Usuń istniejący widok kreatora, jeśli już istnieje
+        if self.gate_creator_view:
+            self.stack.removeWidget(self.gate_creator_view)
+            self.gate_creator_view.deleteLater()
+            self.gate_creator_view = None
 
-            # Utwórz nową instancję Kreator
-            self.gate_creator_view = Kreator(self.selected_gate_type)
-            self.stack.insertWidget(self.VIEW_INDICES["gate_creator"], self.gate_creator_view)
-            self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
-            self._setup_connections_gate_creator()
+        # Utwórz nową instancję Kreator
+        self.gate_creator_view = Kreator(self.selected_gate_type)
+        self.stack.insertWidget(self.VIEW_INDICES["gate_creator"], self.gate_creator_view)
+        self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
+        self._setup_connections_gate_creator()
 
     def _setup_connections_gate_creator(self):
         """Sets up connections for the Kreator view buttons."""
@@ -138,10 +145,10 @@ class MainApplication(QMainWindow):
             # Jeśli walidacja nie powiodła się, wyświetl komunikat w konsoli
             print("Nie wszystkie wymagane opcje zostały wybrane!")
 
-    def set_selected_gate_type(self, gate_type):
-        """Stores selected gate type and navigates to dimension view."""
-        self.selected_gate_type = gate_type
-        self.navigate_to_dimension_view()
+    # def set_selected_gate_type(self, gate_type):
+    #     """Stores selected gate type and navigates to dimension view."""
+    #     self.selected_gate_type = gate_type
+    #     self.navigate_to_dimension_view()
 
     def initialize_database(self):
         """Initializes the database if it does not already exist."""
