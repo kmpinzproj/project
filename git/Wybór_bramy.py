@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
 )
 
 from button import StyledButton
+import os
+import json
 
 
 class WyborBramy(QMainWindow):
@@ -13,12 +15,11 @@ class WyborBramy(QMainWindow):
     FRAME_WIDTH = 390
     FRAME_HEIGHT = 220
 
-    def __init__(self, set_gate_type_func):
+    def __init__(self, dimension_view):
         super().__init__()
         self.back_button = None
         self.accept_button = None
-        self.set_gate_type_func = set_gate_type_func  # Przechowuje funkcję zapisywania typu bramy
-
+        self.dimension_view = dimension_view
         self.setWindowTitle("Wybór bramy")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)  # Zachowanie minimalnego rozmiaru
@@ -79,7 +80,7 @@ class WyborBramy(QMainWindow):
 
         button = StyledButton("Wybierz", frame_inner)
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        button.clicked.connect(lambda _, g=title: self.select_gate(g))  # Connect button to select_gate method
+        button.clicked.connect(lambda _, g=title: (self.dimension_view(), self.save_gate_type(g)))  # Connect button to select_gate method
         horizontal_layout.addWidget(button)
 
         vertical_layout.addWidget(frame_inner)
@@ -117,7 +118,35 @@ class WyborBramy(QMainWindow):
         layout.addWidget(buttons_widget)
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-    def select_gate(self, gate_type):
-        """Calls the provided function to save the selected gate type and closes the view."""
-        self.set_gate_type_func(gate_type)
-        self.close()
+    # def select_gate(self, gate_type):
+    #     """Calls the provided function to save the selected gate type and closes the view."""
+    #     self.set_gate_type_func(gate_type)
+    #     self.close()
+
+    @staticmethod
+    def save_gate_type(gate_type):
+        """
+        Saves the gate type to the JSON file. Creates the file if it doesn't exist.
+        """
+        file_path = "selected_options.json"
+        try:
+            # Sprawdź, czy plik istnieje; jeśli nie, utwórz go z pustym słownikiem
+            if not os.path.isfile(file_path):
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump({}, file, ensure_ascii=False, indent=4)
+
+            # Załaduj istniejące dane z pliku
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+
+            # Zapisz typ bramy
+            data["gate_type"] = gate_type
+
+            # Zapisz zaktualizowane dane do pliku
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+            print(f"Zapisano typ bramy: {gate_type} do pliku {file_path}")
+        except OSError as e:
+            print(f"Wystąpił błąd podczas operacji na pliku: {e}")
+        except Exception as e:
+            print(f"Wystąpił niespodziewany błąd: {e}")

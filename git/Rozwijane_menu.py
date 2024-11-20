@@ -201,18 +201,27 @@ class ScrollableMenu(QWidget):
 
         if selected_text:
             if category in ["Kolor Standardowy", "Kolor RAL"]:
+                # Jeśli wybrano kolor, usuń czerwoną ramkę z obu kategorii
+                for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                    if color_category in self.category_widgets:
+                        field_group = self.category_widgets[color_category]["field_group"]
+                        field_group.setStyleSheet("")  # Usuń stylizację (domyślny wygląd)
+
+                # Ustaw wybraną wartość dla klucza "Kolor"
                 self.selected_options["Kolor"] = selected_text
             else:
+                # Ustaw wybraną wartość dla innych kategorii
                 self.selected_options[category] = selected_text
 
-            # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
-            if category in self.category_widgets:
-                field_group = self.category_widgets[category]["field_group"]
-                field_group.setStyleSheet("")  # Usuń stylizację (przywróć domyślny wygląd)
+                # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet("")  # Usuń stylizację (domyślny wygląd)
+
+            print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
-        print(self.selected_options)
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
@@ -263,7 +272,6 @@ class ScrollableMenu(QWidget):
                 # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
                 self.selected_options.pop(category, None)
 
-        print(self.selected_options)
 
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""

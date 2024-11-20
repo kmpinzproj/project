@@ -13,16 +13,18 @@ class Kreator(QMainWindow):
     LEFT_PANEL_WIDTH = 400
     IMAGE_WIDGET_MIN_SIZE = 400  # Minimum size for image widget
 
-    def __init__(self, gate_type, image_path="cube_render.png"):
+    def __init__(self, test, image_path="cube_render.png"):
         super().__init__()
-        self.gate_type = gate_type
-        # Poprawiona ścieżka
         self.image_path = os.path.abspath(image_path) if image_path else None
-        self.setWindowTitle(f"Kreator - {self.gate_type}")
+        self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
-        self.required_fields = self.load_required_fields("wymagane.txt").get(gate_type, [])
-        self.default_options = self.load_selected_options("selected_options.json").get(gate_type, {})
+
+        # Wczytanie opcji z pliku JSON, w tym gate_type
+        data = self.load_selected_options("selected_options.json")
+        self.gate_type = data.get("gate_type", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
+        self.default_options = {key: value for key, value in data.items() if key != "gate_type"}
+        self.required_fields = self.load_required_fields("wymagane.txt").get(self.gate_type, [])
 
         self.selected_options = {}
 
@@ -30,6 +32,7 @@ class Kreator(QMainWindow):
         # Initialize UI
         self._setup_ui()
 
+        print(self.default_options)
         # Ustaw domyślne opcje
         self.set_default_options()
 
@@ -132,7 +135,7 @@ class Kreator(QMainWindow):
 
             # Zapisz zaznaczone opcje do pliku
             print(f"Zaznaczone opcje: {self.selected_options}")
-            self.save_selected_options("selected_options.json", self.gate_type, self.selected_options)
+            self.save_selected_options("selected_options.json", self.selected_options)
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
 
 
@@ -165,37 +168,60 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def load_selected_options(file_path):
-        """Loads selected options for a specific gate type from a JSON file."""
+        """Loads selected options from a JSON file."""
         if not os.path.exists(file_path):
+            print(f"Plik {file_path} nie istnieje. Zwracanie pustych opcji.")
             return {}
 
-        with open(file_path, 'r', encoding='utf-8') as file:
-            try:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
                 data = json.load(file)
-                return data
-            except json.JSONDecodeError:
-                print(f"Błąd podczas wczytywania pliku {file_path}.")
-                return {}
-
-        return selected_options
+                return data  # Zwraca pełne dane z JSON-a, w tym gate_type
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Błąd podczas wczytywania pliku {file_path}: {e}")
+            return {}
 
     @staticmethod
-    def save_selected_options(file_path, gate_type, selected_options):
-        """Saves selected options for the current gate type to a JSON file."""
-        data = {gate_type: selected_options}  # Dane do zapisania
+    def save_selected_options(file_path, selected_options):
+        """Saves selected options to a JSON file without overwriting existing data."""
+        # Sprawdź, czy plik istnieje, a jeśli nie, utwórz pustą strukturę
+        if not os.path.exists(file_path):
+            existing_data = {}
+        else:
+            # Wczytaj istniejące dane z pliku JSON
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    existing_data = json.load(file)
+            except (json.JSONDecodeError, FileNotFoundError):
+                print(f"Plik {file_path} jest uszkodzony lub nie istnieje. Tworzenie nowego pliku.")
+                existing_data = {}
 
-        with open(file_path, 'w', encoding='utf-8') as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-            print(f"Zapisano dane dla {gate_type}: {selected_options}")
+        # Zaktualizuj dane dla wybranych opcji
+        existing_data.update(selected_options)
+
+        # Zapisz zaktualizowane dane z powrotem do pliku
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(existing_data, file, ensure_ascii=False, indent=4)
+                print(f"Zaktualizowano dane w pliku {file_path}: {selected_options}")
+        except Exception as e:
+            print(f"Wystąpił błąd podczas zapisywania danych do pliku: {e}")
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
         for category, value in self.default_options.items():
-            # Obsługa dla opcji checkbox
+            # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
             if category in self.navigation_menu.option_items_by_category:
                 for item in self.navigation_menu.option_items_by_category[category]:
-                    if isinstance(item, QCheckBox) and item.text() == value:
-                        item.setChecked(True)
+                    if isinstance(item, QCheckBox):
+                        if isinstance(value, list):
+                            # Jeśli wartość to lista, zaznacz checkboxy odpowiadające każdej wartości
+                            if item.text() in value:
+                                item.setChecked(True)
+                        else:
+                            # Jeśli wartość to pojedynczy tekst, zaznacz odpowiedni checkbox
+                            if item.text() == value:
+                                item.setChecked(True)
 
             # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
             if category in self.navigation_menu.option_items_by_category:
@@ -226,6 +252,3 @@ class Kreator(QMainWindow):
                                 # Zaktualizuj klucz "Kolor" w selected_options
                                 self.navigation_menu.selected_options["Kolor"] = kolor_value
 
-    def get_selected_options(self):
-        """Returns the currently selected options in JSON-friendly format."""
-        return self.selected_options

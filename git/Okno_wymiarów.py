@@ -7,6 +7,9 @@ from PySide6.QtGui import QIntValidator
 from button import StyledButton
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtCore import QRegularExpression
+import json
+import os
+
 
 class OknoWymiarow(QMainWindow):
     def __init__(self):
@@ -19,6 +22,10 @@ class OknoWymiarow(QMainWindow):
 
         # Initialize UI
         self._setup_ui()
+
+        # Load dimensions from file if available
+        self.load_dimensions_from_file()
+
 
     def _setup_ui(self):
         """Configures the main layout and divides it into left and right panels."""
@@ -122,13 +129,16 @@ class OknoWymiarow(QMainWindow):
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def save_dimensions(self):
-        """Reads the dimensions from input fields and saves them to self.dimensions."""
+        """Reads the dimensions from input fields and saves them to self.dimensions and the JSON file."""
         width = self.width_input.text()
         height = self.height_input.text()
 
-        # Zapisz wymiary jako liczby całkowite
-        self.dimensions['width'] = int(width)
-        self.dimensions['height'] = int(height)
+        if width.isdigit() and height.isdigit():
+            self.dimensions['width'] = int(width)
+            self.dimensions['height'] = int(height)
+
+            # Zapisz wymiary do pliku JSON
+            self.save_dimensions_to_file()
 
 
     def validate_inputs(self):
@@ -147,3 +157,53 @@ class OknoWymiarow(QMainWindow):
 
         # Jeśli wartości są nieprawidłowe, przycisk pozostaje wyłączony
         self.accept_button.setEnabled(False)
+
+    def save_dimensions_to_file(self, file_path="selected_options.json"):
+        """Saves the gate dimensions to a JSON file."""
+        try:
+            # Ensure the file exists; if not, create an empty JSON structure
+            if not os.path.exists(file_path):
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump({}, file, ensure_ascii=False, indent=4)
+
+            # Load existing data from the file
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+
+            # Update the dimensions in the file
+            data['dimensions'] = {
+                'width': self.dimensions.get('width', 0),
+                'height': self.dimensions.get('height', 0)
+            }
+
+            # Save the updated data back to the file
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+
+            print(f"Wymiary zostały zapisane: {data['dimensions']}")
+
+        except Exception as e:
+            print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
+
+    def load_dimensions_from_file(self, file_path="selected_options.json"):
+        """Loads dimensions from the JSON file and updates the input fields."""
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+
+                dimensions = data.get('dimensions', {})
+                self.dimensions = dimensions
+
+                # Update input fields with loaded dimensions
+                if 'width' in dimensions:
+                    self.width_input.setText(str(dimensions['width']))
+                if 'height' in dimensions:
+                    self.height_input.setText(str(dimensions['height']))
+
+                print(f"Wczytano wymiary: {dimensions}")
+
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Błąd podczas wczytywania wymiarów: {e}")
+        else:
+            print(f"Plik {file_path} nie istnieje. Wymiary nie zostały wczytane.")
