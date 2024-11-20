@@ -195,9 +195,9 @@ class OknoStartowe(QMainWindow):
             empty_item.setTextAlignment(Qt.AlignCenter)  # Wyśrodkowanie komunikatu
             self.project_table.setItem(0, 1, empty_item)
 
-    @staticmethod
-    def clear_selected_options(file_path):
+    def clear_selected_options(self):
         """Clears the contents of the JSON file or creates it if it doesn't exist."""
+        file_path = "selected_options.json"
         try:
             # Sprawdź, czy plik istnieje
             if not os.path.isfile(file_path):
@@ -214,10 +214,3 @@ class OknoStartowe(QMainWindow):
             print(f"Wystąpił błąd podczas operacji na pliku: {e}")
         except Exception as e:
             print(f"Wystąpił niespodziewany błąd: {e}")
-
-    def _clear_and_start_new_project(self):
-        """Czyści plik z opcjami i inicjuje nowy projekt."""
-        file_path = "selected_options.json"  # Ścieżka do pliku JSON
-        self.clear_selected_options(file_path)
-        print("Rozpoczynamy nowy projekt!")
-        # Możesz tutaj dodać logikę przejścia do kolejnego widoku, jeśli to wymagane
