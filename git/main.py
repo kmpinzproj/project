@@ -33,8 +33,6 @@ class MainApplication(QMainWindow):
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
 
-        self.load_styles()
-
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -45,20 +43,6 @@ class MainApplication(QMainWindow):
     def resizeEvent(self, event):
         """Adjust background image size upon window resizing."""
         super().resizeEvent(event)
-        # self.resize_background()
-
-    # def resize_background(self):
-    #     """Scales background to fit window size while preserving aspect ratio."""
-    #     self.background_label.setGeometry(self.rect())
-    #     window_ratio = self.width() / self.height()
-    #     pixmap_ratio = self.original_pixmap.width() / self.original_pixmap.height()
-    #
-    #     if window_ratio > pixmap_ratio:
-    #         scaled_pixmap = self.original_pixmap.scaledToHeight(self.height(), Qt.SmoothTransformation)
-    #     else:
-    #         scaled_pixmap = self.original_pixmap.scaledToWidth(self.width(), Qt.SmoothTransformation)
-    #
-    #     self.background_label.setPixmap(scaled_pixmap)
 
     def _initialize_views(self):
         """Creates and adds all views to the QStackedWidget."""
@@ -144,11 +128,6 @@ class MainApplication(QMainWindow):
             # Jeśli walidacja nie powiodła się, wyświetl komunikat w konsoli
             print("Nie wszystkie wymagane opcje zostały wybrane!")
 
-    # def set_selected_gate_type(self, gate_type):
-    #     """Stores selected gate type and navigates to dimension view."""
-    #     self.selected_gate_type = gate_type
-    #     self.navigate_to_dimension_view()
-
     def initialize_database(self):
         """Initializes the database if it does not already exist."""
         if not os.path.exists(self.DB_FILE):
@@ -165,13 +144,17 @@ class MainApplication(QMainWindow):
         else:
             print("Baza danych już istnieje.")
 
-    def load_styles(self):
-        with open("styles.qss", "r") as file:
-            self.setStyleSheet(file.read())
+def load_stylesheet(app, file_path):
+    """Ładuje plik stylów CSS i stosuje go do aplikacji."""
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            app.setStyleSheet(file.read())
+    else:
+        print(f"Plik stylów {file_path} nie istnieje!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # load_stylesheet(app, "styles.qss")
+    load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
     main_app.initialize_database()

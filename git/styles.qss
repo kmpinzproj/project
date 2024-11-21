@@ -59,11 +59,6 @@ QMainWindow {
     background: none;
 }
 
-#wyborBramyWindow {
-    background: url("../jpg/background.jpg") no-repeat center center;
-    background-size: cover;
-}
-
 #wyborBramyWindow QLabel#gateTitleLabel {
     font-family: "Arial";
     font-size: 14px;
