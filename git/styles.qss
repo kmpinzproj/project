@@ -109,14 +109,14 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 
 /* Styl dla widoku ContactForm */
-.contactForm QLabel {
-    color: white;
+.ContactForm QLabel {
+    color: white !important; /* Wymuszenie białego koloru na wszystkich etykietach */
     font-size: 14px;
 }
 
 .ContactForm QLineEdit, .ContactForm QTextEdit {
     background-color: #333333;
-    color: white;
+    color: white !important; /* Wymuszenie białego koloru tekstu */
     border: 1px solid #666666;
     border-radius: 5px;
     padding: 5px;
@@ -132,7 +132,7 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 
 .ContactForm StyledButton {
     background-color: #555555;
-    color: white;
+    color: white !important; /* Wymuszenie białego koloru tekstu na przyciskach */
     border-radius: 10px;
     padding: 5px 15px;
 }
