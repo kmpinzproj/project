@@ -89,7 +89,7 @@ class ScrollableMenu(QWidget):
         field_layout.addLayout(header_layout)
 
         # Options widget
-        if field_name in ["Kolor Standardowy", "Kolor RAL", "Układ wypełnienia", "Wysokość profili",
+        if field_name in ["Kolor standardowy", "Kolor RAL", "Układ wypełnienia", "Wysokość profili",
                           "Struktura powierzchni", "Rodzaj przetłoczenia", "Przeszklenia"]:
             options_widget = self._create_image_options_widget(field_name, options)
         else:
@@ -176,8 +176,8 @@ class ScrollableMenu(QWidget):
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
         # Usuń zaznaczenie poprzednich opcji
-        if category in ["Kolor Standardowy", "Kolor RAL"]:
-            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+        if category in ["Kolor standardowy", "Kolor RAL"]:
+            for color_category in ["Kolor standardowy", "Kolor RAL"]:
                 if color_category in self.option_items_by_category:
                     for option_widget in self.option_items_by_category[color_category]:
                         img_label = option_widget.findChild(QLabel, "image_label")
@@ -202,9 +202,9 @@ class ScrollableMenu(QWidget):
             selected_text = None  # Jeśli nie znaleziono, ustaw na None
 
         if selected_text:
-            if category in ["Kolor Standardowy", "Kolor RAL"]:
+            if category in ["Kolor standardowy", "Kolor RAL"]:
                 # Jeśli wybrano kolor, usuń czerwoną ramkę z obu kategorii
-                for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                for color_category in ["Kolor standardowy", "Kolor RAL"]:
                     if color_category in self.category_widgets:
                         field_group = self.category_widgets[color_category]["field_group"]
                         field_group.setStyleSheet("")  # Usuń stylizację (domyślny wygląd)

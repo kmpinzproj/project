@@ -1,7 +1,7 @@
 [Brama Segmentowa]
 Rodzaj przetłoczenia: Bez przetłoczenia, Średnie, Niskie, Kasetony
 Struktura powierzchni: Silkgrain, Woodgrain, Smoothgrain
-Kolor Standardowy: Biały, Brąz, Złoty dąb, Orzech, Mahoń, Dąb antyczny, Macore, Dąb ciemny, Dąb Bagienny, Tabasco, Siena rosso, Winchester, Kremowy biały, Dark Green, Metbrush silver, Silbergrau, Sapeli, Siena pl
+Kolor standardowy: Biały, Brąz, Złoty dąb, Orzech, Mahoń, Dąb antyczny, Macore, Dąb ciemny, Dąb Bagienny, Tabasco, Siena rosso, Winchester, Kremowy biały, Dark Green, Metbrush silver, Silbergrau, Sapeli, Siena pl
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Przeszklenia: Wzór 1, Wzór 2, Wzór 3
 Klamka do bramy: Klamka 1, Klamka 2, Klamka 3, Klamka 4
@@ -11,7 +11,7 @@ Opcje dodatkowe: Drzwi w bramie, Samozamykacz, Zamykane ręcznie, Rygiel
 
 [Brama Roletowa]
 Wysokość profili: 77 mm, 100 mm
-Kolor Standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
+Kolor standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Przeszklenia: Wzór 4
 Sposób otwierania bramy: Automatycznie (kluczyk), Zdalne sterowanie, Fotokomórka
@@ -21,7 +21,7 @@ Kratka wentylacyjna, Lewa, Prawa, Obustronna
 Ilość skrzydeł: Dwuskrzydłowe, Jednoskrzydłowe prawe, Jednoskrzydłowe lewe
 Ocieplenie: Brama ocieplana, Brama nieocieplana
 Układ wypełnienia: Poziome, Pionowe, Jodełka w górę, Jodełka w dół
-Kolor Standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
+Kolor standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Przeszklenia: Okna poziome, Okna pionowe
 Kratka wentylacyjna, Lewa, Prawa, Obustronna
@@ -29,7 +29,7 @@ Opcje dodatkowe: Rygiel trzypunktowy, Dodatkowe zamknięcie na kłódkę
 
 [Brama Uchylna]
 Układ wypełnienia: Pionowe, Poziome, Jodełka w górę
-Kolor Standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
+Kolor standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Sposób otwierania drzwi: Ręczne, Automatyczne
 Przeszklenia: Okna poziome, Okna pionowe

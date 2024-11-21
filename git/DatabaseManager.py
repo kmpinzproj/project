@@ -97,7 +97,7 @@ class DatabaseManager:
                     "rodzaj_przetloczenia": gate_data.get("Rodzaj przetłoczenia", None),
                     "struktura_powierzchni": gate_data.get("Struktura powierzchni", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor", None),
+                    "kolor_ral": gate_data.get("Kolor RAL", None),
                     "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
                 }
@@ -106,7 +106,7 @@ class DatabaseManager:
                 return {
                     "wysokosc_profili": gate_data.get("Wysokość profili", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor", None),
+                    "kolor_ral": gate_data.get("Kolor RAL", None),
                     "sposob_otwierania_bramy": gate_data.get("Sposób otwierania bramy", None),
                     "przeszklenia": gate_data.get("Przeszklenia", None),
                 }
@@ -117,7 +117,7 @@ class DatabaseManager:
                     "ocieplenie": gate_data.get("Ocieplenie", None),
                     "uklad_wypelnienia": gate_data.get("Układ wypełnienia", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor", None),
+                    "kolor_ral": gate_data.get("Kolor RAL", None),
                     "przeszklenia": gate_data.get("Przeszklenia", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
                 }
@@ -126,7 +126,7 @@ class DatabaseManager:
                 return {
                     "uklad_wypelnienia": gate_data.get("Układ wypełnienia", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor", None),
+                    "kolor_ral": gate_data.get("Kolor RAL", None),
                     "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
                     "przeszklenia": gate_data.get("Przeszklenia", None),
                     "drzwi_przejsciowe": gate_data.get("Drzwi przejściowe", None),
