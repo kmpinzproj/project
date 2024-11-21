@@ -136,8 +136,8 @@ class OknoWymiarow(QMainWindow):
         height = self.height_input.text()
 
         if width.isdigit() and height.isdigit():
-            self.dimensions['width'] = int(width)
-            self.dimensions['height'] = int(height)
+            self.dimensions['Szerokość'] = int(width)
+            self.dimensions['Wysokość'] = int(height)
 
             # Zapisz wymiary do pliku JSON
             self.save_dimensions_to_file()
@@ -174,9 +174,9 @@ class OknoWymiarow(QMainWindow):
                 data = json.load(file)
 
             # Update the dimensions in the file
-            data['dimensions'] = {
-                'width': self.dimensions.get('width', 0),
-                'height': self.dimensions.get('height', 0)
+            data['Wymiary'] = {
+                'Szerokość': self.dimensions.get('Szerokość', 0),
+                'Wysokość': self.dimensions.get('Wysokość', 0)
             }
 
             # Save the updated data back to the file
