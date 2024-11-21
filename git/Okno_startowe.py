@@ -157,7 +157,8 @@ class OknoStartowe(QMainWindow):
 
     def open_selected_project(self):
         """
-        Czyści opcje i pobiera dane zaznaczonego projektu na podstawie nazwy projektu oraz powiązanej bramy.
+        Czyści opcje, pobiera dane zaznaczonego projektu na podstawie nazwy projektu,
+        powiązaną bramę oraz zapisuje dane do pliku JSON.
         """
         self.clear_selected_options()
 
@@ -174,15 +175,14 @@ class OknoStartowe(QMainWindow):
         if project_name_item:
             project_name = project_name_item.text()
             try:
-                # Pobranie danych projektu i powiązanej bramy z bazy na podstawie nazwy projektu
-                project_data = self.db_manager.get_project_by_name(project_name)
-                if project_data:
-                    print(f"Wybrany projekt: {project_data['projekt']}")
-                    print(f"Powiązana brama: {project_data['brama']}")
-                else:
-                    print("Nie udało się pobrać danych projektu.")
+                # Ścieżka testowa (możesz zmienić na własną)
+                output_file = "../resources/selected_options.json"
+
+                # Zapis do JSON przy użyciu metody bazy danych
+                self.db_manager.load_project_to_json(project_name, output_file)
+
             except Exception as e:
-                print(f"Błąd podczas pobierania danych projektu: {e}")
+                print(f"Błąd podczas zapisywania projektu do JSON: {e}")
         else:
             print("Nie można odczytać nazwy projektu z tabeli.")
 

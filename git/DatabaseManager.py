@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 class DatabaseManager:
 
@@ -307,6 +308,54 @@ class DatabaseManager:
         conn.close()
         return project_data
 
+    def load_project_to_json(self, project_name, output_file):
+        """
+        Pobiera dane projektu z bazy na podstawie nazwy projektu i zapisuje je do pliku JSON.
+
+        :param project_name: Nazwa projektu, który ma być zapisany do JSON.
+        :param output_file: Ścieżka do pliku, w którym dane zostaną zapisane.
+        """
+        try:
+            # Pobierz dane projektu
+            project_data = self.get_project_by_name(project_name)
+            if not project_data:
+                print(f"Nie znaleziono projektu o nazwie {project_name}")
+                return
+
+            # Mapowanie typu bramy na pełną nazwę
+            full_gate_type_map = {
+                "segmentowa": "Brama Segmentowa",
+                "roletowa": "Brama Roletowa",
+                "rozwierana": "Brama Rozwierana",
+                "uchylna": "Brama Uchylna"
+            }
+
+            # Pobranie pełnej nazwy bramy
+            gate_type_full = full_gate_type_map.get(project_data["projekt"]["typ_bramy"], "Nieznany typ bramy")
+
+            # Przygotowanie struktury JSON
+            project_json = {
+                "project_name": project_data["projekt"]["nazwa"],
+                "gate_type": gate_type_full,  # Użycie pełnej nazwy typu bramy
+                "dimensions": {
+                    "width": project_data["brama"]["szerokosc"],
+                    "height": project_data["brama"]["wysokosc"]
+                },
+                **{
+                    key: value
+                    for key, value in project_data["brama"].items()
+                    if key not in ["szerokosc", "wysokosc"]
+                }
+            }
+
+            # Zapis do pliku JSON
+            with open(output_file, "w", encoding="utf-8") as json_file:
+                json.dump(project_json, json_file, ensure_ascii=False, indent=4)
+
+            print(f"Projekt zapisano do pliku JSON: {output_file}")
+        except Exception as e:
+            print(f"Błąd podczas zapisywania projektu do JSON: {e}")
+
 
 # TESTOWANIE BAZY DANYCH
 if __name__ == "__main__":
@@ -325,11 +374,10 @@ if __name__ == "__main__":
         print(projekt)
 
     # Załadowanie JSON jako słownika Python
-    import json
 
+    db_manager = DatabaseManager()
     with open("../resources/selected_options.json", "r", encoding="utf-8") as file:
         project_json = json.load(file)
-
     # Dodanie projektu do bazy danych
     db_manager = DatabaseManager()
     db_manager.add_project_from_json(project_json)
