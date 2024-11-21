@@ -55,7 +55,6 @@ CREATE TABLE BramaUchylna (
     kolor_ral TEXT,
     sposob_otwierania_drzwi TEXT,
     przeszklenia TEXT,
-    drzwi_przejsciowe TEXT,
     opcje_dodatkowe TEXT,
     szerokosc INTEGER, -- Dodano szerokość bramy
     wysokosc INTEGER,  -- Dodano wysokość bramy

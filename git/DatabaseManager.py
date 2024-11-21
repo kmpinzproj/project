@@ -198,8 +198,8 @@ class DatabaseManager:
         elif typ_bramy == "uchylna":
             cursor.execute("""
                 INSERT INTO BramaUchylna 
-                (projekt_id, uklad_wypelnienia, kolor_standardowy, kolor_ral, sposob_otwierania_drzwi, przeszklenia, drzwi_przejsciowe, opcje_dodatkowe, szerokosc, wysokosc)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (projekt_id, uklad_wypelnienia, kolor_standardowy, kolor_ral, sposob_otwierania_drzwi, przeszklenia, opcje_dodatkowe, szerokosc, wysokosc)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 projekt_id,
                 gate_data.get("uklad_wypelnienia"),
@@ -207,7 +207,6 @@ class DatabaseManager:
                 gate_data.get("kolor_ral"),
                 gate_data.get("sposob_otwierania_drzwi"),
                 gate_data.get("przeszklenia"),
-                gate_data.get("drzwi_przejsciowe"),
                 gate_data.get("opcje_dodatkowe"),
                 width,
                 height
