@@ -7,6 +7,8 @@ from Rozwijane_menu import ScrollableMenu
 from button import StyledButton
 import os
 import json
+from git.DatabaseManager import DatabaseManager
+
 
 
 class Kreator(QMainWindow):
@@ -120,6 +122,7 @@ class Kreator(QMainWindow):
         self.save_button = StyledButton("Zapisz")
 
         self.contact_button.clicked.connect(self.validate_and_proceed)
+        self.save_button.clicked.connect(self.save_without_validate)
 
         # Dodaj przyciski w układzie 2x2
         buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
@@ -148,6 +151,15 @@ class Kreator(QMainWindow):
     def validate_fields(self):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
         return self.navigation_menu.validate_required_fields(self.required_fields)
+
+    def save_without_validate(self):
+        self.selected_options = self.navigation_menu.get_selected_options()
+
+        # Zapisz zaznaczone opcje do pliku
+        print(f"Zaznaczone opcje: {self.selected_options}")
+        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
+        print(self.selected_options)
 
     @staticmethod
     def load_required_fields(file_path):
@@ -191,6 +203,7 @@ class Kreator(QMainWindow):
     def save_selected_options(file_path, selected_options):
         """Saves selected options to a JSON file without overwriting existing data."""
         # Sprawdź, czy plik istnieje, a jeśli nie, utwórz pustą strukturę
+        print(selected_options)
         if not os.path.exists(file_path):
             existing_data = {}
         else:
@@ -212,6 +225,13 @@ class Kreator(QMainWindow):
                 print(f"Zaktualizowano dane w pliku {file_path}: {selected_options}")
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania danych do pliku: {e}")
+
+        db_manager = DatabaseManager()
+        with open("../resources/selected_options.json", "r", encoding="utf-8") as file:
+            project_json = json.load(file)
+        # Dodanie projektu do bazy danych
+        db_manager = DatabaseManager()
+        db_manager.add_project_from_json(project_json)
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
