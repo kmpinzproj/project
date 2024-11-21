@@ -147,7 +147,7 @@ class MainApplication(QMainWindow):
 def load_stylesheet(app, file_path):
     """Ładuje plik stylów CSS i stosuje go do aplikacji."""
     if os.path.exists(file_path):
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             app.setStyleSheet(file.read())
     else:
         print(f"Plik stylów {file_path} nie istnieje!")
