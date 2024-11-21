@@ -18,6 +18,11 @@ class OknoStartowe(QMainWindow):
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
+        # Wczytaj style
+        self._apply_styles()
+
+        print(self.styleSheet())
+
         # Ustawienia główne i UI
         self.selected_row = None  # Zmienna przechowująca ID zaznaczonego projektu
         self.db_manager = DatabaseManager()  # Menedżer bazy danych
@@ -77,25 +82,7 @@ class OknoStartowe(QMainWindow):
         self.project_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Wyłącz edytowanie pól
         self.project_table.setShowGrid(False)  # Ukrycie siatki
         self.project_table.verticalHeader().setVisible(False)  # Ukrycie nagłówków wierszy
-        self.project_table.setStyleSheet("""
-            QTableWidget {
-                background-color: transparent;
-                border: none;
-                color: white;
-            }
-            QHeaderView::section {
-                background-color: #333333;
-                color: white;
-                border: 1px solid #444444;
-                padding: 5px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QTableWidget::item:selected {
-                background-color: rgba(100, 100, 100, 0.8);
-                color: red;
-            }
-        """)
+
 
         # Konfiguracja nagłówków
         header = self.project_table.horizontalHeader()
@@ -195,3 +182,17 @@ class OknoStartowe(QMainWindow):
             self.selected_row = row + 1  # Zakładam, że ID projektu odpowiada numerowi wiersza (zaczyna od 1)
         else:
             self.selected_row = None
+
+    def _apply_styles(self):
+        """Wczytuje i ustawia style z pliku QSS."""
+        qss_path = "styles.qss"  # Upewnij się, że podajesz poprawną ścieżkę
+        if os.path.exists(qss_path):
+            with open(qss_path, "r", encoding="utf-8") as file:
+                style = file.read()
+                if not os.path.exists("../jpg/tło.jpg"):
+                    print("Obraz tła nie istnieje! Sprawdź ścieżkę.")
+                else:
+                    print("Obraz tła załadowano pomyślnie.")
+                self.setStyleSheet(style)
+        else:
+            print(f"Plik stylów {qss_path} nie istnieje.")

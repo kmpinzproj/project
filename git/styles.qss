@@ -1,0 +1,64 @@
+/* Styl ogólny aplikacji */
+QWidget {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Tło dla całego głównego okna */
+QMainWindow {
+    border-image: url('../jpg/tło.jpg') 0 0 0 0 stretch stretch;
+}
+
+/* Styl dla przycisków */
+QPushButton {
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+QPushButton:hover {
+    background-color: #005a9e;
+}
+
+QPushButton:disabled {
+    background-color: #c0c0c0;
+    color: #808080;
+}
+
+/* Styl dla etykiet */
+QLabel {
+    color: #333;
+    font-size: 14px;
+}
+
+/* Styl dla pól tekstowych */
+QLineEdit {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+    background-color: white;
+}
+
+/* Styl dla tabel */
+QTableWidget {
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+QHeaderView::section {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444444;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+QTableWidget::item:selected {
+    background-color: rgba(100, 100, 100, 0.8);
+    color: red;
+}

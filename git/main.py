@@ -32,8 +32,8 @@ class MainApplication(QMainWindow):
         self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
-        self.original_pixmap = QPixmap("../jpg/tło.jpg")
-        self.resize_background()
+        # self.original_pixmap = QPixmap("../jpg/tło.jpg")
+        # self.resize_background()
 
 
         # Initialize QStackedWidget
@@ -46,20 +46,20 @@ class MainApplication(QMainWindow):
     def resizeEvent(self, event):
         """Adjust background image size upon window resizing."""
         super().resizeEvent(event)
-        self.resize_background()
+        # self.resize_background()
 
-    def resize_background(self):
-        """Scales background to fit window size while preserving aspect ratio."""
-        self.background_label.setGeometry(self.rect())
-        window_ratio = self.width() / self.height()
-        pixmap_ratio = self.original_pixmap.width() / self.original_pixmap.height()
-
-        if window_ratio > pixmap_ratio:
-            scaled_pixmap = self.original_pixmap.scaledToHeight(self.height(), Qt.SmoothTransformation)
-        else:
-            scaled_pixmap = self.original_pixmap.scaledToWidth(self.width(), Qt.SmoothTransformation)
-
-        self.background_label.setPixmap(scaled_pixmap)
+    # def resize_background(self):
+    #     """Scales background to fit window size while preserving aspect ratio."""
+    #     self.background_label.setGeometry(self.rect())
+    #     window_ratio = self.width() / self.height()
+    #     pixmap_ratio = self.original_pixmap.width() / self.original_pixmap.height()
+    #
+    #     if window_ratio > pixmap_ratio:
+    #         scaled_pixmap = self.original_pixmap.scaledToHeight(self.height(), Qt.SmoothTransformation)
+    #     else:
+    #         scaled_pixmap = self.original_pixmap.scaledToWidth(self.width(), Qt.SmoothTransformation)
+    #
+    #     self.background_label.setPixmap(scaled_pixmap)
 
     def _initialize_views(self):
         """Creates and adds all views to the QStackedWidget."""
@@ -166,9 +166,17 @@ class MainApplication(QMainWindow):
         else:
             print("Baza danych już istnieje.")
 
+def load_stylesheet(app, file_path):
+    """Ładuje plik stylów CSS i stosuje go do aplikacji."""
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            app.setStyleSheet(file.read())
+    else:
+        print(f"Plik stylów {file_path} nie istnieje!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
     main_app.initialize_database()
