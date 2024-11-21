@@ -9,6 +9,7 @@ from button import StyledButton
 class ContactForm(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setObjectName("ContactForm")  # Ustawiamy nazwę klasy CSS
         self.submit_button = None
         self.back_button = None
         self.comments_input = None

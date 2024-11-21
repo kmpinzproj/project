@@ -107,3 +107,36 @@ QMainWindow#OknoWymiarow QPushButton:disabled {
 QMainWindow#OknoWymiarow QPushButton:hover {
     background-color: #505050; /* Jaśniejsze tło przy najechaniu */
 }
+
+/* Styl dla widoku ContactForm */
+.contactForm QLabel {
+    color: white;
+    font-size: 14px;
+}
+
+.ContactForm QLineEdit, .ContactForm QTextEdit {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #666666;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.ContactForm QLineEdit:focus, .ContactForm QTextEdit:focus {
+    border: 1px solid #999999;
+}
+
+.ContactForm QTextEdit {
+    min-height: 80px;
+}
+
+.ContactForm StyledButton {
+    background-color: #555555;
+    color: white;
+    border-radius: 10px;
+    padding: 5px 15px;
+}
+
+.ContactForm StyledButton:hover {
+    background-color: #777777;
+}
