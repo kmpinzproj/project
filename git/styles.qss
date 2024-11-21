@@ -147,6 +147,10 @@ QMainWindow#OknoWymiarow QPushButton:hover {
     border: none; /* Brak ramki */
 }
 
+#kreator_view QWidget {
+    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+}
+
 /* Styl przycisków rozwijania w ScrollableMenu */
 #kreator_view QPushButton {
     background-color: transparent; /* Przycisk w pełni przezroczysty */
@@ -169,6 +173,11 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 
 /* Styl QScrollBar tylko dla widoku Kreator */
+#kreator_view QScrollArea {
+    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+    border: none; /* Usunięcie obramowania */
+}
+
 #kreator_view QScrollBar:vertical {
     background: transparent; /* Tło paska przewijania */
     width: 12px; /* Szerokość paska */
@@ -201,7 +210,7 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 
 #kreator_view QGroupBox::title {
-    color: rgba(255, 255, 255, 0.9); /* Jasny kolor tytułu */
+    background-color: rgb(48, 48, 48); /* Tło grup */
     font-size: 14px; /* Rozmiar czcionki */
     font-weight: bold;
     subcontrol-origin: margin;
