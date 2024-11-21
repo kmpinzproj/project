@@ -25,8 +25,8 @@ class Kreator(QMainWindow):
 
         # Wczytanie opcji z pliku JSON, w tym gate_type
         data = self.load_selected_options("../resources/selected_options.json")
-        self.gate_type = data.get("gate_type", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
-        self.default_options = {key: value for key, value in data.items() if key != "gate_type"}
+        self.gate_type = data.get("Typ bramy", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
+        self.default_options = {key: value for key, value in data.items() if key != "Typ bramy"}
         self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
 
         self.selected_options = {}

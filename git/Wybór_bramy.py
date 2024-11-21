@@ -132,7 +132,7 @@ class WyborBramy(QMainWindow):
                 data = json.load(file)
 
             # Zapisz typ bramy
-            data["gate_type"] = gate_type
+            data["Typ bramy"] = gate_type
 
             # Zapisz zaktualizowane dane do pliku
             with open(file_path, 'w', encoding='utf-8') as file:
