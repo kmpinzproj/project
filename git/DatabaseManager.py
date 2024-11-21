@@ -29,11 +29,12 @@ class DatabaseManager:
         :param project_json: Słownik reprezentujący dane projektu i bramy.
         :return: None
         """
+
         try:
             # Pobranie typu bramy
-            gate_type = project_json.get("gate_type")
+            gate_type = project_json.get("Typ bramy")
             if not gate_type:
-                raise ValueError("JSON musi zawierać klucz 'gate_type' określający typ bramy.")
+                raise ValueError("JSON musi zawierać klucz 'Typ bramy' określający typ bramy.")
 
             # Dopasowanie typu bramy do bazy danych
             typ_bramy_map = {
@@ -45,19 +46,19 @@ class DatabaseManager:
 
             if gate_type not in typ_bramy_map:
                 raise ValueError(f"Nieznany typ bramy: {gate_type}")
-
+            conn = self.connect()
             typ_bramy = typ_bramy_map[gate_type]
 
             # Pobranie wymiarów
-            dimensions = project_json.get("dimensions", {})
-            width = dimensions.get("width")
-            height = dimensions.get("height")
+            dimensions = project_json.get("Wymiary", {})
+            width = dimensions.get("Szerokość")
+            height = dimensions.get("Wysokość")
 
             if not width or not height:
-                raise ValueError("Brama musi mieć określone szerokość i wysokość (dimensions).")
+                raise ValueError("Brama musi mieć określone szerokość i wysokość (wymiary).")
 
             # Nawiązanie połączenia z bazą danych
-            conn = self.connect()
+
             cursor = conn.cursor()
 
             # Dodanie projektu do tabeli Projekt
@@ -333,20 +334,40 @@ class DatabaseManager:
             # Pobranie pełnej nazwy bramy
             gate_type_full = full_gate_type_map.get(project_data["projekt"]["typ_bramy"], "Nieznany typ bramy")
 
+            # Mapowanie kluczy na polskie nazwy
+            key_map = {
+                "ilosc_skrzydel": "Ilość skrzydeł",
+                "ocieplenie": "Ocieplenie",
+                "uklad_wypelnienia": "Układ wypełnienia",
+                "kolor_standardowy": "Kolor standardowy",
+                "kolor_ral": "Kolor RAL",
+                "wysokosc_profili": "Wysokość profili",
+                "sposob_otwierania_drzwi": "Sposób otwierania drzwi",
+                "sposob_otwierania_bramy": "Sposób otwierania bramy",
+                "przeszklenia": "Przeszklenia",
+                "drzwi_przejsciowe": "Drzwi przejściowe",
+                "opcje_dodatkowe": "Opcje dodatkowe"
+            }
+
             # Przygotowanie struktury JSON
             project_json = {
-                "project_name": project_data["projekt"]["nazwa"],
-                "gate_type": gate_type_full,  # Użycie pełnej nazwy typu bramy
-                "dimensions": {
-                    "width": project_data["brama"]["szerokosc"],
-                    "height": project_data["brama"]["wysokosc"]
-                },
-                **{
-                    key: value
-                    for key, value in project_data["brama"].items()
-                    if key not in ["szerokosc", "wysokosc"]
+                "Nazwa Projektu": project_data["projekt"]["nazwa"],
+                "Typ bramy": gate_type_full,
+                "Wymiary": {
+                    "Szerokość": project_data["brama"]["szerokosc"],
+                    "Wysokość": project_data["brama"]["wysokosc"]
                 }
             }
+
+            # Przetwarzanie danych bramy
+            for key, value in project_data["brama"].items():
+                if key in ["szerokosc", "wysokosc"]:
+                    continue  # Pomijamy szerokość i wysokość, bo są już w "Wymiary"
+                mapped_key = key_map.get(key, key)  # Mapowanie kluczy na polskie nazwy
+                if key == "opcje_dodatkowe" and value:  # Opcje dodatkowe jako lista
+                    project_json[mapped_key] = [opt.strip() for opt in value.split(",")]
+                else:
+                    project_json[mapped_key] = value
 
             # Zapis do pliku JSON
             with open(output_file, "w", encoding="utf-8") as json_file:
