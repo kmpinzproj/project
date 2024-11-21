@@ -32,9 +32,8 @@ class MainApplication(QMainWindow):
         self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
-        # self.original_pixmap = QPixmap("../jpg/tło.jpg")
-        # self.resize_background()
 
+        self.load_styles()
 
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
@@ -166,17 +165,13 @@ class MainApplication(QMainWindow):
         else:
             print("Baza danych już istnieje.")
 
-def load_stylesheet(app, file_path):
-    """Ładuje plik stylów CSS i stosuje go do aplikacji."""
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
-            app.setStyleSheet(file.read())
-    else:
-        print(f"Plik stylów {file_path} nie istnieje!")
+    def load_styles(self):
+        with open("styles.qss", "r") as file:
+            self.setStyleSheet(file.read())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    load_stylesheet(app, "styles.qss")
+    # load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
     main_app.initialize_database()
