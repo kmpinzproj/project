@@ -346,7 +346,9 @@ class DatabaseManager:
                 "sposob_otwierania_bramy": "Sposób otwierania bramy",
                 "przeszklenia": "Przeszklenia",
                 "drzwi_przejsciowe": "Drzwi przejściowe",
-                "opcje_dodatkowe": "Opcje dodatkowe"
+                "opcje_dodatkowe": "Opcje dodatkowe",
+                "rodzaj_przetloczenia": "Rodzaj przetłoczenia",
+                "struktura_powierzchni": "Struktura powierzchni"
             }
 
             # Przygotowanie struktury JSON

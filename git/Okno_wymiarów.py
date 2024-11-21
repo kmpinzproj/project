@@ -183,7 +183,7 @@ class OknoWymiarow(QMainWindow):
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
 
-            print(f"Wymiary zostały zapisane: {data['dimensions']}")
+            print(f"Wymiary zostały zapisane: {data['Wymiary']}")
 
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
