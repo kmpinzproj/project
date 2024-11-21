@@ -196,14 +196,14 @@ class OknoWymiarow(QMainWindow):
                 with open(file_path, 'r', encoding='utf-8') as file:
                     data = json.load(file)
 
-                dimensions = data.get('dimensions', {})
+                dimensions = data.get('Wymiary', {})
                 self.dimensions = dimensions
 
                 # Update input fields with loaded dimensions
-                if 'width' in dimensions:
-                    self.width_input.setText(str(dimensions['width']))
-                if 'height' in dimensions:
-                    self.height_input.setText(str(dimensions['height']))
+                if 'Szerokość' in dimensions:
+                    self.width_input.setText(str(dimensions['Szerokość']))
+                if 'Wysokość' in dimensions:
+                    self.height_input.setText(str(dimensions['Wysokość']))
 
                 print(f"Wczytano wymiary: {dimensions}")
 
