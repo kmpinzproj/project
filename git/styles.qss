@@ -142,12 +142,9 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 
 /* Styl głównego widoku kreatora */
-#kreator_view {
-    background-color: rgba(30, 30, 30, 1); /* Ciemnoszare tło */
-    border: none; /* Brak ramki */
-}
 
-#kreator_view QWidget {
+
+#rozwijane_menu QWidget {
     background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
 }
 

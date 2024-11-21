@@ -14,6 +14,8 @@ class ScrollableMenu(QWidget):
         super().__init__()
         self.setWindowTitle("Przewijane menu")
         self.setMinimumWidth(400)
+        self.setObjectName("rozwijane_menu")
+
 
         self.gate_type = gate_type
         self.category_widgets = {}  # Store field group, options widget, and toggle button for each category
