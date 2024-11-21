@@ -144,7 +144,13 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 /* Styl głównego widoku kreatora */
 
 
-#rozwijane_menu QWidget {
+#kreator_view QScrollArea {
+    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+    border: none; /* Usuń ramkę wokół przewijania */
+}
+
+/* Tło wewnętrznego obszaru ScrollableMenu */
+#kreator_view QScrollArea > QWidget {
     background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
 }
 
