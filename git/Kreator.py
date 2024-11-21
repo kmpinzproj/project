@@ -15,6 +15,7 @@ class Kreator(QMainWindow):
 
     def __init__(self, test, image_path="../tworzenie_bramy_demo/cube_render.png"):
         super().__init__()
+        self.setObjectName("kreator_view")
         self.image_path = os.path.abspath(image_path) if image_path else None
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)

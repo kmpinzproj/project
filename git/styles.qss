@@ -140,3 +140,97 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 .ContactForm StyledButton:hover {
     background-color: #777777;
 }
+
+/* Styl QGroupBox tylko dla widoku Kreator */
+
+
+#kreator_view QGroupBox::title {
+    color: white;
+    font-weight: bold;
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 3px;
+}
+
+/* Styl QLabel tylko w widoku Kreator */
+#kreator_view QLabel {
+    color: white;
+    font-size: 14px;
+}
+
+/* Styl przycisków rozwijania w ScrollableMenu */
+#kreator_view QPushButton {
+    background-color: transparent; /* Przycisk w pełni przezroczysty */
+    border: none; /* Brak ramki */
+    color: rgba(255, 255, 255, 0.7); /* Jasnoszary kolor tekstu */
+    font-size: 16px; /* Większa czcionka dla czytelności */
+    font-weight: bold;
+    text-align: center; /* Wyśrodkowanie tekstu */
+    padding: 0px; /* Brak odstępów wewnętrznych */
+}
+
+#kreator_view QPushButton:hover {
+    color: white; /* Pełny biały kolor podczas najechania */
+    background-color: rgba(255, 255, 255, 0.1); /* Subtelne podświetlenie tła */
+}
+
+#kreator_view QPushButton:pressed {
+    color: rgba(200, 200, 200, 0.8); /* Zmiana koloru na ciemniejszy po kliknięciu */
+    background-color: rgba(255, 255, 255, 0.2); /* Nieco ciemniejsze tło po kliknięciu */
+}
+
+/* Styl QScrollBar tylko dla widoku Kreator */
+#kreator_view QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 2px;
+}
+
+#kreator_view QScrollBar::handle:vertical {
+    background: rgba(128, 128, 128, 0.6);
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+#kreator_view QScrollBar::add-line:vertical,
+#kreator_view QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+#kreator_view QScrollBar::add-page:vertical,
+#kreator_view QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* Styl opcji w rozwijanym menu */
+#kreator_view QCheckBox {
+    color: white;
+    font-size: 13px;
+}
+
+#kreator_view QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 3px;
+    background-color: transparent;
+}
+
+#kreator_view QCheckBox::indicator:checked {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Styl obrazów w menu */
+#kreator_view QLabel#image_label {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+#kreator_view QLabel#text_label {
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    margin: 3px;
+}
