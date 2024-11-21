@@ -78,7 +78,7 @@ QMainWindow {
 QMainWindow#OknoWymiarow QLabel {
     color: white;
     font-size: 14px;
-    font-family: "San Francisco", Arial, sans-serif; /* MacOS default font */
+    font-family: "Arial"; /* MacOS default font */
 }
 
 QMainWindow#OknoWymiarow QLineEdit {
@@ -140,6 +140,10 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 .ContactForm StyledButton:hover {
     background-color: #777777;
 }
+#kreator_view QPushButton:focus {
+    outline: none; /* Usuwa obrys */
+/*    box-shadow: none; *//* Usuwa efekt podświetlenia */
+}
 
 /* Styl ScrollableMenu - usuwa białe przerwy */
 #kreator_view QScrollArea {
@@ -159,7 +163,7 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 /* Styl dla QGroupBox - grup opcji */
 #kreator_view QGroupBox {
     background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtelna ramka */
+    border: 1px solid rgba(0, 0, 0, 0.3); /* Subtelna ramka */
     border-radius: 5px;
     margin: 5px 0; /* Odstęp między grupami */
     padding: 10px; /* Wypełnienie wewnątrz grupy */
@@ -186,7 +190,10 @@ QMainWindow#OknoWymiarow QPushButton:hover {
     color: white; /* Ustaw biały kolor tekstu */
     font-size: 13px; /* Rozmiar tekstu */
 }
-
+#kreator_view QCheckBox:focus {
+    outline: none; /* Usuwa podświetlenie po kliknięciu */
+/*    box-shadow: none; *//* Usuwa dodatkowy cień */
+}
 
 /* Styl dla marginesów ScrollableMenu */
 #kreator_view QScrollArea QVBoxLayout > * {

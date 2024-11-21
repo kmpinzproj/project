@@ -116,7 +116,7 @@ class MainApplication(QMainWindow):
     def _setup_connections_gate_creator(self):
         """Sets up connections for the Kreator view buttons."""
         self.gate_creator_view.back_button.clicked.connect(self.navigate_to_dimension_view)
-        self.gate_creator_view.save_button.clicked.connect(self.navigate_to_contact_form_view)
+        self.gate_creator_view.contact_button.clicked.connect(self.navigate_to_contact_form_view)
 
     def navigate_to_contact_form_view(self):
         """Navigates to the contact form view if all required fields in the gate creator are valid."""

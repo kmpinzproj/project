@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout
 )
 from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
@@ -109,22 +109,27 @@ class Kreator(QMainWindow):
         return image_label
 
     def _create_navigation_buttons(self):
-        """Creates a widget with 'Back' and 'Save' buttons."""
+        """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
         buttons_widget = QWidget()
-        buttons_layout = QHBoxLayout(buttons_widget)
+        buttons_layout = QGridLayout(buttons_widget)  # Zamiast QHBoxLayout używamy QGridLayout
 
-        # Create Back and Save buttons
+        # Create Back, Save, Render, and Contact buttons
         self.back_button = StyledButton("Cofnij")
+        self.contact_button = StyledButton("Kontakt")
+        self.render_button = StyledButton("Renderuj")
         self.save_button = StyledButton("Zapisz")
 
-        self.save_button.clicked.connect(self.validate_and_proceed)
+        self.contact_button.clicked.connect(self.validate_and_proceed)
 
-        buttons_layout.addWidget(self.back_button)
-        buttons_layout.addWidget(self.save_button)
+        # Dodaj przyciski w układzie 2x2
+        buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
+        buttons_layout.addWidget(self.save_button, 0, 1)  # Wiersz 0, kolumna 1
+        buttons_layout.addWidget(self.back_button, 1, 0)  # Wiersz 1, kolumna 0
+        buttons_layout.addWidget(self.contact_button, 1, 1)  # Wiersz 1, kolumna 1
 
-        # Remove margins and spacing for navigation buttons
+        # Usuń marginesy i odstępy dla przycisków
         buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(10)
+        buttons_layout.setSpacing(10)  # Odstęp między przyciskami
 
         return buttons_widget
 
