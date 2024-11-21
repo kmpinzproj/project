@@ -188,3 +188,26 @@ QMainWindow#OknoWymiarow QPushButton:hover {
     margin: 0px; /* Usuń marginesy */
     padding: 0px; /* Usuń wypełnienie */
 }
+
+#kreator_view QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 2px;
+}
+
+#kreator_view QScrollBar::handle:vertical {
+    background: rgba(128, 128, 128, 0.6);
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+#kreator_view QScrollBar::add-line:vertical,
+#kreator_view QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+#kreator_view QScrollBar::add-page:vertical,
+#kreator_view QScrollBar::sub-page:vertical {
+    background: none;
+}
