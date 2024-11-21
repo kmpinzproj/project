@@ -62,3 +62,28 @@ QTableWidget::item:selected {
     background-color: rgba(100, 100, 100, 0.8);
     color: red;
 }
+
+/* Stylizacja pionowego paska przewijania */
+QScrollBar:vertical {
+    background: transparent; /* Tło paska przewijania */
+    width: 12px; /* Szerokość paska */
+    margin: 0px; /* Marginesy wokół paska */
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(100, 100, 100, 0.8); /* Kolor uchwytu */
+    border-radius: 6px; /* Zaokrąglenie rogów */
+    min-height: 20px; /* Minimalna wysokość uchwytu */
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none; /* Tło poniżej i powyżej uchwytu */
+}
