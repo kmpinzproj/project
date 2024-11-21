@@ -141,114 +141,50 @@ QMainWindow#OknoWymiarow QPushButton:hover {
     background-color: #777777;
 }
 
-/* Styl głównego widoku kreatora */
-
-
+/* Styl ScrollableMenu - usuwa białe przerwy */
 #kreator_view QScrollArea {
     background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
     border: none; /* Usuń ramkę wokół przewijania */
+    margin: 0px; /* Usuń marginesy */
+    padding: 0px; /* Usuń wypełnienie */
 }
 
-/* Tło wewnętrznego obszaru ScrollableMenu */
+/* Tło obszaru zawartości ScrollableMenu */
 #kreator_view QScrollArea > QWidget {
     background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+    margin: 0px; /* Usuń marginesy */
+    padding: 0px; /* Usuń wypełnienie */
 }
 
-/* Styl przycisków rozwijania w ScrollableMenu */
-#kreator_view QPushButton {
-    background-color: transparent; /* Przycisk w pełni przezroczysty */
-    border: none; /* Brak ramki */
-    color: rgba(255, 255, 255, 0.8); /* Jasnobiały kolor tekstu */
-    font-size: 16px; /* Większy rozmiar czcionki */
-    font-weight: bold;
-    text-align: center; /* Wyśrodkowanie tekstu */
-    padding: 0px;
-}
-
-#kreator_view QPushButton:hover {
-    color: white; /* Pełny biały kolor podczas najechania */
-    background-color: rgba(255, 255, 255, 0.1); /* Subtelne podświetlenie tła */
-}
-
-#kreator_view QPushButton:pressed {
-    color: rgba(200, 200, 200, 0.9); /* Ciemniejszy biały po kliknięciu */
-    background-color: rgba(255, 255, 255, 0.2); /* Delikatne podświetlenie */
-}
-
-/* Styl QScrollBar tylko dla widoku Kreator */
-#kreator_view QScrollArea {
-    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
-    border: none; /* Usunięcie obramowania */
-}
-
-#kreator_view QScrollBar:vertical {
-    background: transparent; /* Tło paska przewijania */
-    width: 12px; /* Szerokość paska */
-    margin: 2px; /* Margines */
-}
-
-#kreator_view QScrollBar::handle:vertical {
-    background: rgba(100, 100, 100, 0.8); /* Kolor uchwytu przewijania */
-    min-height: 20px; /* Minimalna wysokość uchwytu */
-    border-radius: 4px; /* Zaokrąglone rogi */
-}
-
-#kreator_view QScrollBar::add-line:vertical,
-#kreator_view QScrollBar::sub-line:vertical {
-    border: none;
-    background: none;
-}
-
-#kreator_view QScrollBar::add-page:vertical,
-#kreator_view QScrollBar::sub-page:vertical {
-    background: none;
-}
-
-/* Styl rozwijanych opcji */
+/* Styl dla QGroupBox - grup opcji */
 #kreator_view QGroupBox {
-    background-color: rgba(40, 40, 40, 1); /* Ciemnoszare tło */
-    border: 1px solid rgba(255, 255, 255, 0.5); /* Jasna ramka */
-    border-radius: 5px; /* Zaokrąglone rogi */
-    padding: 5px;
+    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtelna ramka */
+    border-radius: 5px;
+    margin: 5px 0; /* Odstęp między grupami */
+    padding: 10px; /* Wypełnienie wewnątrz grupy */
 }
 
-#kreator_view QGroupBox::title {
-    background-color: rgb(48, 48, 48); /* Tło grup */
-    font-size: 14px; /* Rozmiar czcionki */
-    font-weight: bold;
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 0 3px;
+/* Styl QWidget wewnątrz ScrollableMenu */
+#kreator_view QScrollArea QWidget {
+    background-color: rgb(48, 48, 48); /* Ciemnoszare tło */
+    margin: 0px; /* Usuń marginesy */
+    padding: 0px; /* Usuń wypełnienie */
 }
 
-/* Styl checkboxów */
-#kreator_view QCheckBox {
-    color: rgba(255, 255, 255, 0.9); /* Kolor tekstu checkboxów */
-    font-size: 13px; /* Rozmiar czcionki */
+/* Styl dla QVBoxLayout i innych układów wewnątrz ScrollableMenu */
+#kreator_view QScrollArea QVBoxLayout {
+    margin: 0px; /* Usuń marginesy */
+    spacing: 0px; /* Usuń odstępy między elementami */
 }
 
-#kreator_view QCheckBox::indicator {
-    width: 14px; /* Rozmiar wskaźnika */
-    height: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.6); /* Ramka wskaźnika */
-    border-radius: 3px; /* Zaokrąglenie */
-    background-color: rgba(50, 50, 50, 1); /* Ciemnoszare tło */
+/* Styl dla QLabel w grupach */
+#kreator_view QGroupBox QLabel {
+    color: white; /* Biały tekst */
 }
 
-#kreator_view QCheckBox::indicator:checked {
-    background-color: rgba(255, 255, 255, 0.9); /* Jasnobiały wskaźnik */
-    border: 1px solid rgba(255, 255, 255, 0.9);
-}
-
-/* Styl opcji w menu */
-#kreator_view QLabel#text_label {
-    color: rgba(255, 255, 255, 0.9); /* Jasny kolor tekstu */
-    font-size: 13px;
-    margin: 5px 0;
-}
-
-#kreator_view QLabel#image_label {
-    border: 1px solid rgba(255, 255, 255, 0.4); /* Jasna ramka wokół obrazu */
-    border-radius: 5px; /* Zaokrąglenie */
-    background-color: transparent; /* Przezroczyste tło */
+/* Styl dla marginesów ScrollableMenu */
+#kreator_view QScrollArea QVBoxLayout > * {
+    margin: 0px; /* Usuń marginesy */
+    padding: 0px; /* Usuń wypełnienie */
 }
