@@ -1,6 +1,6 @@
 CREATE TABLE Projekt (
     id INTEGER PRIMARY KEY, -- SQLite traktuje INTEGER PRIMARY KEY jako auto-increment
-    nazwa TEXT NOT NULL,
+    nazwa TEXT NOT NULL UNIQUE, -- Nazwa projektu musi być unikalna
     data_zapisu DATETIME NOT NULL,
     typ_bramy TEXT NOT NULL
 );
@@ -14,6 +14,8 @@ CREATE TABLE BramaSegmentowa (
     kolor_ral TEXT,
     sposob_otwierania_drzwi TEXT,
     opcje_dodatkowe TEXT,
+    szerokosc INTEGER, -- Dodano szerokość bramy
+    wysokosc INTEGER,  -- Dodano wysokość bramy
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
 );
 
@@ -25,6 +27,8 @@ CREATE TABLE BramaRoletowa (
     kolor_ral TEXT,
     sposob_otwierania_bramy TEXT,
     przeszklenia TEXT,
+    szerokosc INTEGER, -- Dodano szerokość bramy
+    wysokosc INTEGER,  -- Dodano wysokość bramy
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
 );
 
@@ -38,6 +42,8 @@ CREATE TABLE BramaRozwierana (
     kolor_ral TEXT,
     przeszklenia TEXT,
     opcje_dodatkowe TEXT,
+    szerokosc INTEGER, -- Dodano szerokość bramy
+    wysokosc INTEGER,  -- Dodano wysokość bramy
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
 );
 
@@ -51,6 +57,7 @@ CREATE TABLE BramaUchylna (
     przeszklenia TEXT,
     drzwi_przejsciowe TEXT,
     opcje_dodatkowe TEXT,
+    szerokosc INTEGER, -- Dodano szerokość bramy
+    wysokosc INTEGER,  -- Dodano wysokość bramy
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
 );
-

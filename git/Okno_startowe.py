@@ -107,6 +107,7 @@ class OknoStartowe(QMainWindow):
     def _load_project_files(self):
         """Ładuje projekty z bazy danych do tabelki z obrazem JPG, nazwą i datą zapisu."""
         self.project_table.clearContents()
+
         projects = self.db_manager.list_projects()
         image_path = "../jpg/icon.png"  # Ścieżka do domyślnego obrazu
 
@@ -155,15 +156,24 @@ class OknoStartowe(QMainWindow):
             print(f"Wystąpił błąd podczas operacji na pliku: {e}")
 
     def open_selected_project(self):
-        """Czyści opcje i pobiera dane zaznaczonego projektu na podstawie nazwy projektu oraz powiązanej bramy."""
+        """
+        Czyści opcje i pobiera dane zaznaczonego projektu na podstawie nazwy projektu oraz powiązanej bramy.
+        """
         self.clear_selected_options()
 
-        if self.selected_row is not None:
-            # Pobranie nazwy projektu z tabeli
-            project_name_item = self.project_table.item(self.selected_row, 1)  # Nazwa projektu jest w kolumnie 1
-            print(project_name_item)
-            if project_name_item:
-                project_name = project_name_item.text()
+        # Pobranie aktualnie zaznaczonego wiersza
+        selected_items = self.project_table.selectedItems()
+        if not selected_items:
+            print("Nie zaznaczono żadnego projektu.")
+            return
+
+        selected_row = self.project_table.row(selected_items[0])  # Pobranie indeksu zaznaczonego wiersza
+
+        # Pobranie nazwy projektu z wybranej komórki w kolumnie 1
+        project_name_item = self.project_table.item(selected_row, 1)
+        if project_name_item:
+            project_name = project_name_item.text()
+            try:
                 # Pobranie danych projektu i powiązanej bramy z bazy na podstawie nazwy projektu
                 project_data = self.db_manager.get_project_by_name(project_name)
                 if project_data:
@@ -171,10 +181,10 @@ class OknoStartowe(QMainWindow):
                     print(f"Powiązana brama: {project_data['brama']}")
                 else:
                     print("Nie udało się pobrać danych projektu.")
-            else:
-                print("Nie można odczytać nazwy projektu z tabeli.")
+            except Exception as e:
+                print(f"Błąd podczas pobierania danych projektu: {e}")
         else:
-            print("Nie zaznaczono żadnego projektu.")
+            print("Nie można odczytać nazwy projektu z tabeli.")
 
     def _handle_row_selection(self):
         """Obsługuje zaznaczanie wiersza w tabeli."""

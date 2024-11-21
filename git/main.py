@@ -29,6 +29,9 @@ class MainApplication(QMainWindow):
         self.gate_creator_view = None
         self.selected_gate_type = None  # Stores the selected gate type
 
+        #Initialize DB
+        self.initialize_database()
+
         self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
@@ -157,6 +160,5 @@ if __name__ == "__main__":
     load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
-    main_app.initialize_database()
     main_app.show()
     sys.exit(app.exec())
