@@ -182,6 +182,11 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 #kreator_view QGroupBox QLabel {
     color: white; /* Biały tekst */
 }
+#kreator_view QCheckBox {
+    color: white; /* Ustaw biały kolor tekstu */
+    font-size: 13px; /* Rozmiar tekstu */
+}
+
 
 /* Styl dla marginesów ScrollableMenu */
 #kreator_view QScrollArea QVBoxLayout > * {
