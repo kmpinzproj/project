@@ -14,6 +14,7 @@ import os
 class OknoWymiarow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setObjectName("OknoWymiarow")  # Dodanie identyfikatora dla stylów
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
@@ -37,6 +38,7 @@ class OknoWymiarow(QMainWindow):
         # Left and Right panels
         left_panel = self._create_left_panel()
         right_panel = self._create_right_panel()
+        right_panel.setObjectName("right_panel")  # Dodanie identyfikatora dla stylów instrukcji
 
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_panel)

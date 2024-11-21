@@ -1,9 +1,5 @@
 /* Styl ogólny aplikacji */
-QWidget {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    color: #333;
-}
+
 
 /* Tło dla całego głównego okna */
 QMainWindow {
@@ -78,3 +74,36 @@ QMainWindow {
     border: 1px solid rgb(105, 105, 105);
 }
 
+/* Styl dla widoku OknoWymiarow */
+QMainWindow#OknoWymiarow QLabel {
+    color: white;
+    font-size: 14px;
+    font-family: "San Francisco", Arial, sans-serif; /* MacOS default font */
+}
+
+QMainWindow#OknoWymiarow QLineEdit {
+    background-color: #333333; /* Ciemnoszare tło */
+    border: 1px solid #555555; /* Ciemniejsza szarość dla obramowania */
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    color: white; /* Biały tekst */
+}
+
+QMainWindow#OknoWymiarow QPushButton {
+    background-color: #404040; /* Ciemnoszary przycisk */
+    border: 1px solid #606060; /* Obramowanie nieco jaśniejsze */
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white; /* Biały tekst */
+}
+
+QMainWindow#OknoWymiarow QPushButton:disabled {
+    background-color: #333333; /* Jeszcze ciemniejsze tło dla wyłączonego przycisku */
+    color: #888888; /* Szary tekst */
+}
+
+QMainWindow#OknoWymiarow QPushButton:hover {
+    background-color: #505050; /* Jaśniejsze tło przy najechaniu */
+}
