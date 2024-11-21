@@ -68,6 +68,7 @@ class MainApplication(QMainWindow):
     def _setup_connections_start_view(self):
         """Sets up connections for start view buttons."""
         self.start_view.create_new_button.clicked.connect(self.navigate_to_gate_selection_view)
+        self.start_view.open_saved_button.clicked.connect(self.navigate_to_dimension_view)
 
     def _setup_connections_gate_selection(self):
         """Sets up connections for gate selection view buttons."""
