@@ -19,9 +19,8 @@ class OknoStartowe(QMainWindow):
         self.setMinimumSize(834, 559)  # Ustawienie minimalnego rozmiaru okna
 
         # Wczytaj style
-        self._apply_styles()
+        # self._apply_styles()
 
-        print(self.styleSheet())
 
         # Ustawienia główne i UI
         self.selected_row = None  # Zmienna przechowująca ID zaznaczonego projektu
@@ -32,6 +31,7 @@ class OknoStartowe(QMainWindow):
     def _setup_ui(self):
         """Konfiguruje główny layout i dzieli na panele lewe i prawe."""
         central_widget = QWidget(self)
+        central_widget.setObjectName("oknoStartoweWindow")  # Identyfikator
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
 
@@ -72,10 +72,12 @@ class OknoStartowe(QMainWindow):
     def _create_right_panel(self):
         """Tworzy prawy panel z tabelką projektów."""
         right_widget = QWidget()
+        right_widget.setObjectName("projectTablePanel")  # Identyfikator
         right_layout = QVBoxLayout(right_widget)
 
         # Tabela z projektami
         self.project_table = QTableWidget()
+        self.project_table.setObjectName("projectTable")  # Identyfikator
         self.project_table.setColumnCount(3)  # Trzy kolumny: obraz, nazwa, data
         self.project_table.setHorizontalHeaderLabels(["Typ", "Nazwa Projektu", "Data Zapisu"])
         self.project_table.setSelectionBehavior(QTableWidget.SelectRows)  # Zaznaczanie całych wierszy

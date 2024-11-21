@@ -26,6 +26,7 @@ class WyborBramy(QMainWindow):
 
         # Central widget setup
         central_widget = QWidget(self)
+        central_widget.setObjectName("wyborBramyWindow")
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
 
@@ -61,8 +62,8 @@ class WyborBramy(QMainWindow):
     def create_inner_frame(self, title, description):
         """Creates an individual frame for each door type with a title, description, and selection button."""
         frame = QFrame()
+        frame.setObjectName("gateFrame")  # Identyfikator
         frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
-        frame.setStyleSheet("background-color: rgb(121, 121, 121);")
 
         vertical_layout = QVBoxLayout(frame)
 
@@ -86,22 +87,18 @@ class WyborBramy(QMainWindow):
         vertical_layout.addWidget(frame_inner)
         return frame
 
-    @staticmethod
-    def create_title_label(title):
-        """Creates a title label with bold styling."""
+    def create_title_label(self, title):
         label_title = QLabel(title)
+        label_title.setObjectName("gateTitleLabel")  # Identyfikator
         font = QFont()
         font.setBold(True)
         label_title.setFont(font)
-        label_title.setStyleSheet("color: rgb(105, 64, 14);")
         label_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         return label_title
 
-    @staticmethod
-    def create_description_label(description):
-        """Creates a description label with word wrapping and styled color."""
+    def create_description_label(self, description):
         label_description = QLabel(description)
-        label_description.setStyleSheet("color: rgb(74,68,61);")
+        label_description.setObjectName("gateDescriptionLabel")  # Identyfikator
         label_description.setWordWrap(True)
         return label_description
 
@@ -117,11 +114,6 @@ class WyborBramy(QMainWindow):
 
         layout.addWidget(buttons_widget)
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-    # def select_gate(self, gate_type):
-    #     """Calls the provided function to save the selected gate type and closes the view."""
-    #     self.set_gate_type_func(gate_type)
-    #     self.close()
 
     @staticmethod
     def save_gate_type(gate_type):

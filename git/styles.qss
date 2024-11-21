@@ -10,80 +10,76 @@ QMainWindow {
     border-image: url('../jpg/tło.jpg') 0 0 0 0 stretch stretch;
 }
 
-/* Styl dla przycisków */
-QPushButton {
-    background-color: #0078d7;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-}
-
-QPushButton:hover {
-    background-color: #005a9e;
-}
-
-QPushButton:disabled {
-    background-color: #c0c0c0;
-    color: #808080;
-}
-
-/* Styl dla etykiet */
-QLabel {
-    color: #333;
-    font-size: 14px;
-}
-
-/* Styl dla pól tekstowych */
-QLineEdit {
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    padding: 5px;
-    background-color: white;
-}
-
-/* Styl dla tabel */
-QTableWidget {
+#oknoStartoweWindow QTableWidget#projectTable {
     background-color: transparent;
     border: none;
     color: white;
+    font-size: 12px;
 }
 
-QHeaderView::section {
+#oknoStartoweWindow QHeaderView::section {
     background-color: #333333;
     color: white;
     border: 1px solid #444444;
     padding: 5px;
     font-weight: bold;
-    font-size: 12px;
 }
 
-QTableWidget::item:selected {
+#oknoStartoweWindow QTableWidget::item:selected {
     background-color: rgba(100, 100, 100, 0.8);
     color: red;
 }
 
-/* Stylizacja pionowego paska przewijania */
-QScrollBar:vertical {
-    background: transparent; /* Tło paska przewijania */
-    width: 12px; /* Szerokość paska */
-    margin: 0px; /* Marginesy wokół paska */
+#oknoStartoweWindow QWidget#projectTablePanel {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-QScrollBar::handle:vertical {
-    background: rgba(100, 100, 100, 0.8); /* Kolor uchwytu */
-    border-radius: 6px; /* Zaokrąglenie rogów */
-    min-height: 20px; /* Minimalna wysokość uchwytu */
+#oknoStartoweWindow QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 2px;
 }
 
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical {
+#oknoStartoweWindow QScrollBar::handle:vertical {
+    background: rgba(128, 128, 128, 0.6);
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+#oknoStartoweWindow QScrollBar::add-line:vertical,
+#oknoStartoweWindow QScrollBar::sub-line:vertical {
     border: none;
     background: none;
-    height: 0px;
 }
 
-QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {
-    background: none; /* Tło poniżej i powyżej uchwytu */
+#oknoStartoweWindow QScrollBar::add-page:vertical,
+#oknoStartoweWindow QScrollBar::sub-page:vertical {
+    background: none;
 }
+
+#wyborBramyWindow {
+    background: url("../jpg/background.jpg") no-repeat center center;
+    background-size: cover;
+}
+
+#wyborBramyWindow QLabel#gateTitleLabel {
+    font-family: "Arial";
+    font-size: 14px;
+    color: rgb(105, 64, 14);
+    text-align: center;
+}
+
+#wyborBramyWindow QLabel#gateDescriptionLabel {
+    font-size: 12px;
+    color: rgb(74, 68, 61);
+}
+
+#wyborBramyWindow QFrame#gateFrame {
+    background-color: rgb(121, 121, 121);
+    border-radius: 10px;
+    padding: 5px;
+    border: 1px solid rgb(105, 105, 105);
+}
+
