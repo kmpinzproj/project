@@ -215,9 +215,13 @@ class ScrollableMenu(QWidget):
                 self.selected_options["Kolor standardowy"] = selected_text
             elif category == "Kolor RAL":
                 self.selected_options["Kolor RAL"] = selected_text
+            else:
+                # Dla innych kategorii dodaj lub nadpisz wybraną opcję
+                self.selected_options[category] = selected_text
             print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
+        print(self.selected_options)
 
 
     def _create_checkbox_options_widget(self, options, category):
@@ -268,6 +272,7 @@ class ScrollableMenu(QWidget):
             else:
                 # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
                 self.selected_options.pop(category, None)
+        print(self.selected_options)
 
 
     def _create_toggle_button(self):
