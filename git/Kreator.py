@@ -217,18 +217,6 @@ class Kreator(QMainWindow):
 
         # Zaktualizuj dane dla wybranych opcji
         existing_data.update(selected_options)
-        for e in list(existing_data.keys()):
-            if e == "Kolor" and existing_data[e].isdigit():
-                tmp = existing_data.pop(e)
-                if "Kolor standardowy" in existing_data:
-                    existing_data.pop("Kolor standardowy")
-                existing_data["Kolor RAL"] = tmp
-            elif e == "Kolor" and not existing_data[e].isdigit():
-                tmp = existing_data.pop(e)
-                if "Kolor RAL" in existing_data:
-                    existing_data.pop("Kolor RAL")
-                existing_data["Kolor standardowy"] = tmp
-        print(existing_data)
         # Zapisz zaktualizowane dane z powrotem do pliku
         try:
             with open(file_path, 'w', encoding='utf-8') as file:

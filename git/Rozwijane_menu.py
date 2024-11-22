@@ -175,20 +175,31 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Usuń zaznaczenie poprzednich opcji
-        if category in ["Kolor standardowy", "Kolor RAL"]:
-            for color_category in ["Kolor standardowy", "Kolor RAL"]:
-                if color_category in self.option_items_by_category:
-                    for option_widget in self.option_items_by_category[color_category]:
-                        img_label = option_widget.findChild(QLabel, "image_label")
-                        if img_label:
-                            img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-        else:
-            if category in self.option_items_by_category:
-                for option_widget in self.option_items_by_category[category]:
-                    img_label = option_widget.findChild(QLabel, "image_label")
-                    if img_label:
-                        img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+        # Usuń zaznaczenie poprzednich opcji w tej samej kategorii
+        for option_widget in self.option_items_by_category.get(category, []):
+            img_label = option_widget.findChild(QLabel, "image_label")
+            if img_label:
+                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+
+        # Usuń czerwone obramowanie z obu pól (Kolor standardowy i Kolor RAL)
+        for color_category in ["Kolor standardowy", "Kolor RAL"]:
+            if color_category in self.category_widgets:
+                field_group = self.category_widgets[color_category]["field_group"]
+                field_group.setStyleSheet("")  # Usuń czerwone obramowanie
+
+        # Usuń zaznaczenie opcji w drugiej kategorii i odpowiedni klucz
+        if category == "Kolor standardowy":
+            for option_widget in self.option_items_by_category.get("Kolor RAL", []):
+                img_label = option_widget.findChild(QLabel, "image_label")
+                if img_label:
+                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+            self.selected_options.pop("Kolor RAL", None)
+        elif category == "Kolor RAL":
+            for option_widget in self.option_items_by_category.get("Kolor standardowy", []):
+                img_label = option_widget.findChild(QLabel, "image_label")
+                if img_label:
+                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+            self.selected_options.pop("Kolor standardowy", None)
 
         # Zaznacz klikniętą opcję
         image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
@@ -196,30 +207,14 @@ class ScrollableMenu(QWidget):
         # Pobierz tekst opcji
         parent_widget = image_label.parent()
         text_label = parent_widget.findChild(QLabel, "text_label")  # Znajdź QLabel z nazwą opcji
-        if text_label:
-            selected_text = text_label.text()
-        else:
-            selected_text = None  # Jeśli nie znaleziono, ustaw na None
+        selected_text = text_label.text() if text_label else None
 
+        # Zaktualizuj zaznaczoną opcję
         if selected_text:
-            if category in ["Kolor standardowy", "Kolor RAL"]:
-                # Jeśli wybrano kolor, usuń czerwoną ramkę z obu kategorii
-                for color_category in ["Kolor standardowy", "Kolor RAL"]:
-                    if color_category in self.category_widgets:
-                        field_group = self.category_widgets[color_category]["field_group"]
-                        field_group.setStyleSheet("")  # Usuń stylizację (domyślny wygląd)
-
-                # Ustaw wybraną wartość dla klucza "Kolor"
-                self.selected_options["Kolor"] = selected_text
-            else:
-                # Ustaw wybraną wartość dla innych kategorii
-                self.selected_options[category] = selected_text
-
-                # Usuń czerwoną ramkę, jeśli poprawnie zaznaczono
-                if category in self.category_widgets:
-                    field_group = self.category_widgets[category]["field_group"]
-                    field_group.setStyleSheet("")  # Usuń stylizację (domyślny wygląd)
-
+            if category == "Kolor standardowy":
+                self.selected_options["Kolor standardowy"] = selected_text
+            elif category == "Kolor RAL":
+                self.selected_options["Kolor RAL"] = selected_text
             print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
@@ -371,21 +366,23 @@ class ScrollableMenu(QWidget):
 
         for category in required_fields:
             if category == "Kolor":
-                # Specjalna obsługa dla kategorii "Kolor"
-                kolor_selected = self.selected_options.get("Kolor", None)
-                if not kolor_selected:
+                # Sprawdź, czy istnieje zaznaczony kolor w "Kolor standardowy" lub "Kolor RAL"
+                kolor_standardowy_selected = "Kolor standardowy" in self.selected_options
+                kolor_ral_selected = "Kolor RAL" in self.selected_options
+
+                if not (kolor_standardowy_selected or kolor_ral_selected):
                     # Jeśli żaden kolor nie jest zaznaczony, podświetl oba pola
-                    for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                    for color_category in ["Kolor standardowy", "Kolor RAL"]:
                         if color_category in self.category_widgets:
                             field_group = self.category_widgets[color_category]["field_group"]
                             field_group.setStyleSheet("QGroupBox { border: 2px solid red; border-radius: 5px; }")
                     all_valid = False
                 else:
-                    # Jeśli którykolwiek kolor jest zaznaczony, usuń podświetlenie
-                    for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                    # Jeśli którykolwiek kolor jest zaznaczony, usuń podświetlenie z obu
+                    for color_category in ["Kolor standardowy", "Kolor RAL"]:
                         if color_category in self.category_widgets:
                             field_group = self.category_widgets[color_category]["field_group"]
-                            field_group.setStyleSheet("")
+                            field_group.setStyleSheet("")  # Przywróć domyślny wygląd
             else:
                 # Walidacja dla innych kategorii
                 if category not in self.selected_options or not self.selected_options[category]:
