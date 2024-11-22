@@ -85,6 +85,8 @@ class MainApplication(QMainWindow):
         self.contact_form_view.submit_button.clicked.connect(self.navigate_to_start_view)
 
     def navigate_to_start_view(self):
+        """Przejście do widoku startowego i odświeżenie danych."""
+        self.start_view.refresh()  # Odśwież dane w oknie startowym
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
