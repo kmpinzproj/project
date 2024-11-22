@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout, QInputDialog
 )
 from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
@@ -122,7 +122,7 @@ class Kreator(QMainWindow):
         self.save_button = StyledButton("Zapisz")
 
         self.contact_button.clicked.connect(self.validate_and_proceed)
-        self.save_button.clicked.connect(self.save_without_validate)
+        self.save_button.clicked.connect(self.prompt_project_name)
 
         # Dodaj przyciski w układzie 2x2
         buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
@@ -152,14 +152,22 @@ class Kreator(QMainWindow):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
         return self.navigation_menu.validate_required_fields(self.required_fields)
 
+    def prompt_project_name(self):
+        """Prompt user for a project name before saving."""
+        project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
+        if ok and project_name.strip():
+            self.selected_options["Nazwa projektu"] = project_name.strip()
+            self.save_without_validate()
+        else:
+            print("Anulowano zapis projektu.")
+
     def save_without_validate(self):
-        self.selected_options = self.navigation_menu.get_selected_options()
+        self.selected_options.update(self.navigation_menu.get_selected_options())
 
         # Zapisz zaznaczone opcje do pliku
         print(f"Zaznaczone opcje: {self.selected_options}")
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
-        print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
-        print(self.selected_options)
+        print("Opcje zapisane do pliku.")
 
     @staticmethod
     def load_required_fields(file_path):

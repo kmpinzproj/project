@@ -62,7 +62,7 @@ class DatabaseManager:
             cursor = conn.cursor()
 
             # Dodanie projektu do tabeli Projekt
-            project_name = project_json.get("project_name", f"Projekt {gate_type}")
+            project_name = project_json.get("Nazwa projektu")
             cursor.execute(
                 "INSERT INTO Projekt (nazwa, data_zapisu, typ_bramy) VALUES (?, CURRENT_TIMESTAMP, ?)",
                 (project_name, typ_bramy)
