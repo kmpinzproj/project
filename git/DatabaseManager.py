@@ -299,10 +299,9 @@ class DatabaseManager:
                     "kolor_ral": brama[4],
                     "sposob_otwierania_drzwi": brama[5],
                     "przeszklenia": brama[6],
-                    "drzwi_przejsciowe": brama[7],
-                    "opcje_dodatkowe": brama[8],
-                    "szerokosc": brama[9],
-                    "wysokosc": brama[10]
+                    "opcje_dodatkowe": brama[7],
+                    "szerokosc": brama[8],
+                    "wysokosc": brama[9]
                 }
 
         conn.close()
@@ -321,15 +320,13 @@ class DatabaseManager:
             if not project_data:
                 print(f"Nie znaleziono projektu o nazwie {project_name}")
                 return
-
             # Mapowanie typu bramy na pełną nazwę
             full_gate_type_map = {
                 "segmentowa": "Brama Segmentowa",
                 "roletowa": "Brama Roletowa",
-                "rozwierana": "Brama Rozwierana",
-                "uchylna": "Brama Uchylna"
+                "uchylna": "Brama Uchylna",
+                "rozwierana": "Brama Rozwierana"
             }
-
             # Pobranie pełnej nazwy bramy
             gate_type_full = full_gate_type_map.get(project_data["projekt"]["typ_bramy"], "Nieznany typ bramy")
 
@@ -359,7 +356,6 @@ class DatabaseManager:
                     "Wysokość": project_data["brama"]["wysokosc"]
                 }
             }
-
             # Przetwarzanie danych bramy
             for key, value in project_data["brama"].items():
                 if key in ["szerokosc", "wysokosc"]:
@@ -376,7 +372,7 @@ class DatabaseManager:
 
             print(f"Projekt zapisano do pliku JSON: {output_file}")
         except Exception as e:
-            print(f"Błąd podczas zapisywania projektu do JSON: {e}")
+           print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
 
 # TESTOWANIE BAZY DANYCH
