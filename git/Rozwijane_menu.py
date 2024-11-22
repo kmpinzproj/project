@@ -181,25 +181,28 @@ class ScrollableMenu(QWidget):
             if img_label:
                 img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-        # Usuń czerwone obramowanie z obu pól (Kolor standardowy i Kolor RAL)
-        for color_category in ["Kolor standardowy", "Kolor RAL"]:
-            if color_category in self.category_widgets:
-                field_group = self.category_widgets[color_category]["field_group"]
-                field_group.setStyleSheet("")  # Usuń czerwone obramowanie
+        # Specjalne zachowanie dla pól "Kolor standardowy" i "Kolor RAL"
+        if category in ["Kolor standardowy", "Kolor RAL"]:
+            for color_category in ["Kolor standardowy", "Kolor RAL"]:
+                # Usuń czerwone obramowanie z obu pól
+                if color_category in self.category_widgets:
+                    field_group = self.category_widgets[color_category]["field_group"]
+                    field_group.setStyleSheet("")  # Usuń czerwone obramowanie
 
-        # Usuń zaznaczenie opcji w drugiej kategorii i odpowiedni klucz
-        if category == "Kolor standardowy":
-            for option_widget in self.option_items_by_category.get("Kolor RAL", []):
-                img_label = option_widget.findChild(QLabel, "image_label")
-                if img_label:
-                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-            self.selected_options.pop("Kolor RAL", None)
-        elif category == "Kolor RAL":
-            for option_widget in self.option_items_by_category.get("Kolor standardowy", []):
-                img_label = option_widget.findChild(QLabel, "image_label")
-                if img_label:
-                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-            self.selected_options.pop("Kolor standardowy", None)
+                # Usuń zaznaczenie opcji w drugiej kategorii
+                if color_category != category:  # Nie usuwaj opcji w bieżącej kategorii
+                    for option_widget in self.option_items_by_category.get(color_category, []):
+                        img_label = option_widget.findChild(QLabel, "image_label")
+                        if img_label:
+                            img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+                    # Usuń klucz z `selected_options` dla przeciwnej kategorii
+                    self.selected_options.pop(color_category, None)
+
+        else:
+            # Dla innych pól usuń czerwone obramowanie tylko z bieżącego pola
+            if category in self.category_widgets:
+                field_group = self.category_widgets[category]["field_group"]
+                field_group.setStyleSheet("")  # Usuń czerwone obramowanie
 
         # Zaznacz klikniętą opcję
         image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
@@ -211,18 +214,12 @@ class ScrollableMenu(QWidget):
 
         # Zaktualizuj zaznaczoną opcję
         if selected_text:
-            if category == "Kolor standardowy":
-                self.selected_options["Kolor standardowy"] = selected_text
-            elif category == "Kolor RAL":
-                self.selected_options["Kolor RAL"] = selected_text
-            else:
-                # Dla innych kategorii dodaj lub nadpisz wybraną opcję
-                self.selected_options[category] = selected_text
+            self.selected_options[category] = selected_text
             print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
-        print(self.selected_options)
 
+        print(self.selected_options)
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
