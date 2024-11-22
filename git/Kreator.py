@@ -144,7 +144,7 @@ class Kreator(QMainWindow):
 
             # Zapisz zaznaczone opcje do pliku
             print(f"Zaznaczone opcje: {self.selected_options}")
-            self.save_selected_options("../resources/selected_options.json", self.selected_options)
+            self.prompt_project_name()
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
 
 
@@ -157,12 +157,11 @@ class Kreator(QMainWindow):
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
         if ok and project_name.strip():
             self.selected_options["Nazwa projektu"] = project_name.strip()
-            self.save_without_validate()
+            self.selected_options.update(self.navigation_menu.get_selected_options())
         else:
             print("Anulowano zapis projektu.")
 
-    def save_without_validate(self):
-        self.selected_options.update(self.navigation_menu.get_selected_options())
+
 
         # Zapisz zaznaczone opcje do pliku
         print(f"Zaznaczone opcje: {self.selected_options}")
