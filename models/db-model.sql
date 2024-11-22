@@ -14,6 +14,7 @@ CREATE TABLE BramaSegmentowa (
     kolor_ral TEXT,
     sposob_otwierania_drzwi TEXT,
     opcje_dodatkowe TEXT,
+    kratka_wentylacyjna TEXT,
     szerokosc INTEGER, -- Dodano szerokość bramy
     wysokosc INTEGER,  -- Dodano wysokość bramy
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)

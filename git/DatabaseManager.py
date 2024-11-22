@@ -97,9 +97,10 @@ class DatabaseManager:
                     "rodzaj_przetloczenia": gate_data.get("Rodzaj przetłoczenia", None),
                     "struktura_powierzchni": gate_data.get("Struktura powierzchni", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor RAL", None),
+                    "kolor_ral": gate_data.get("Kolor", None),
                     "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                    "kratka_wentylacyjna": gate_data.get("Kratka wentylacyjna", None),
                 }
 
             elif typ_bramy == "roletowa":
@@ -146,10 +147,11 @@ class DatabaseManager:
         """
         if typ_bramy == "segmentowa":
             cursor.execute("""
-                INSERT INTO BramaSegmentowa 
-                (projekt_id, rodzaj_przetloczenia, struktura_powierzchni, kolor_standardowy, kolor_ral, sposob_otwierania_drzwi, opcje_dodatkowe, szerokosc, wysokosc)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+                        INSERT INTO BramaSegmentowa 
+                        (projekt_id, rodzaj_przetloczenia, struktura_powierzchni, kolor_standardowy, kolor_ral, 
+                         sposob_otwierania_drzwi, opcje_dodatkowe, kratka_wentylacyjna, szerokosc, wysokosc)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
                 projekt_id,
                 gate_data.get("rodzaj_przetloczenia"),
                 gate_data.get("struktura_powierzchni"),
@@ -157,6 +159,7 @@ class DatabaseManager:
                 gate_data.get("kolor_ral"),
                 gate_data.get("sposob_otwierania_drzwi"),
                 gate_data.get("opcje_dodatkowe"),
+                gate_data.get("kratka_wentylacyjna"),
                 width,
                 height
             ))
@@ -255,8 +258,9 @@ class DatabaseManager:
                     "kolor_ral": brama[5],
                     "sposob_otwierania_drzwi": brama[6],
                     "opcje_dodatkowe": brama[7],
-                    "szerokosc": brama[8],
-                    "wysokosc": brama[9]
+                    "kratka_wentylacyjna": brama[8],
+                    "szerokosc": brama[9],
+                    "wysokosc": brama[10]
                 }
 
         elif typ_bramy == "roletowa":
@@ -299,10 +303,9 @@ class DatabaseManager:
                     "kolor_ral": brama[4],
                     "sposob_otwierania_drzwi": brama[5],
                     "przeszklenia": brama[6],
-                    "drzwi_przejsciowe": brama[7],
-                    "opcje_dodatkowe": brama[8],
-                    "szerokosc": brama[9],
-                    "wysokosc": brama[10]
+                    "opcje_dodatkowe": brama[7],
+                    "szerokosc": brama[8],
+                    "wysokosc": brama[9]
                 }
 
         conn.close()
@@ -321,15 +324,13 @@ class DatabaseManager:
             if not project_data:
                 print(f"Nie znaleziono projektu o nazwie {project_name}")
                 return
-
             # Mapowanie typu bramy na pełną nazwę
             full_gate_type_map = {
                 "segmentowa": "Brama Segmentowa",
                 "roletowa": "Brama Roletowa",
-                "rozwierana": "Brama Rozwierana",
-                "uchylna": "Brama Uchylna"
+                "uchylna": "Brama Uchylna",
+                "rozwierana": "Brama Rozwierana"
             }
-
             # Pobranie pełnej nazwy bramy
             gate_type_full = full_gate_type_map.get(project_data["projekt"]["typ_bramy"], "Nieznany typ bramy")
 
@@ -347,7 +348,8 @@ class DatabaseManager:
                 "drzwi_przejsciowe": "Drzwi przejściowe",
                 "opcje_dodatkowe": "Opcje dodatkowe",
                 "rodzaj_przetloczenia": "Rodzaj przetłoczenia",
-                "struktura_powierzchni": "Struktura powierzchni"
+                "struktura_powierzchni": "Struktura powierzchni",
+                "kratka_wentylacyjna": "Kratka wentylacyjna"
             }
 
             # Przygotowanie struktury JSON
@@ -359,7 +361,6 @@ class DatabaseManager:
                     "Wysokość": project_data["brama"]["wysokosc"]
                 }
             }
-
             # Przetwarzanie danych bramy
             for key, value in project_data["brama"].items():
                 if key in ["szerokosc", "wysokosc"]:
@@ -376,7 +377,7 @@ class DatabaseManager:
 
             print(f"Projekt zapisano do pliku JSON: {output_file}")
         except Exception as e:
-            print(f"Błąd podczas zapisywania projektu do JSON: {e}")
+           print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
 
 # TESTOWANIE BAZY DANYCH
