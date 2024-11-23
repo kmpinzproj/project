@@ -54,8 +54,8 @@ class DatabaseManager:
             width = dimensions.get("Szerokość")
             height = dimensions.get("Wysokość")
 
-            if not width or not height:
-                raise ValueError("Brama musi mieć określone szerokość i wysokość (wymiary).")
+            # if not width or not height:
+            #     raise ValueError("Brama musi mieć określone szerokość i wysokość (wymiary).")
 
             # Nawiązanie połączenia z bazą danych
 
@@ -97,10 +97,12 @@ class DatabaseManager:
                     "rodzaj_przetloczenia": gate_data.get("Rodzaj przetłoczenia", None),
                     "struktura_powierzchni": gate_data.get("Struktura powierzchni", None),
                     "kolor_standardowy": gate_data.get("Kolor standardowy", None),
-                    "kolor_ral": gate_data.get("Kolor", None),
+                    "kolor_ral": gate_data.get("Kolor RAL", None),
                     "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
                     "kratka_wentylacyjna": gate_data.get("Kratka wentylacyjna", None),
+                    "przeszklenia": gate_data.get("Przeszklenia", None),
+                    "klamka_do_bramy": gate_data.get("Klamka do bramy", None),
                 }
 
             elif typ_bramy == "roletowa":
@@ -149,8 +151,8 @@ class DatabaseManager:
             cursor.execute("""
                         INSERT INTO BramaSegmentowa 
                         (projekt_id, rodzaj_przetloczenia, struktura_powierzchni, kolor_standardowy, kolor_ral, 
-                         sposob_otwierania_drzwi, opcje_dodatkowe, kratka_wentylacyjna, szerokosc, wysokosc)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         sposob_otwierania_drzwi, opcje_dodatkowe, kratka_wentylacyjna, przeszklenia, klamka_do_bramy, szerokosc, wysokosc)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                 projekt_id,
                 gate_data.get("rodzaj_przetloczenia"),
@@ -160,6 +162,8 @@ class DatabaseManager:
                 gate_data.get("sposob_otwierania_drzwi"),
                 gate_data.get("opcje_dodatkowe"),
                 gate_data.get("kratka_wentylacyjna"),
+                gate_data.get("przeszklenia"),
+                gate_data.get("klamka_do_bramy"),
                 width,
                 height
             ))
@@ -259,8 +263,10 @@ class DatabaseManager:
                     "sposob_otwierania_drzwi": brama[6],
                     "opcje_dodatkowe": brama[7],
                     "kratka_wentylacyjna": brama[8],
-                    "szerokosc": brama[9],
-                    "wysokosc": brama[10]
+                    "przeszklenia": brama[9],
+                    "klamka_do_bramy": brama[10],
+                    "szerokosc": brama[11],
+                    "wysokosc": brama[12]
                 }
 
         elif typ_bramy == "roletowa":
@@ -349,7 +355,9 @@ class DatabaseManager:
                 "opcje_dodatkowe": "Opcje dodatkowe",
                 "rodzaj_przetloczenia": "Rodzaj przetłoczenia",
                 "struktura_powierzchni": "Struktura powierzchni",
-                "kratka_wentylacyjna": "Kratka wentylacyjna"
+                "kratka_wentylacyjna": "Kratka wentylacyjna",
+                "przeszklenia": "Przeszklenia",
+                "klamka_do_bramy": "Klamka do bramy"
             }
 
             # Przygotowanie struktury JSON

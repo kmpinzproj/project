@@ -15,10 +15,13 @@ CREATE TABLE BramaSegmentowa (
     sposob_otwierania_drzwi TEXT,
     opcje_dodatkowe TEXT,
     kratka_wentylacyjna TEXT,
-    szerokosc INTEGER, -- Dodano szerokość bramy
-    wysokosc INTEGER,  -- Dodano wysokość bramy
+    przeszklenia TEXT,
+    klamka_do_bramy TEXT,
+    szerokosc INTEGER,
+    wysokosc INTEGER,
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
 );
+
 
 CREATE TABLE BramaRoletowa (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

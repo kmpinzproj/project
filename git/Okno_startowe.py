@@ -133,12 +133,7 @@ class OknoStartowe(QMainWindow):
                 date_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                 date_item.setTextAlignment(Qt.AlignCenter)
                 self.project_table.setItem(row, 2, date_item)
-        else:
-            self.project_table.setRowCount(1)
-            empty_item = QTableWidgetItem("Brak zapisanych projektów")
-            empty_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            empty_item.setTextAlignment(Qt.AlignCenter)
-            self.project_table.setItem(0, 1, empty_item)
+
 
     def clear_selected_options(self):
         file_path = "../resources/selected_options.json"
