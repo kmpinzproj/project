@@ -208,36 +208,43 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def save_selected_options(file_path, selected_options):
-        """Saves selected options to a JSON file without overwriting existing data."""
-        # Sprawdź, czy plik istnieje, a jeśli nie, utwórz pustą strukturę
-        print(selected_options)
-        if not os.path.exists(file_path):
-            existing_data = {}
-        else:
-            # Wczytaj istniejące dane z pliku JSON
+        """
+        Saves selected options to a JSON file by preserving 'Typ bramy' and 'Wymiary',
+        and overwriting all other data with new selected options.
+        """
+        # Przygotuj bazową strukturę danych
+        base_data = {}
+
+        # Wczytaj istniejące dane z pliku JSON, jeśli plik istnieje
+        if os.path.exists(file_path):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     existing_data = json.load(file)
+                    # Zachowaj 'Typ bramy' i 'Wymiary'
+                    if "Typ bramy" in existing_data:
+                        base_data["Typ bramy"] = existing_data["Typ bramy"]
+                    if "Wymiary" in existing_data:
+                        base_data["Wymiary"] = existing_data["Wymiary"]
             except (json.JSONDecodeError, FileNotFoundError):
-                print(f"Plik {file_path} jest uszkodzony lub nie istnieje. Tworzenie nowego pliku.")
-                existing_data = {}
+                print(f"Nie udało się wczytać istniejącego pliku {file_path}. Użycie pustej struktury.")
 
-        # Zaktualizuj dane dla wybranych opcji
-        existing_data.update(selected_options)
-        # Zapisz zaktualizowane dane z powrotem do pliku
+        # Połącz dane bazowe z nowymi wybranymi opcjami
+        base_data.update(selected_options)
+
+        # Zapisz dane z powrotem do pliku
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(existing_data, file, ensure_ascii=False, indent=4)
-                print(f"Zaktualizowano dane w pliku {file_path}: {selected_options}")
+                json.dump(base_data, file, ensure_ascii=False, indent=4)
+                print(f"Dane zostały zapisane w pliku {file_path}.")
         except Exception as e:
-            print(f"Wystąpił błąd podczas zapisywania danych do pliku: {e}")
+            print(f"Wystąpił błąd podczas zapisywania danych: {e}")
 
-        db_manager = DatabaseManager()
-        with open("../resources/selected_options.json", "r", encoding="utf-8") as file:
-            project_json = json.load(file)
-        # Dodanie projektu do bazy danych
-        db_manager = DatabaseManager()
-        db_manager.add_project_from_json(project_json)
+        # Dodaj projekt do bazy danych
+        try:
+            db_manager = DatabaseManager()
+            db_manager.add_project_from_json(base_data)
+        except Exception as e:
+            print(f"Wystąpił błąd podczas dodawania projektu do bazy danych: {e}")
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
