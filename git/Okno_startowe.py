@@ -39,6 +39,7 @@ class OknoStartowe(QMainWindow):
         main_layout.setStretch(1, 3)
 
     def _create_left_panel(self):
+        """Tworzy lewy panel z przyciskami do zarządzania projektami."""
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
@@ -46,6 +47,7 @@ class OknoStartowe(QMainWindow):
 
         self.create_new_button = StyledButton("Stwórz nowy")
         self.open_saved_button = StyledButton("Otwórz zapisany")
+        self.open_saved_button.setEnabled(False)  # Domyślnie wyłączony
 
         self.create_new_button.clicked.connect(self.clear_selected_options)
         self.open_saved_button.clicked.connect(self.open_selected_project)
@@ -55,7 +57,18 @@ class OknoStartowe(QMainWindow):
 
         self._add_spacer(left_layout)
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         return left_widget
+
+    def _handle_row_selection(self):
+        """Obsługuje zaznaczanie wiersza w tabeli."""
+        selected_items = self.project_table.selectedItems()
+        if selected_items:
+            self.selected_row = self.project_table.row(selected_items[0]) + 1
+            self.open_saved_button.setEnabled(True)  # Aktywuj przycisk
+        else:
+            self.selected_row = None
+            self.open_saved_button.setEnabled(False)  # Wyłącz przycisk
 
     def _create_right_panel(self):
         right_widget = QWidget()
@@ -154,10 +167,3 @@ class OknoStartowe(QMainWindow):
             except Exception as e:
                 print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
-    def _handle_row_selection(self):
-        selected_items = self.project_table.selectedItems()
-        if selected_items:
-            row = self.project_table.row(selected_items[0])
-            self.selected_row = row + 1
-        else:
-            self.selected_row = None
