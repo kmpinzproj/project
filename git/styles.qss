@@ -1,5 +1,11 @@
 /* Styl ogólny aplikacji */
+QPushButton:focus {
+    outline: none; /* Usuwa obrys przy podświetleniu */
+}
 
+QPushButton:hover {
+    background-color: #303030; /* Ciemniejsze tło przy najechaniu */
+}
 
 /* Tło dla całego głównego okna */
 QMainWindow {
@@ -142,7 +148,6 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 #kreator_view QPushButton:focus {
     outline: none; /* Usuwa obrys */
-/*    box-shadow: none; *//* Usuwa efekt podświetlenia */
 }
 
 /* Styl ScrollableMenu - usuwa białe przerwy */
