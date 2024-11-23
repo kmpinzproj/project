@@ -141,7 +141,7 @@ class ScrollableMenu(QWidget):
         """Create a single image option widget with selectable functionality and centered text."""
         option_widget = QWidget()
         layout = QVBoxLayout(option_widget)
-        layout.setAlignment(Qt.AlignCenter)  # Center align the items vertically and horizontally
+        layout.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie elementów
 
         # Image
         image_label = QLabel()
@@ -149,26 +149,22 @@ class ScrollableMenu(QWidget):
         if pixmap.isNull():
             pixmap = QPixmap("../jpg/placeholder.jpg")
         image_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        image_label.setAlignment(Qt.AlignCenter)  # Ensure the image is centered
-        image_label.setObjectName("image_label")  # Assign a unique object name for styling
-
-        # Set consistent size for the image label
-        image_label.setFixedSize(70, 70)
-
-        # Connect image click event
-        image_label.mousePressEvent = lambda event: self._on_option_click(category, image_label)
+        image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+        image_label.setObjectName("image_label")
+        image_label.setFixedSize(70, 70)  # Zapewnij stały rozmiar obrazka
 
         # Text
         text_label = QLabel(option_name)
-        text_label.setAlignment(Qt.AlignCenter)  # Center-align the text
-        text_label.setWordWrap(True)  # Allow the text to wrap if it’s too long
-        text_label.setObjectName("text_label")  # Add an object name for identification
+        text_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie tekstu
+        text_label.setWordWrap(True)  # Umożliwia łamanie tekstu na dwa wiersze
+        text_label.setObjectName("text_label")
+        text_label.setFixedHeight(30)  # Stała wysokość dla tekstu, aby uniknąć wpływu na obrazek
 
         # Add widgets to layout
-        layout.addWidget(image_label)
-        layout.addWidget(text_label)
+        layout.addWidget(image_label, alignment=Qt.AlignCenter)
+        layout.addWidget(text_label, alignment=Qt.AlignTop)
 
-        # Set consistent fixed size for the option widget
+        # Zapewnij stały rozmiar całego widgetu
         option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], self.OPTION_WIDGET_SIZE[1])
 
         return option_widget
@@ -271,7 +267,6 @@ class ScrollableMenu(QWidget):
                 self.selected_options.pop(category, None)
         print(self.selected_options)
 
-
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""
         button = QPushButton("↓")
@@ -292,7 +287,6 @@ class ScrollableMenu(QWidget):
         spacing = 10
 
         columns = max(3, available_width // (option_width + spacing))
-
         for category, data in self.category_widgets.items():
             option_items = self.option_items_by_category.get(category, [])
             layout = self.options_layout_by_category.get(category)
@@ -303,7 +297,7 @@ class ScrollableMenu(QWidget):
             # Update grid layout
             self._populate_grid_layout(option_items, layout, columns)
 
-            # Adjust field group height if options widget is visible
+            # Manually enforce consistent heights for all rows
             if data["options_widget"].isVisible():
                 self._adjust_field_group_height(option_items, columns, data["field_group"])
 

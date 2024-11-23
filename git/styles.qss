@@ -183,13 +183,25 @@ QMainWindow#OknoWymiarow QPushButton:hover {
 }
 
 /* Styl dla QLabel w grupach */
-#kreator_view QGroupBox QLabel {
-    color: white; /* Biały tekst */
+/* Styl dla opcji z obrazkami */
+#kreator_view QGroupBox QLabel#text_label {
+    color: white; /* Ustaw biały tekst */
+    font-size: 13px; /* Spójny rozmiar czcionki */
+    text-align: center; /* Wyśrodkuj tekst */
+    margin: 0px;
+    padding: 0px;
+}
+
+#kreator_view QGroupBox QLabel#image_label {
+    border: none; /* Usuń ramkę obrazów */
+    margin: 0px;
+    padding: 0px;
 }
 #kreator_view QCheckBox {
     color: white; /* Ustaw biały kolor tekstu */
     font-size: 13px; /* Rozmiar tekstu */
 }
+
 #kreator_view QCheckBox:focus {
     outline: none; /* Usuwa podświetlenie po kliknięciu */
 /*    box-shadow: none; *//* Usuwa dodatkowy cień */
