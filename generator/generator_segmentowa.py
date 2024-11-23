@@ -2,6 +2,22 @@ import bpy
 import os
 import math
 
+# Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
+object_names = ["brama-segmentowa", "szyny-na-brame.001"]
+
+for object_name in object_names:
+    # Sprawdzenie, czy obiekt istnieje
+    obj = bpy.data.objects.get(object_name)
+    if obj:
+        # Ustawienie obiektu jako aktywnego i zaznaczenie
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
+
+        # Usunięcie obiektu
+        bpy.ops.object.delete()
+        print(f"Obiekt '{object_name}' został usunięty.")
+    else:
+        print(f"Obiekt '{object_name}' nie istnieje.")
 
 def scale_stack_and_align_rails():
     # Nazwy obiektów
