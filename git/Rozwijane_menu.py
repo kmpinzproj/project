@@ -141,7 +141,8 @@ class ScrollableMenu(QWidget):
         """Create a single image option widget with selectable functionality and centered text."""
         option_widget = QWidget()
         layout = QVBoxLayout(option_widget)
-        layout.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie elementów
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # Image
         image_label = QLabel()
@@ -149,23 +150,29 @@ class ScrollableMenu(QWidget):
         if pixmap.isNull():
             pixmap = QPixmap("../jpg/placeholder.jpg")
         image_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+        image_label.setAlignment(Qt.AlignCenter)
         image_label.setObjectName("image_label")
-        image_label.setFixedSize(70, 70)  # Zapewnij stały rozmiar obrazka
+
+        # Wymuszenie stałego rozmiaru dla obrazka
+        image_label.setFixedSize(70, 70)
 
         # Text
         text_label = QLabel(option_name)
-        text_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie tekstu
-        text_label.setWordWrap(True)  # Umożliwia łamanie tekstu na dwa wiersze
+        text_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        text_label.setWordWrap(True)
         text_label.setObjectName("text_label")
-        text_label.setFixedHeight(30)  # Stała wysokość dla tekstu, aby uniknąć wpływu na obrazek
+        text_label.setMaximumWidth(70)
+        text_label.setFixedHeight(40)
 
-        # Add widgets to layout
-        layout.addWidget(image_label, alignment=Qt.AlignCenter)
-        layout.addWidget(text_label, alignment=Qt.AlignTop)
+        # Dodaj obrazek i tekst do układu
+        layout.addWidget(image_label)
+        layout.addWidget(text_label)
 
-        # Zapewnij stały rozmiar całego widgetu
-        option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], self.OPTION_WIDGET_SIZE[1])
+        # Wymuszenie stałego rozmiaru widgetu
+        option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], 120)
+
+        # Połącz zdarzenie kliknięcia
+        option_widget.mousePressEvent = lambda event: self._on_option_click(category, image_label)
 
         return option_widget
 
