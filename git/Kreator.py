@@ -35,12 +35,9 @@ class Kreator(QMainWindow):
         self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
 
         self.selected_options = {}
-
-
         # Initialize UI
         self._setup_ui()
 
-        print(self.default_options)
         # Ustaw domyślne opcje
         self.set_default_options()
 
@@ -89,34 +86,10 @@ class Kreator(QMainWindow):
 
         return right_widget
 
-    # def _create_image_widget(self):
-    #     """Creates and configures the QLabel widget for image display."""
-    #     self.image_label = QLabel()  # Zmieniono na self.image_label, aby był dostępny w całej klasie
-    #     self.image_label.setObjectName("imageLabel")
-    #     self.image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
-    #     self.image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
-    #
-    #     # Ładowanie obrazka
-    #     if self.image_path and os.path.exists(self.image_path):
-    #         pixmap = QPixmap(self.image_path)
-    #
-    #         if not pixmap.isNull():
-    #             # Dopasowanie obrazu z zachowaniem proporcji
-    #             scaled_pixmap = pixmap.scaled(
-    #                 self.IMAGE_WIDGET_MIN_SIZE,
-    #                 self.IMAGE_WIDGET_MIN_SIZE,
-    #                 Qt.KeepAspectRatio,
-    #                 Qt.SmoothTransformation
-    #             )
-    #             self.image_label.setPixmap(scaled_pixmap)
-    #     else:
-    #         self.image_label.setText("Nie znaleziono obrazka")
-    #         self.image_label.setAlignment(Qt.AlignCenter)
-    #
-    #     return self.image_label
-
     def _create_image_widget(self):
         """Creates and configures the OpenGLWidget for 3D display."""
+        self.gate_render()
+
         # Ścieżka do pliku .obj
         obj_file = "../generator/model.obj"
 

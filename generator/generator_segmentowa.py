@@ -152,6 +152,8 @@ def read_json(json_path):
             wymiary = existing_data["Wymiary"]
         if "Rodzaj przetłoczenia" in existing_data:
             przetloczenie = existing_data["Rodzaj przetłoczenia"]
+        else:
+            przetloczenie = "Bez przetłoczenia"
 
     return [wymiary, przetloczenie]
 def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="brama-segmentowa.obj"):

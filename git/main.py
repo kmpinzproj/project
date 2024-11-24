@@ -12,6 +12,8 @@ from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
 
+from PySide6.QtGui import QSurfaceFormat
+
 QApplication.setStyle("Fusion")
 
 class MainApplication(QMainWindow):
@@ -159,6 +161,10 @@ def load_stylesheet(app, file_path):
         print(f"Plik stylów {file_path} nie istnieje!")
 
 if __name__ == "__main__":
+    format = QSurfaceFormat()
+    format.setSamples(64)  # Ustaw 8 próbek dla multisamplingu
+    QSurfaceFormat.setDefaultFormat(format)
+
     app = QApplication(sys.argv)
     load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
