@@ -9,6 +9,7 @@ import os
 import json
 from git.DatabaseManager import DatabaseManager
 from generator.generator_gateV2 import BlenderScriptRunner
+from Widget3D import OpenGLWidget
 
 if __name__ == "__main__":
     runner = BlenderScriptRunner()
@@ -88,31 +89,40 @@ class Kreator(QMainWindow):
 
         return right_widget
 
+    # def _create_image_widget(self):
+    #     """Creates and configures the QLabel widget for image display."""
+    #     self.image_label = QLabel()  # Zmieniono na self.image_label, aby był dostępny w całej klasie
+    #     self.image_label.setObjectName("imageLabel")
+    #     self.image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
+    #     self.image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+    #
+    #     # Ładowanie obrazka
+    #     if self.image_path and os.path.exists(self.image_path):
+    #         pixmap = QPixmap(self.image_path)
+    #
+    #         if not pixmap.isNull():
+    #             # Dopasowanie obrazu z zachowaniem proporcji
+    #             scaled_pixmap = pixmap.scaled(
+    #                 self.IMAGE_WIDGET_MIN_SIZE,
+    #                 self.IMAGE_WIDGET_MIN_SIZE,
+    #                 Qt.KeepAspectRatio,
+    #                 Qt.SmoothTransformation
+    #             )
+    #             self.image_label.setPixmap(scaled_pixmap)
+    #     else:
+    #         self.image_label.setText("Nie znaleziono obrazka")
+    #         self.image_label.setAlignment(Qt.AlignCenter)
+    #
+    #     return self.image_label
+
     def _create_image_widget(self):
-        """Creates and configures the QLabel widget for image display."""
-        self.image_label = QLabel()  # Zmieniono na self.image_label, aby był dostępny w całej klasie
-        self.image_label.setObjectName("imageLabel")
-        self.image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
-        self.image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+        """Creates and configures the OpenGLWidget for 3D display."""
+        # Ścieżka do pliku .obj
+        obj_file = "../generator/model.obj"
 
-        # Ładowanie obrazka
-        if self.image_path and os.path.exists(self.image_path):
-            pixmap = QPixmap(self.image_path)
-
-            if not pixmap.isNull():
-                # Dopasowanie obrazu z zachowaniem proporcji
-                scaled_pixmap = pixmap.scaled(
-                    self.IMAGE_WIDGET_MIN_SIZE,
-                    self.IMAGE_WIDGET_MIN_SIZE,
-                    Qt.KeepAspectRatio,
-                    Qt.SmoothTransformation
-                )
-                self.image_label.setPixmap(scaled_pixmap)
-        else:
-            self.image_label.setText("Nie znaleziono obrazka")
-            self.image_label.setAlignment(Qt.AlignCenter)
-
-        return self.image_label
+        # Tworzenie widżetu OpenGL
+        self.opengl_widget = OpenGLWidget(obj_file)
+        return self.opengl_widget
 
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
@@ -128,6 +138,7 @@ class Kreator(QMainWindow):
         self.contact_button.clicked.connect(self.validate_and_proceed)
         self.save_button.clicked.connect(self.prompt_project_name)
         self.render_button.clicked.connect(self.gate_render)
+        self.render_button.clicked.connect(self.change_model)
 
         # Dodaj przyciski w układzie 2x2
         buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
@@ -356,3 +367,12 @@ class Kreator(QMainWindow):
 
         except Exception as e:
             print(f"Wystąpił błąd podczas renderowania: {e}")
+
+    def change_model(self):
+        """Zmienia model na nowy i przeładowuje widok 3D."""
+        new_model_path = "../generator/model.obj"  # Ścieżka do nowego modelu .obj
+        if os.path.exists(new_model_path):
+            self.opengl_widget.load_model(new_model_path)  # Przeładuj model w widżecie OpenGL
+            print(f"Załadowano nowy model: {new_model_path}")
+        else:
+            print(f"Nie znaleziono pliku modelu: {new_model_path}")
