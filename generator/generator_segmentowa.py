@@ -143,72 +143,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-
-def add_cameras_and_render_with_light():
-    # Pobierz obiekt bramy
-    gate = bpy.data.objects.get("brama-segmentowa")
-    if not gate:
-        print("Obiekt 'brama-segmentowa' nie został znaleziony.")
-        return
-
-    # Pozycja bramy
-    gate_location = gate.location
-
-    # Ustawienia kamer
-    camera_distance = 5  # Promień w metrach (większy promień)
-    camera_height = 1  # Wysokość w osi Z
-    num_cameras = 6  # Liczba kamer
-    output_dir = os.path.join(bpy.path.abspath("//"), "renders")  # Folder na rendery
-
-    # Usuń istniejące kamery i światła (opcjonalne)
-    for obj in bpy.data.objects:
-        if obj.type in {'CAMERA', 'LIGHT'}:
-            bpy.data.objects.remove(obj)
-
-    # Dodaj światło na -1m w osi Y
-    bpy.ops.object.light_add(type='AREA', location=(gate_location.x, gate_location.y - 5, gate_location.z + 1))
-    light = bpy.context.object
-    light.data.energy = 200  # U
-    light.data.size = 5  # Rozmiar światła
-
-    # Tworzenie kamer
-    cameras = []
-    angle_offset = math.pi / num_cameras  # Pominięcie kamery na X=0
-    for i in range(num_cameras):
-        angle = (2 * math.pi / num_cameras) * i + angle_offset  # Przesunięcie kąta
-        x = gate_location.x + camera_distance * math.cos(angle)
-        y = gate_location.y + camera_distance * math.sin(angle)
-        z = gate_location.z + camera_height
-
-        # Dodaj kamerę
-        bpy.ops.object.camera_add(location=(x, y, z))
-        cam = bpy.context.object
-        cam.name = f"Camera_{i + 1}"
-        cameras.append(cam)
-
-        # Skieruj kamerę na bramę
-        cam_constraint = cam.constraints.new(type='TRACK_TO')
-        cam_constraint.target = gate
-        cam_constraint.track_axis = 'TRACK_NEGATIVE_Z'
-        cam_constraint.up_axis = 'UP_Y'
-
-    # Tworzenie folderu na rendery, jeśli nie istnieje
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Renderuj scenę z każdej kamery
-    for i, cam in enumerate(cameras):
-        # Ustaw aktywną kamerę
-        bpy.context.scene.camera = cam
-
-        # Ustaw ścieżkę pliku wyjściowego
-        bpy.context.scene.render.filepath = os.path.join(output_dir, f"Camera_{i + 1}.png")
-
-        # Wykonaj render
-        bpy.ops.render.render(write_still=True)
-
-    print(f"Renderowanie zakończone. Pliki zapisano w folderze: {output_dir}")
-
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
@@ -232,7 +166,7 @@ def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="
         return
 
     # Ścieżka wyjściowa
-    output_path = os.path.abspath(output_path)
+    output_path = "../generator/model.obj"
 
     # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -278,7 +212,8 @@ width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 
 scale_stack_and_align_rails(width, height, przetloczenie)
-add_cameras_and_render_with_light()
+# add_cameras_and_render_with_light()
+custom_export_to_obj()
 
 
 
