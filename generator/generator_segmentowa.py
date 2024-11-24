@@ -1,6 +1,7 @@
 import bpy
 import os
 import math
+import json
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
 object_names = ["brama-segmentowa", "szyny-na-brame.001"]
@@ -19,12 +20,12 @@ for object_name in object_names:
     else:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
-def scale_stack_and_align_rails():
+def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczenia"):
     # Nazwy obiektów
     segment_name = "Cube.002"
     rail_name = "szyny-na-brame"
     # Lista dostępnych segmentów
-    available_segments = ["Cube", "Cube.001", "Cube.002"]
+    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001","Średnie":  "Cube.002"}
 
     # Wyświetlenie dostępnych segmentów
     print("Dostępne segmenty:")
@@ -32,11 +33,9 @@ def scale_stack_and_align_rails():
         print(f"{i + 1}. {segment_name}")
     # Pobranie wyboru użytkownika
     try:
-        segment_choice = int(input("Wybierz numer segmentu (1, 2, 3): "))
-        if segment_choice < 1 or segment_choice > len(available_segments):
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
-            return
-        segment_name = available_segments[segment_choice - 1]
+        # segment_choice = przetloczenie #tu było pobieranie segmentu 1, 2, 3
+
+        segment_name = available_segments[przetloczenie]
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -55,9 +54,9 @@ def scale_stack_and_align_rails():
 
     try:
         # Pobranie danych od użytkownika
-        x_length_cm = float(input("Podaj długość segmentu w osi X (w cm): "))
-        x_length_m = x_length_cm / 100  # Konwersja cm na metry
-        segment_count = int(input("Podaj liczbę segmentów w pionie: "))
+        x_length_cm = width
+        x_length_m = x_length_cm / 1000  # Konwersja cm na metry
+        segment_count = height//500
 
         # Aktualne wymiary segmentu
         current_length_x = segment.dimensions[0]
@@ -201,9 +200,24 @@ def add_cameras_and_render_with_light():
 
     print(f"Renderowanie zakończone. Pliki zapisano w folderze: {output_dir}")
 
+def read_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as file:
+        existing_data = json.load(file)
+        # Zachowaj 'Typ bramy' i 'Wymiary'
+
+        if "Wymiary" in existing_data:
+            wymiary = existing_data["Wymiary"]
+        if "Rodzaj przetłoczenia" in existing_data:
+            przetloczenie = existing_data["Rodzaj przetłoczenia"]
+
+    return [wymiary, przetloczenie]
 
 # Uruchom funkcję
-scale_stack_and_align_rails()
+dimensions, przetloczenie = read_json("../resources/selected_options.json")
+width = dimensions.get("Szerokość")
+height = dimensions.get("Wysokość")
+
+scale_stack_and_align_rails(width, height, przetloczenie)
 add_cameras_and_render_with_light()
 
 

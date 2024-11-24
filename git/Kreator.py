@@ -8,14 +8,18 @@ from button import StyledButton
 import os
 import json
 from git.DatabaseManager import DatabaseManager
+from generator.generator_gateV2 import BlenderScriptRunner
 
+if __name__ == "__main__":
+    runner = BlenderScriptRunner()
+    runner.run()
 
 
 class Kreator(QMainWindow):
     LEFT_PANEL_WIDTH = 400
     IMAGE_WIDGET_MIN_SIZE = 400  # Minimum size for image widget
 
-    def __init__(self, test, image_path="../tworzenie_bramy_demo/cube_render.png"):
+    def __init__(self, test, image_path="../generator/renders/Camera_4.png"):
         super().__init__()
         self.setObjectName("kreator_view")
         self.image_path = os.path.abspath(image_path) if image_path else None
@@ -86,10 +90,10 @@ class Kreator(QMainWindow):
 
     def _create_image_widget(self):
         """Creates and configures the QLabel widget for image display."""
-        image_label = QLabel()
-        image_label.setObjectName("imageLabel")
-        image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
-        image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
+        self.image_label = QLabel()  # Zmieniono na self.image_label, aby był dostępny w całej klasie
+        self.image_label.setObjectName("imageLabel")
+        self.image_label.setMinimumSize(self.IMAGE_WIDGET_MIN_SIZE, self.IMAGE_WIDGET_MIN_SIZE)
+        self.image_label.setAlignment(Qt.AlignCenter)  # Wyśrodkowanie obrazu
 
         # Ładowanie obrazka
         if self.image_path and os.path.exists(self.image_path):
@@ -103,12 +107,12 @@ class Kreator(QMainWindow):
                     Qt.KeepAspectRatio,
                     Qt.SmoothTransformation
                 )
-                image_label.setPixmap(scaled_pixmap)
+                self.image_label.setPixmap(scaled_pixmap)
         else:
-            image_label.setText("Nie znaleziono obrazka")
-            image_label.setAlignment(Qt.AlignCenter)
+            self.image_label.setText("Nie znaleziono obrazka")
+            self.image_label.setAlignment(Qt.AlignCenter)
 
-        return image_label
+        return self.image_label
 
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
@@ -123,6 +127,7 @@ class Kreator(QMainWindow):
 
         self.contact_button.clicked.connect(self.validate_and_proceed)
         self.save_button.clicked.connect(self.prompt_project_name)
+        self.render_button.clicked.connect(self.gate_render)
 
         # Dodaj przyciski w układzie 2x2
         buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
@@ -147,7 +152,6 @@ class Kreator(QMainWindow):
             self.prompt_project_name()
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
 
-
     def validate_fields(self):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
         return self.navigation_menu.validate_required_fields(self.required_fields)
@@ -166,6 +170,7 @@ class Kreator(QMainWindow):
         # Zapisz zaznaczone opcje do pliku
         print(f"Zaznaczone opcje: {self.selected_options}")
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        self.save_json_to_db("../resources/selected_options.json", self.selected_options)
         print("Opcje zapisane do pliku.")
 
     @staticmethod
@@ -230,6 +235,7 @@ class Kreator(QMainWindow):
 
         # Połącz dane bazowe z nowymi wybranymi opcjami
         base_data.update(selected_options)
+        print(selected_options)
 
         # Zapisz dane z powrotem do pliku
         try:
@@ -238,6 +244,27 @@ class Kreator(QMainWindow):
                 print(f"Dane zostały zapisane w pliku {file_path}.")
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania danych: {e}")
+
+    @staticmethod
+    def save_json_to_db(file_path, selected_options):
+        # Przygotuj bazową strukturę danych
+        base_data = {}
+
+        # Wczytaj istniejące dane z pliku JSON, jeśli plik istnieje
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    existing_data = json.load(file)
+                    # Zachowaj 'Typ bramy' i 'Wymiary'
+                    if "Typ bramy" in existing_data:
+                        base_data["Typ bramy"] = existing_data["Typ bramy"]
+                    if "Wymiary" in existing_data:
+                        base_data["Wymiary"] = existing_data["Wymiary"]
+            except (json.JSONDecodeError, FileNotFoundError):
+                print(f"Nie udało się wczytać istniejącego pliku {file_path}. Użycie pustej struktury.")
+
+        # Połącz dane bazowe z nowymi wybranymi opcjami
+        base_data.update(selected_options)
 
         # Dodaj projekt do bazy danych
         try:
@@ -291,3 +318,40 @@ class Kreator(QMainWindow):
                                 # Zaktualizuj klucz "Kolor" w selected_options
                                 self.navigation_menu.selected_options["Kolor"] = kolor_value
 
+    def gate_render(self):
+        """
+        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        """
+        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        # Uruchomienie Blendera za pomocą BlenderScriptRunner
+        try:
+            test = BlenderScriptRunner()
+            test.run()
+
+            # Ścieżka do nowo wygenerowanego obrazu
+            new_image_path = os.path.abspath(
+                "../generator/renders/Camera_4.png")  # Upewnij się, że ścieżka jest poprawna
+
+            # Sprawdź, czy obraz istnieje
+            if os.path.exists(new_image_path):
+                pixmap = QPixmap(new_image_path)
+
+                if not pixmap.isNull():
+                    # Dopasowanie nowego obrazu z zachowaniem proporcji
+                    scaled_pixmap = pixmap.scaled(
+                        self.IMAGE_WIDGET_MIN_SIZE,
+                        self.IMAGE_WIDGET_MIN_SIZE,
+                        Qt.KeepAspectRatio,
+                        Qt.SmoothTransformation
+                    )
+                    # Zaktualizowanie QLabel
+                    self.image_label.setPixmap(scaled_pixmap)
+                    print("Obraz zaktualizowany po renderowaniu.")
+                else:
+                    print("Nie można załadować obrazka: Pixmap jest pusta.")
+            else:
+                print(f"Obraz {new_image_path} nie istnieje.")
+
+        except Exception as e:
+            print(f"Wystąpił błąd podczas renderowania: {e}")
