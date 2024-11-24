@@ -2,9 +2,10 @@ import bpy
 import os
 import math
 import json
+import mathutils
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["brama-segmentowa", "szyny-na-brame.001"]
+object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami"]
 
 for object_name in object_names:
     # Sprawdzenie, czy obiekt istnieje
@@ -126,6 +127,14 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
         # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
         rail_copy.location.z -= rail_bottom_z  # Przesuwamy dolną krawędź szyny na Z = 0
         joined_gate.location.z -= gate_bottom_z  # Przesuwamy dolną krawędź bramy na Z = 0
+        # Połączenie 'brama-segmentowa' i 'rail_copy'
+        bpy.context.view_layer.objects.active = joined_gate
+        joined_gate.select_set(True)
+        rail_copy.select_set(True)
+        bpy.ops.object.join()
+
+        final_gate = bpy.context.view_layer.objects.active
+        final_gate.name = "brama-segmentowa-z-szynami"
 
         print(f"Dodano i dopasowano szyny do obiektu 'brama-segmentowa'.")
 
@@ -211,6 +220,57 @@ def read_json(json_path):
             przetloczenie = existing_data["Rodzaj przetłoczenia"]
 
     return [wymiary, przetloczenie]
+def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="brama-segmentowa.obj"):
+    """
+    Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
+    ukrywając inne obiekty w scenie.
+    """
+    # Sprawdź, czy obiekt istnieje
+    obj = bpy.data.objects.get(object_name)
+    if not obj:
+        print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
+        return
+
+    # Ścieżka wyjściowa
+    output_path = os.path.abspath(output_path)
+
+    # Rotacja o 90 stopni w osi X
+    rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
+    transformed_matrix = rotation_matrix @ obj.matrix_world
+
+    # Otwórz plik wyjściowy
+    with open(output_path, 'w') as obj_file:
+        # Napisz nagłówek pliku .obj
+        obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
+        obj_file.write(f"# Object: {object_name}\n\n")
+
+        # Przechodzimy do siatki obiektu
+        mesh = obj.data
+
+        # Zapisz wierzchołki (vertices)
+        for vertex in mesh.vertices:
+            # Przelicz współrzędne wierzchołków na przestrzeń globalną z rotacją
+            world_coord = transformed_matrix @ vertex.co
+            obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
+
+        # Zapisz normalne (normals)
+        if mesh.polygons:
+            for poly in mesh.polygons:
+                rotated_normal = rotation_matrix @ poly.normal
+                obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
+
+        # Zapisz współrzędne UV (jeśli istnieją)
+        if mesh.uv_layers:
+            uv_layer = mesh.uv_layers.active.data
+            for loop in uv_layer:
+                obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
+
+        # Zapisz powierzchnie (faces)
+        for poly in mesh.polygons:
+            face_vertices = [str(vert + 1) for vert in poly.vertices]  # +1, bo .obj zaczyna od 1
+            obj_file.write(f"f {' '.join(face_vertices)}\n")
+
+    print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
 
 # Uruchom funkcję
 dimensions, przetloczenie = read_json("../resources/selected_options.json")
