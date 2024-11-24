@@ -218,11 +218,11 @@ class ScrollableMenu(QWidget):
         # Zaktualizuj zaznaczoną opcję
         if selected_text:
             self.selected_options[category] = selected_text
-            print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
+            # print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
-        print(f"To jest wybrane i przekazywane do kreatora{self.selected_options}")
+        # print(f"To jest wybrane i przekazywane do kreatora{self.selected_options}")
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
@@ -272,7 +272,7 @@ class ScrollableMenu(QWidget):
             else:
                 # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
                 self.selected_options.pop(category, None)
-        print(self.selected_options)
+        # print(self.selected_options)
 
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""
@@ -366,7 +366,7 @@ class ScrollableMenu(QWidget):
     def validate_required_fields(self, required_fields):
         """Validates that all required fields from the given list have selected options."""
         all_valid = True
-
+        print(f"Dane sprawdzane podczas walidacji {self.selected_options}")
         for category in required_fields:
             if category == "Kolor":
                 # Sprawdź, czy istnieje zaznaczony kolor w "Kolor standardowy" lub "Kolor RAL"
@@ -405,5 +405,5 @@ class ScrollableMenu(QWidget):
     def get_selected_options(self):
         """Returns the currently selected options."""
         print(f"To jest wybrane i przekazywane do kreatora wersja ostateczna{self.selected_options}")
-
-        return self.selected_options
+        tmp = self.selected_options
+        return tmp

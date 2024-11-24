@@ -34,7 +34,7 @@ class Kreator(QMainWindow):
         self.default_options = {key: value for key, value in data.items() if key != "Typ bramy"}
         self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
 
-        self.selected_options = {}
+        self.selected_options_k = {}
         # Initialize UI
         self._setup_ui()
 
@@ -108,7 +108,6 @@ class Kreator(QMainWindow):
         self.render_button = StyledButton("Renderuj")
         self.save_button = StyledButton("Zapisz")
 
-        self.contact_button.clicked.connect(self.validate_and_proceed)
         self.save_button.clicked.connect(self.prompt_project_name)
         self.render_button.clicked.connect(self.gate_render)
         self.render_button.clicked.connect(self.change_model)
@@ -128,13 +127,18 @@ class Kreator(QMainWindow):
     def validate_and_proceed(self):
         """Validates required fields and triggers the transition if valid."""
         if self.validate_fields():
+            print("Przeszło walidacje")
             # Pobierz zaznaczone opcje z ScrollableMenu
-            self.selected_options = self.navigation_menu.get_selected_options()
+            self.selected_options_k = self.navigation_menu.get_selected_options()
 
             # Zapisz zaznaczone opcje do pliku
-            print(f"Zaznaczone opcje: {self.selected_options}")
+            print(f"Zaznaczone opcje: {self.selected_options_k}")
             self.prompt_project_name()
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
+            return True
+        else:
+            print("Dlaczego działasz drugi raz?")
+            return False
 
     def validate_fields(self):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
@@ -144,18 +148,17 @@ class Kreator(QMainWindow):
         """Prompt user for a project name before saving."""
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
         if ok and project_name.strip():
-            self.selected_options.clear()
-            self.selected_options["Nazwa projektu"] = project_name.strip()
-            self.selected_options.update(self.navigation_menu.get_selected_options())
+            self.selected_options_k.clear()
+            self.selected_options_k["Nazwa projektu"] = project_name.strip()
+            self.selected_options_k = self.navigation_menu.get_selected_options()
+            print(self.selected_options_k)
         else:
             print("Anulowano zapis projektu.")
 
-
-
         # Zapisz zaznaczone opcje do pliku
-        print(f"Zaznaczone opcje: {self.selected_options}")
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
-        self.save_json_to_db("../resources/selected_options.json", self.selected_options)
+        print(f"Zaznaczone opcje: {self.selected_options_k}")
+        self.save_selected_options("../resources/selected_options.json", self.selected_options_k)
+        self.save_json_to_db("../resources/selected_options.json", self.selected_options_k)
         print("Opcje zapisane do pliku.")
 
     @staticmethod
@@ -307,8 +310,8 @@ class Kreator(QMainWindow):
         """
         Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
         """
-        self.selected_options.update(self.navigation_menu.get_selected_options())
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        self.selected_options_k.update(self.navigation_menu.get_selected_options())
+        self.save_selected_options("../resources/selected_options.json", self.selected_options_k)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
             test = BlenderScriptRunner()

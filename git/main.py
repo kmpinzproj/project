@@ -128,7 +128,7 @@ class MainApplication(QMainWindow):
 
     def navigate_to_contact_form_view(self):
         """Navigates to the contact form view if all required fields in the gate creator are valid."""
-        if self.gate_creator_view.validate_fields():
+        if self.gate_creator_view.validate_and_proceed():
             # Jeśli wszystkie pola są poprawnie wypełnione, przejdź do formularza kontaktowego
             self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
             print("Przejście do widoku formularza kontaktowego.")
@@ -162,7 +162,7 @@ def load_stylesheet(app, file_path):
 
 if __name__ == "__main__":
     format = QSurfaceFormat()
-    format.setSamples(64)  # Ustaw 8 próbek dla multisamplingu
+    format.setSamples(4096)  # Ustaw 8 próbek dla multisamplingu
     QSurfaceFormat.setDefaultFormat(format)
 
     app = QApplication(sys.argv)
