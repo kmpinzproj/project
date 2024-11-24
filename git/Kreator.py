@@ -160,6 +160,7 @@ class Kreator(QMainWindow):
         """Prompt user for a project name before saving."""
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
         if ok and project_name.strip():
+            self.selected_options.clear()
             self.selected_options["Nazwa projektu"] = project_name.strip()
             self.selected_options.update(self.navigation_menu.get_selected_options())
         else:

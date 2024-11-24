@@ -222,7 +222,7 @@ class ScrollableMenu(QWidget):
         else:
             print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
-        print(self.selected_options)
+        print(f"To jest wybrane i przekazywane do kreatora{self.selected_options}")
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
@@ -404,4 +404,6 @@ class ScrollableMenu(QWidget):
 
     def get_selected_options(self):
         """Returns the currently selected options."""
+        print(f"To jest wybrane i przekazywane do kreatora wersja ostateczna{self.selected_options}")
+
         return self.selected_options
