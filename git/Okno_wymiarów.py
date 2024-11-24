@@ -119,6 +119,7 @@ class OknoWymiarow(QMainWindow):
 
         # Obsługa kliknięcia przycisku „Akceptuj”
         self.accept_button.clicked.connect(self.save_dimensions)
+        self.back_button.clicked.connect(self.clear_json)
 
         # Add buttons with centered alignment
         buttons_layout.addWidget(self.back_button)
@@ -211,3 +212,22 @@ class OknoWymiarow(QMainWindow):
                 print(f"Błąd podczas wczytywania wymiarów: {e}")
         else:
             print(f"Plik {file_path} nie istnieje. Wymiary nie zostały wczytane.")
+    @staticmethod
+    def clear_json(file_path):
+        """
+        Nadpisuje plik JSON pustą strukturą (pusty obiekt {}).
+
+        Args:
+            file_path (str): Ścieżka do pliku JSON, który ma zostać wyczyszczony.
+        """
+        file_path = "../resources/selected_options.json"
+        try:
+            # Nadpisanie pustą strukturą
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump({}, file, ensure_ascii=False, indent=4)  # Pusty obiekt {}
+            print(f"Plik {file_path} został wyczyszczony i zastąpiony pustą strukturą.")
+        except Exception as e:
+            print(f"Błąd podczas nadpisywania pliku {file_path}: {e}")
+
+    # Przykład użycia:
+    clear_json("../resources/selected_options.json")
