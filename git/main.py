@@ -162,7 +162,7 @@ def load_stylesheet(app, file_path):
 
 if __name__ == "__main__":
     format = QSurfaceFormat()
-    format.setSamples(4096)  # Ustaw 8 próbek dla multisamplingu
+    format.setSamples(256)  # Ustaw 8 próbek dla multisamplingu
     QSurfaceFormat.setDefaultFormat(format)
 
     app = QApplication(sys.argv)
@@ -171,3 +171,4 @@ if __name__ == "__main__":
     main_app = MainApplication()
     main_app.show()
     sys.exit(app.exec())
+

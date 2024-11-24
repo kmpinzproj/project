@@ -18,10 +18,16 @@ def compute_normals(vertices, faces):
         edge2 = v3 - v1
         # Oblicz iloczyn wektorowy (normalną)
         normal = np.cross(edge1, edge2)
-        normal = normal / np.linalg.norm(normal)  # Normalizacja wektora
+        norm = np.linalg.norm(normal)
+        if norm != 0:  # Sprawdź, czy norma nie wynosi 0
+            normal /= norm  # Normalizacja wektora
         # Dodaj normalną do każdego wierzchołka trójkąta
         for vertex in face:
             normals[vertex] += normal
+
+    # Normalizacja normalnych dla każdego wierzchołka
+    normals = np.array([normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal for normal in normals])
+    return normals
 
     # Normalizacja normalnych dla każdego wierzchołka
     normals = np.array([normal / np.linalg.norm(normal) for normal in normals])
@@ -41,6 +47,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.rotation_y = 0  # Obrót wokół osi Y
         self.last_mouse_position = None  # Ostatnia pozycja myszy
         self.zoom = -5.0  # Domyślna odległość kamery (negatywne wartości, bo kamera patrzy na -Z)
+
 
     def initializeGL(self):
         glEnable(GL_DEPTH_TEST)  # Włącz test głębokości
@@ -117,7 +124,9 @@ class OpenGLWidget(QOpenGLWidget):
         for face in self.faces:
             vertices = [self.vertices[vertex_index] for vertex_index in face]
             normal = np.cross(vertices[1] - vertices[0], vertices[2] - vertices[0])
-            normal = normal / np.linalg.norm(normal)  # Normalizacja wektora normalnego
+            norm = np.linalg.norm(normal)
+            if norm != 0:  # Sprawdź, czy norma nie wynosi 0
+                normal /= norm  # Normalizacja wektora
             glNormal3fv(normal)  # Ustaw normalną dla trójkąta
 
             for vertex in vertices:

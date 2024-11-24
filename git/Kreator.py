@@ -316,31 +316,6 @@ class Kreator(QMainWindow):
         try:
             test = BlenderScriptRunner()
             test.run()
-
-            # Ścieżka do nowo wygenerowanego obrazu
-            new_image_path = os.path.abspath(
-                "../generator/renders/Camera_4.png")  # Upewnij się, że ścieżka jest poprawna
-
-            # Sprawdź, czy obraz istnieje
-            if os.path.exists(new_image_path):
-                pixmap = QPixmap(new_image_path)
-
-                if not pixmap.isNull():
-                    # Dopasowanie nowego obrazu z zachowaniem proporcji
-                    scaled_pixmap = pixmap.scaled(
-                        self.IMAGE_WIDGET_MIN_SIZE,
-                        self.IMAGE_WIDGET_MIN_SIZE,
-                        Qt.KeepAspectRatio,
-                        Qt.SmoothTransformation
-                    )
-                    # Zaktualizowanie QLabel
-                    self.image_label.setPixmap(scaled_pixmap)
-                    print("Obraz zaktualizowany po renderowaniu.")
-                else:
-                    print("Nie można załadować obrazka: Pixmap jest pusta.")
-            else:
-                print(f"Obraz {new_image_path} nie istnieje.")
-
         except Exception as e:
             print(f"Wystąpił błąd podczas renderowania: {e}")
 
