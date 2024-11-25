@@ -41,6 +41,8 @@ class MainApplication(QMainWindow):
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
+        self.previous_index = None  # Przechowuje poprzedni indeks
+
 
         # Add views
         self._initialize_views()
@@ -89,9 +91,11 @@ class MainApplication(QMainWindow):
     def navigate_to_start_view(self):
         """Przejście do widoku startowego i odświeżenie danych."""
         self.start_view.refresh()  # Odśwież dane w oknie startowym
+        self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
+        self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
     def navigate_to_dimension_view(self):
@@ -103,8 +107,12 @@ class MainApplication(QMainWindow):
         # Utwórz nową instancję Kreator
         self.dimension_view = OknoWymiarow()
         self.stack.insertWidget(self.VIEW_INDICES["dimension"], self.dimension_view)
+        self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["dimension"])
         self._setup_connections_dimension_view()
+        for i in range(self.stack.count()):
+            widget = self.stack.widget(i)
+            print(f"Widżet na indeksie {i}: {widget}")
 
     def navigate_to_gate_creator_view(self):
         """Creates a new instance of Kreator with the selected gate type and configures buttons."""
@@ -118,8 +126,10 @@ class MainApplication(QMainWindow):
         # Utwórz nową instancję Kreator
         self.gate_creator_view = Kreator(self.selected_gate_type)
         self.stack.insertWidget(self.VIEW_INDICES["gate_creator"], self.gate_creator_view)
+        self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
         self._setup_connections_gate_creator()
+        print(self.stack.currentWidget())
 
     def _setup_connections_gate_creator(self):
         """Sets up connections for the Kreator view buttons."""
@@ -130,6 +140,7 @@ class MainApplication(QMainWindow):
         """Navigates to the contact form view if all required fields in the gate creator are valid."""
         if self.gate_creator_view.validate_and_proceed():
             # Jeśli wszystkie pola są poprawnie wypełnione, przejdź do formularza kontaktowego
+            self.previous_index = self.stack.currentWidget()
             self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
             print("Przejście do widoku formularza kontaktowego.")
         else:

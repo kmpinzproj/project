@@ -14,6 +14,7 @@ import os
 class OknoStartowe(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setObjectName("OknoStartowe")  # Dodanie identyfikatora dla stylów
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
