@@ -3,6 +3,7 @@ import os
 import math
 import mathutils
 import bmesh
+import json
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
 object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami"]
@@ -22,10 +23,10 @@ for object_name in object_names:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
 
-def tilt_gate():
+def tilt_gate(width, height, wypelnienie = "Poziome"):
     # Nazwa segmentu bazowego
     segment_name = "Cube.002"
-    available_segments = ["Cube.002", "Cube.003"]
+    available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003"}
     # kopia szyny
     rail_name = "szyny-na-brame"
 
@@ -36,11 +37,9 @@ def tilt_gate():
 
     # Wybór segmentu
     try:
-        segment_choice = int(input("Wybierz numer segmentu (1, 2): "))
-        if segment_choice < 1 or segment_choice > len(available_segments):
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
-            return
-        segment_name = available_segments[segment_choice - 1]
+        segment_name = available_segments[wypelnienie]
+        print(f"Przetłoczenie   {wypelnienie}")
+        print(f"Wybrany segment   {segment_name}")
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -57,10 +56,10 @@ def tilt_gate():
 
     try:
         # Pobranie wymiarów bramy od użytkownika
-        x_length_cm = float(input("Podaj szerokość bramy w osi X (w cm): "))
-        z_height_cm = float(input("Podaj wysokość bramy w osi Z (w cm): "))
-        x_length_m = x_length_cm / 100  # Konwersja cm na metry
-        z_height_m = z_height_cm / 100  # Konwersja cm na metry
+        x_length_cm = width
+        z_height_cm = height
+        x_length_m = x_length_cm / 1000  # Konwersja cm na metry
+        z_height_m = z_height_cm / 1000  # Konwersja cm na metry
 
         # Wymiary segmentu
         segment_width = segment.dimensions[0]
@@ -249,7 +248,7 @@ def custom_export_to_obj(object_name="brama-uchylna-z-szynami"):
         return
 
     # Ścieżka wyjściowa
-    output_path = "./model.obj"
+    output_path = "../generator/model.obj"
 
     # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -289,9 +288,27 @@ def custom_export_to_obj(object_name="brama-uchylna-z-szynami"):
 
     print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
 
+def read_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as file:
+        existing_data = json.load(file)
+        # Zachowaj 'Typ bramy' i 'Wymiary'
+
+        if "Wymiary" in existing_data:
+            wymiary = existing_data["Wymiary"]
+        if "Układ wypełnienia" in existing_data:
+            wypelnienie = existing_data["Układ wypełnienia"]
+            print("TESTTESTET")
+        else:
+            wypelnienie = "Pionowe"
+        return [wymiary, wypelnienie]
+
+
+dimensions, wypelnienie = read_json("../resources/selected_options.json")
+width = dimensions.get("Szerokość")
+height = dimensions.get("Wysokość")
 
 # Uruchom funkcję
-tilt_gate()
+tilt_gate(width, height, wypelnienie)
 custom_export_to_obj()
 
 

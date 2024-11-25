@@ -13,8 +13,8 @@ class BlenderScriptRunner:
             blend_file = "segmentowa_kopia3.blend"
             script_file = "generator_segmentowa.py"
         elif gate_type == "Brama Uchylna":
-            blend_file = "segmentowa_kopia3.blend"
-            script_file = "generator_segmentowa.py"
+            blend_file = "uchylna5.blend"
+            script_file = "generator_uchylna.py"
         elif gate_type == "Brama Roletowa":
             blend_file = "segmentowa_kopia3.blend"
             script_file = "generator_segmentowa.py"

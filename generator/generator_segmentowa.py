@@ -143,19 +143,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def read_json(json_path):
-    with open(json_path, 'r', encoding='utf-8') as file:
-        existing_data = json.load(file)
-        # Zachowaj 'Typ bramy' i 'Wymiary'
-
-        if "Wymiary" in existing_data:
-            wymiary = existing_data["Wymiary"]
-        if "Rodzaj przetłoczenia" in existing_data:
-            przetloczenie = existing_data["Rodzaj przetłoczenia"]
-        else:
-            przetloczenie = "Bez przetłoczenia"
-
-    return [wymiary, przetloczenie]
 def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="brama-segmentowa.obj"):
     """
     Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
@@ -207,6 +194,19 @@ def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
     print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
+
+def read_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as file:
+        existing_data = json.load(file)
+        # Zachowaj 'Typ bramy' i 'Wymiary'
+
+        if "Wymiary" in existing_data:
+            wymiary = existing_data["Wymiary"]
+        if "Rodzaj przetłoczenia" in existing_data:
+            przetloczenie = existing_data["Rodzaj przetłoczenia"]
+        else:
+            przetloczenie = "Bez przetłoczenia"
+        return [wymiary, przetloczenie]
 
 # Uruchom funkcję
 dimensions, przetloczenie = read_json("../resources/selected_options.json")
