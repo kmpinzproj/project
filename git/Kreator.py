@@ -315,7 +315,8 @@ class Kreator(QMainWindow):
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
-            test = BlenderScriptRunner()
+            gate_type = self.gate_type
+            test = BlenderScriptRunner(gate_type)
             test.run()
         except Exception as e:
             print(f"Wystąpił błąd podczas renderowania: {e}")
@@ -328,7 +329,8 @@ class Kreator(QMainWindow):
         self.save_selected_options("../resources/selected_options.json", self.default_options)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
-            test = BlenderScriptRunner()
+            gate_type = self.gate_type
+            test = BlenderScriptRunner(gate_type)
             test.run()
         except Exception as e:
             print(f"Wystąpił błąd podczas renderowania: {e}")

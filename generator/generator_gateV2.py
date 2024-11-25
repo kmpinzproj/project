@@ -5,10 +5,23 @@ class BlenderScriptRunner:
     """
     Klasa obsługująca uruchamianie Blendera w tle z plikiem .blend i skryptem Python.
     """
-    def __init__(self, blend_file="segmentowa_kopia3.blend", script_file="generator_segmentowa.py"):
+    def __init__(self, gate_type = "Segmentowa"):
         """
         Inicjalizacja obiektu BlenderScriptRunner.
         """
+        if gate_type == "Brama Segmentowa":
+            blend_file = "segmentowa_kopia3.blend"
+            script_file = "generator_segmentowa.py"
+        elif gate_type == "Brama Uchylna":
+            blend_file = "segmentowa_kopia3.blend"
+            script_file = "generator_segmentowa.py"
+        elif gate_type == "Brama Roletowa":
+            blend_file = "segmentowa_kopia3.blend"
+            script_file = "generator_segmentowa.py"
+        elif gate_type == "Brama Rozwierana":
+            blend_file = "segmentowa_kopia3.blend"
+            script_file = "generator_segmentowa.py"
+
         # Ścieżka do Blendera
         self.blender_path = self._get_default_blender_path()
 
