@@ -208,7 +208,7 @@ class ScrollableMenu(QWidget):
                 field_group.setStyleSheet("")  # Usuń czerwone obramowanie
 
         # Zaznacz klikniętą opcję
-        image_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+        image_label.setStyleSheet("border: 5px solid green; padding: 0px; margin: 0px;")
 
         # Pobierz tekst opcji
         parent_widget = image_label.parent()

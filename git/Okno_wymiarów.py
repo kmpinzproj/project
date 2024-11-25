@@ -229,5 +229,3 @@ class OknoWymiarow(QMainWindow):
         except Exception as e:
             print(f"Błąd podczas nadpisywania pliku {file_path}: {e}")
 
-    # Przykład użycia:
-    clear_json("../resources/selected_options.json")

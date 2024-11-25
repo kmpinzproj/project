@@ -88,7 +88,7 @@ class Kreator(QMainWindow):
 
     def _create_image_widget(self):
         """Creates and configures the OpenGLWidget for 3D display."""
-        self.gate_render()
+        self.gate_render_start()
 
         # Ścieżka do pliku .obj
         obj_file = "../generator/model.obj"
@@ -109,6 +109,7 @@ class Kreator(QMainWindow):
         self.save_button = StyledButton("Zapisz")
 
         self.save_button.clicked.connect(self.prompt_project_name)
+        # self.contact_button.clicked.connect(self.prompt_project_name)
         self.render_button.clicked.connect(self.gate_render)
         self.render_button.clicked.connect(self.change_model)
 
@@ -129,10 +130,10 @@ class Kreator(QMainWindow):
         if self.validate_fields():
             print("Przeszło walidacje")
             # Pobierz zaznaczone opcje z ScrollableMenu
-            self.selected_options = self.navigation_menu.get_selected_options()
+            # self.selected_options = self.navigation_menu.get_selected_options()
 
             # Zapisz zaznaczone opcje do pliku
-            print(f"Zaznaczone opcje: {self.selected_options}")
+            # print(f"Zaznaczone opcje: {self.selected_options}")
             self.prompt_project_name()
             print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
             return True
@@ -312,6 +313,19 @@ class Kreator(QMainWindow):
         """
         self.selected_options.update(self.navigation_menu.get_selected_options())
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        # Uruchomienie Blendera za pomocą BlenderScriptRunner
+        try:
+            test = BlenderScriptRunner()
+            test.run()
+        except Exception as e:
+            print(f"Wystąpił błąd podczas renderowania: {e}")
+
+    def gate_render_start(self):
+        """
+        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        """
+        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.save_selected_options("../resources/selected_options.json", self.default_options)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
             test = BlenderScriptRunner()
