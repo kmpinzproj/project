@@ -110,9 +110,9 @@ class MainApplication(QMainWindow):
         self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["dimension"])
         self._setup_connections_dimension_view()
-        for i in range(self.stack.count()):
-            widget = self.stack.widget(i)
-            print(f"Widżet na indeksie {i}: {widget}")
+        # for i in range(self.stack.count()):
+        #     widget = self.stack.widget(i)
+        #     print(f"Widżet na indeksie {i}: {widget}")
 
     def navigate_to_gate_creator_view(self):
         """Creates a new instance of Kreator with the selected gate type and configures buttons."""
@@ -129,7 +129,7 @@ class MainApplication(QMainWindow):
         self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
         self._setup_connections_gate_creator()
-        print(self.stack.currentWidget())
+        # print(self.stack.currentWidget())
 
     def _setup_connections_gate_creator(self):
         """Sets up connections for the Kreator view buttons."""

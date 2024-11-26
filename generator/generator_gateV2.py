@@ -34,7 +34,6 @@ class BlenderScriptRunner:
         """
         Zwraca domyślną ścieżkę do Blendera na podstawie systemu operacyjnego.
         """
-        print("test")
         if os.name == 'nt':  # Windows
             return "C:/Program Files/Blender Foundation/Blender 4.1/blender.exe"
         elif os.name == 'posix':  # macOS/Linux
@@ -50,7 +49,7 @@ class BlenderScriptRunner:
             raise FileNotFoundError(f"Błąd: Plik .blend nie istnieje: {self.blend_file}")
         if not os.path.exists(self.script_file):
             raise FileNotFoundError(f"Błąd: Skrypt Blenderowy nie istnieje: {self.script_file}")
-        print("Wszystkie pliki istnieją.")
+        # print("Wszystkie pliki istnieją.")
 
     def run(self):
         """
@@ -67,14 +66,9 @@ class BlenderScriptRunner:
                 self.blend_file,  # Plik .blend do otwarcia
                 "--python", self.script_file  # Skrypt do wykonania
             ], check=True)
-            print("Blender zakończył działanie pomyślnie.")
+            # print("Blender zakończył działanie pomyślnie.")
         except subprocess.CalledProcessError as e:
             print(f"Błąd podczas działania Blendera: {e}")
         except FileNotFoundError:
             print(f"Nie znaleziono Blendera w lokalizacji: {self.blender_path}")
 
-# # Przykład użycia klasy
-# if __name__ == "__main__":
-#     print("Uruchamianie Blendera z Twoim skryptem...")
-#     runner = BlenderScriptRunner()
-#     runner.run()

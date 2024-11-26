@@ -52,26 +52,6 @@ class ScrollableMenu(QWidget):
 
         self.installEventFilter(self)  # Monitor resize events for dynamic updates
 
-    def load_options_data(self, filename):
-        """Load options data from a file."""
-        options_data = {}
-        current_gate = None
-
-        with open(filename, 'r', encoding='utf-8') as file:
-            for line in file:
-                line = line.strip()
-                if not line:
-                    continue
-
-                if line.startswith('[') and line.endswith(']'):
-                    current_gate = line[1:-1]
-                    options_data[current_gate] = {}
-                elif current_gate and ': ' in line:
-                    field_name, options = line.split(': ', 1)
-                    options_data[current_gate][field_name] = options.split(', ')
-
-        return options_data
-
     def _create_field_group(self, field_name, options):
         """Create a field group for a category."""
         field_group = QGroupBox()
@@ -178,6 +158,9 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
+        # Zainicjuj zmienną, aby była dostępna w całej funkcji
+        selected_text = None
+
         # Sprawdź, czy kliknięty obrazek jest już zaznaczony
         if image_label.styleSheet() == "border: 5px solid green; padding: 0px; margin: 0px;":
             # Usuń zaznaczenie
@@ -224,8 +207,8 @@ class ScrollableMenu(QWidget):
         if selected_text:
             self.selected_options[category] = selected_text
             # print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
-        else:
-            print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
+        # else:
+        #     print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
         # print(f"To jest wybrane i przekazywane do kreatora{self.selected_options}")
 
@@ -286,6 +269,38 @@ class ScrollableMenu(QWidget):
         button.setFlat(True)
         return button
 
+    def toggle_options(self, category):
+        """Toggle visibility of options for a category."""
+        data = self.category_widgets[category]
+        field_group = data["field_group"]
+        options_widget = data["options_widget"]
+        toggle_button = data["toggle_button"]
+
+        if options_widget.isVisible():
+            options_widget.setVisible(False)
+            field_group.setFixedHeight(self.FIELD_HEIGHT)
+            toggle_button.setText("↓")
+        else:
+            options_widget.setVisible(True)
+
+            # Sprawdź, czy kategoria posiada układ siatki
+            if category in self.options_layout_by_category:
+                option_items = self.option_items_by_category.get(category)
+                layout = self.options_layout_by_category.get(category)
+                available_width = self.scroll_area.viewport().width()
+                option_width = self.OPTION_WIDGET_SIZE[0]
+                spacing = 10
+
+                columns = max(3, available_width // (option_width + spacing))
+                self._populate_grid_layout(option_items, layout, columns)
+
+            # Calculate and adjust the height of the field group
+            total_height = options_widget.sizeHint().height()
+            expanded_height = self.FIELD_HEIGHT + total_height
+            field_group.setFixedHeight(expanded_height)
+
+            toggle_button.setText("↑")
+
     def eventFilter(self, source, event):
         """Handle resize events for dynamic updates."""
         if event.type() == QEvent.Resize:
@@ -336,42 +351,34 @@ class ScrollableMenu(QWidget):
         field_group.setFixedHeight(new_height)
         field_group.updateGeometry()
 
-    def toggle_options(self, category):
-        """Toggle visibility of options for a category."""
-        data = self.category_widgets[category]
-        field_group = data["field_group"]
-        options_widget = data["options_widget"]
-        toggle_button = data["toggle_button"]
+    def load_options_data(self, filename):
+        """Load options data from a file."""
+        options_data = {}
+        current_gate = None
 
-        if options_widget.isVisible():
-            options_widget.setVisible(False)
-            field_group.setFixedHeight(self.FIELD_HEIGHT)
-            toggle_button.setText("↓")
-        else:
-            options_widget.setVisible(True)
+        with open(filename, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                if not line:
+                    continue
 
-            # Sprawdź, czy kategoria posiada układ siatki
-            if category in self.options_layout_by_category:
-                option_items = self.option_items_by_category.get(category)
-                layout = self.options_layout_by_category.get(category)
-                available_width = self.scroll_area.viewport().width()
-                option_width = self.OPTION_WIDGET_SIZE[0]
-                spacing = 10
+                if line.startswith('[') and line.endswith(']'):
+                    current_gate = line[1:-1]
+                    options_data[current_gate] = {}
+                elif current_gate and ': ' in line:
+                    field_name, options = line.split(': ', 1)
+                    options_data[current_gate][field_name] = options.split(', ')
 
-                columns = max(3, available_width // (option_width + spacing))
-                self._populate_grid_layout(option_items, layout, columns)
+        return options_data
 
-            # Calculate and adjust the height of the field group
-            total_height = options_widget.sizeHint().height()
-            expanded_height = self.FIELD_HEIGHT + total_height
-            field_group.setFixedHeight(expanded_height)
-
-            toggle_button.setText("↑")
+    def get_selected_options(self):
+        """Returns the currently selected options."""
+        return self.selected_options
 
     def validate_required_fields(self, required_fields):
         """Validates that all required fields from the given list have selected options."""
         all_valid = True
-        print(f"Dane sprawdzane podczas walidacji {self.selected_options}")
+        # print(f"Dane sprawdzane podczas walidacji {self.selected_options}")
         for category in required_fields:
             if category == "Kolor":
                 # Sprawdź, czy istnieje zaznaczony kolor w "Kolor standardowy" lub "Kolor RAL"
@@ -406,9 +413,3 @@ class ScrollableMenu(QWidget):
                         field_group.setStyleSheet("")
 
         return all_valid
-
-    def get_selected_options(self):
-        """Returns the currently selected options."""
-        print(f"To jest wybrane i przekazywane do kreatora wersja ostateczna{self.selected_options}")
-        tmp = self.selected_options
-        return tmp

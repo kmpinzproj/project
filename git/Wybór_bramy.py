@@ -137,7 +137,7 @@ class WyborBramy(QMainWindow):
             # Zapisz zaktualizowane dane do pliku
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
-            print(f"Zapisano typ bramy: {gate_type} do pliku {file_path}")
+            # print(f"Zapisano typ bramy: {gate_type} do pliku {file_path}")
         except OSError as e:
             print(f"Wystąpił błąd podczas operacji na pliku: {e}")
         except Exception as e:

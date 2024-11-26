@@ -111,6 +111,28 @@ class OpenGLWidget(QOpenGLWidget):
                 glVertex3fv(vertex)
         glEnd()
 
+    def load_model(self, obj_file):
+        self.obj_file = obj_file
+        self.scene = pywavefront.Wavefront(self.obj_file, collect_faces=True)
+        self.vertices = np.array(self.scene.vertices)
+        self.faces = np.concatenate([mesh.faces for name, mesh in self.scene.meshes.items()])
+
+        adjusted_center = self.compute_adjusted_center(self.vertices)
+        self.vertices -= adjusted_center
+        self.normals = compute_normals(self.vertices, self.faces)
+        self.update()
+
+    def compute_model_center(self, vertices):
+        return np.mean(vertices, axis=0)
+
+    def compute_adjusted_center(self, vertices):
+        min_y = np.min(vertices[:, 1])
+        max_y = np.max(vertices[:, 1])
+        center_y = (min_y + max_y) / 2
+        centroid = np.mean(vertices, axis=0)
+        adjusted_center = np.array([centroid[0], center_y, centroid[2]])
+        return adjusted_center
+
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()
 
@@ -138,28 +160,6 @@ class OpenGLWidget(QOpenGLWidget):
         delta = event.angleDelta().y() / 120
         self.zoom += delta * 0.2
         self.update()
-
-    def load_model(self, obj_file):
-        self.obj_file = obj_file
-        self.scene = pywavefront.Wavefront(self.obj_file, collect_faces=True)
-        self.vertices = np.array(self.scene.vertices)
-        self.faces = np.concatenate([mesh.faces for name, mesh in self.scene.meshes.items()])
-
-        adjusted_center = self.compute_adjusted_center(self.vertices)
-        self.vertices -= adjusted_center
-        self.normals = compute_normals(self.vertices, self.faces)
-        self.update()
-
-    def compute_model_center(self, vertices):
-        return np.mean(vertices, axis=0)
-
-    def compute_adjusted_center(self, vertices):
-        min_y = np.min(vertices[:, 1])
-        max_y = np.max(vertices[:, 1])
-        center_y = (min_y + max_y) / 2
-        centroid = np.mean(vertices, axis=0)
-        adjusted_center = np.array([centroid[0], center_y, centroid[2]])
-        return adjusted_center
 
     def mouseDoubleClickEvent(self, event):
         self.rotation_x = 0

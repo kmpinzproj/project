@@ -61,15 +61,23 @@ class OknoStartowe(QMainWindow):
 
         return left_widget
 
-    def _handle_row_selection(self):
-        """Obsługuje zaznaczanie wiersza w tabeli."""
+    def open_selected_project(self):
+        self.clear_selected_options()
+
         selected_items = self.project_table.selectedItems()
-        if selected_items:
-            self.selected_row = self.project_table.row(selected_items[0]) + 1
-            self.open_saved_button.setEnabled(True)  # Aktywuj przycisk
-        else:
-            self.selected_row = None
-            self.open_saved_button.setEnabled(False)  # Wyłącz przycisk
+        if not selected_items:
+            print("Nie zaznaczono żadnego projektu.")
+            return
+
+        selected_row = self.project_table.row(selected_items[0])
+        project_name_item = self.project_table.item(selected_row, 1)
+        if project_name_item:
+            project_name = project_name_item.text()
+            try:
+                output_file = "../resources/selected_options.json"
+                self.db_manager.load_project_to_json(project_name, output_file)
+            except Exception as e:
+                print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
     def _create_right_panel(self):
         right_widget = QWidget()
@@ -96,9 +104,15 @@ class OknoStartowe(QMainWindow):
         right_layout.addWidget(self.project_table)
         return right_widget
 
-    @staticmethod
-    def _add_spacer(layout):
-        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+    def _handle_row_selection(self):
+        """Obsługuje zaznaczanie wiersza w tabeli."""
+        selected_items = self.project_table.selectedItems()
+        if selected_items:
+            self.selected_row = self.project_table.row(selected_items[0]) + 1
+            self.open_saved_button.setEnabled(True)  # Aktywuj przycisk
+        else:
+            self.selected_row = None
+            self.open_saved_button.setEnabled(False)  # Wyłącz przycisk
 
     def refresh(self):
         """Odświeża dane w tabeli z projektami."""
@@ -135,8 +149,8 @@ class OknoStartowe(QMainWindow):
                 date_item.setTextAlignment(Qt.AlignCenter)
                 self.project_table.setItem(row, 2, date_item)
 
-
-    def clear_selected_options(self):
+    @staticmethod
+    def clear_selected_options():
         file_path = "../resources/selected_options.json"
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -145,21 +159,6 @@ class OknoStartowe(QMainWindow):
         except Exception as e:
             print(f"Błąd podczas czyszczenia pliku: {e}")
 
-    def open_selected_project(self):
-        self.clear_selected_options()
-
-        selected_items = self.project_table.selectedItems()
-        if not selected_items:
-            print("Nie zaznaczono żadnego projektu.")
-            return
-
-        selected_row = self.project_table.row(selected_items[0])
-        project_name_item = self.project_table.item(selected_row, 1)
-        if project_name_item:
-            project_name = project_name_item.text()
-            try:
-                output_file = "../resources/selected_options.json"
-                self.db_manager.load_project_to_json(project_name, output_file)
-            except Exception as e:
-                print(f"Błąd podczas zapisywania projektu do JSON: {e}")
-
+    @staticmethod
+    def _add_spacer(layout):
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))

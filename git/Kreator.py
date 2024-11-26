@@ -33,7 +33,6 @@ class Kreator(QMainWindow):
         self.gate_type = data.get("Typ bramy", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
         self.default_options = {key: value for key, value in data.items() if key != "Typ bramy"}
         self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
-
         self.selected_options = {}
         # Initialize UI
         self._setup_ui()
@@ -97,6 +96,43 @@ class Kreator(QMainWindow):
         self.opengl_widget = OpenGLWidget(obj_file)
         return self.opengl_widget
 
+    def gate_render(self):
+        """
+        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        """
+        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        # Uruchomienie Blendera za pomocą BlenderScriptRunner
+        try:
+            gate_type = self.gate_type
+            test = BlenderScriptRunner(gate_type)
+            test.run()
+        except Exception as e:
+            print(f"Wystąpił błąd podczas renderowania: {e}")
+
+    def gate_render_start(self):
+        """
+        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        """
+        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.save_selected_options("../resources/selected_options.json", self.default_options)
+        # Uruchomienie Blendera za pomocą BlenderScriptRunner
+        try:
+            gate_type = self.gate_type
+            test = BlenderScriptRunner(gate_type)
+            test.run()
+        except Exception as e:
+            print(f"Wystąpił błąd podczas renderowania: {e}")
+
+    def change_model(self):
+        """Zmienia model na nowy i przeładowuje widok 3D."""
+        new_model_path = "../generator/model.obj"  # Ścieżka do nowego modelu .obj
+        if os.path.exists(new_model_path):
+            self.opengl_widget.load_model(new_model_path)  # Przeładuj model w widżecie OpenGL
+            # print(f"Załadowano nowy model: {new_model_path}")
+        else:
+            print(f"Nie znaleziono pliku modelu: {new_model_path}")
+
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
         buttons_widget = QWidget()
@@ -109,7 +145,6 @@ class Kreator(QMainWindow):
         self.save_button = StyledButton("Zapisz")
 
         self.save_button.clicked.connect(self.prompt_project_name)
-        # self.contact_button.clicked.connect(self.prompt_project_name)
         self.render_button.clicked.connect(self.gate_render)
         self.render_button.clicked.connect(self.change_model)
 
@@ -128,17 +163,17 @@ class Kreator(QMainWindow):
     def validate_and_proceed(self):
         """Validates required fields and triggers the transition if valid."""
         if self.validate_fields():
-            print("Przeszło walidacje")
+            # print("Przeszło walidacje")
             # Pobierz zaznaczone opcje z ScrollableMenu
             # self.selected_options = self.navigation_menu.get_selected_options()
 
             # Zapisz zaznaczone opcje do pliku
             # print(f"Zaznaczone opcje: {self.selected_options}")
             self.prompt_project_name()
-            print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
+            # print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
             return True
         else:
-            print("Dlaczego działasz drugi raz?")
+            # print("Dlaczego działasz drugi raz?")
             return False
 
     def validate_fields(self):
@@ -152,15 +187,60 @@ class Kreator(QMainWindow):
             self.selected_options.clear()
             self.selected_options["Nazwa projektu"] = project_name.strip()
             self.selected_options.update(self.navigation_menu.get_selected_options())
-            print(self.selected_options)
+            # print(self.selected_options)
         else:
             print("Anulowano zapis projektu.")
 
         # Zapisz zaznaczone opcje do pliku
-        print(f"Zaznaczone opcje: {self.selected_options}")
+        # print(f"Zaznaczone opcje: {self.selected_options}")
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
         self.save_json_to_db("../resources/selected_options.json", self.selected_options)
-        print("Opcje zapisane do pliku.")
+        # print("Opcje zapisane do pliku.")
+
+    def set_default_options(self):
+        """Sets default options based on loaded data."""
+        for category, value in self.default_options.items():
+            # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
+            if category in self.navigation_menu.option_items_by_category:
+                for item in self.navigation_menu.option_items_by_category[category]:
+                    if isinstance(item, QCheckBox):
+                        if isinstance(value, list):
+                            # Jeśli wartość to lista, zaznacz checkboxy odpowiadające każdej wartości
+                            if item.text() in value:
+                                item.setChecked(True)
+                        else:
+                            # Jeśli wartość to pojedynczy tekst, zaznacz odpowiedni checkbox
+                            if item.text() == value:
+                                item.setChecked(True)
+
+            # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
+            if category in self.navigation_menu.option_items_by_category:
+                for option_widget in self.navigation_menu.option_items_by_category[category]:
+                    text_label = option_widget.findChild(QLabel, "text_label")
+                    if text_label and text_label.text() == value:
+                        img_label = option_widget.findChild(QLabel, "image_label")
+                        if img_label:
+                            # Zaznacz opcję poprzez obramowanie
+                            img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+                            # Aktualizuj zaznaczoną opcję w selected_options
+                            self.navigation_menu.selected_options[category] = value
+
+        # Specjalna obsługa dla kategorii "Kolor"
+        if "Kolor" in self.default_options:
+            kolor_value = self.default_options["Kolor"]
+
+            # Szukaj w "Kolor Standardowy" i "Kolor RAL"
+            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
+                if color_category in self.navigation_menu.option_items_by_category:
+                    for option_widget in self.navigation_menu.option_items_by_category[color_category]:
+                        text_label = option_widget.findChild(QLabel, "text_label")
+                        if text_label and text_label.text() == kolor_value:
+                            img_label = option_widget.findChild(QLabel, "image_label")
+                            if img_label:
+                                # Zaznacz opcję w odpowiedniej kategorii
+                                img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
+                                # Zaktualizuj klucz "Kolor" w selected_options
+                                self.navigation_menu.selected_options["Kolor"] = kolor_value
 
     @staticmethod
     def load_required_fields(file_path):
@@ -224,13 +304,13 @@ class Kreator(QMainWindow):
 
         # Połącz dane bazowe z nowymi wybranymi opcjami
         base_data.update(selected_options)
-        print(selected_options)
+        # print(selected_options)
 
         # Zapisz dane z powrotem do pliku
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(base_data, file, ensure_ascii=False, indent=4)
-                print(f"Dane zostały zapisane w pliku {file_path}.")
+                # print(f"Dane zostały zapisane w pliku {file_path}.")
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania danych: {e}")
 
@@ -262,84 +342,5 @@ class Kreator(QMainWindow):
         except Exception as e:
             print(f"Wystąpił błąd podczas dodawania projektu do bazy danych: {e}")
 
-    def set_default_options(self):
-        """Sets default options based on loaded data."""
-        for category, value in self.default_options.items():
-            # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
-            if category in self.navigation_menu.option_items_by_category:
-                for item in self.navigation_menu.option_items_by_category[category]:
-                    if isinstance(item, QCheckBox):
-                        if isinstance(value, list):
-                            # Jeśli wartość to lista, zaznacz checkboxy odpowiadające każdej wartości
-                            if item.text() in value:
-                                item.setChecked(True)
-                        else:
-                            # Jeśli wartość to pojedynczy tekst, zaznacz odpowiedni checkbox
-                            if item.text() == value:
-                                item.setChecked(True)
 
-            # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
-            if category in self.navigation_menu.option_items_by_category:
-                for option_widget in self.navigation_menu.option_items_by_category[category]:
-                    text_label = option_widget.findChild(QLabel, "text_label")
-                    if text_label and text_label.text() == value:
-                        img_label = option_widget.findChild(QLabel, "image_label")
-                        if img_label:
-                            # Zaznacz opcję poprzez obramowanie
-                            img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-                            # Aktualizuj zaznaczoną opcję w selected_options
-                            self.navigation_menu.selected_options[category] = value
 
-        # Specjalna obsługa dla kategorii "Kolor"
-        if "Kolor" in self.default_options:
-            kolor_value = self.default_options["Kolor"]
-
-            # Szukaj w "Kolor Standardowy" i "Kolor RAL"
-            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
-                if color_category in self.navigation_menu.option_items_by_category:
-                    for option_widget in self.navigation_menu.option_items_by_category[color_category]:
-                        text_label = option_widget.findChild(QLabel, "text_label")
-                        if text_label and text_label.text() == kolor_value:
-                            img_label = option_widget.findChild(QLabel, "image_label")
-                            if img_label:
-                                # Zaznacz opcję w odpowiedniej kategorii
-                                img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-                                # Zaktualizuj klucz "Kolor" w selected_options
-                                self.navigation_menu.selected_options["Kolor"] = kolor_value
-
-    def gate_render(self):
-        """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
-        """
-        self.selected_options.update(self.navigation_menu.get_selected_options())
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
-        # Uruchomienie Blendera za pomocą BlenderScriptRunner
-        try:
-            gate_type = self.gate_type
-            test = BlenderScriptRunner(gate_type)
-            test.run()
-        except Exception as e:
-            print(f"Wystąpił błąd podczas renderowania: {e}")
-
-    def gate_render_start(self):
-        """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
-        """
-        self.selected_options.update(self.navigation_menu.get_selected_options())
-        self.save_selected_options("../resources/selected_options.json", self.default_options)
-        # Uruchomienie Blendera za pomocą BlenderScriptRunner
-        try:
-            gate_type = self.gate_type
-            test = BlenderScriptRunner(gate_type)
-            test.run()
-        except Exception as e:
-            print(f"Wystąpił błąd podczas renderowania: {e}")
-
-    def change_model(self):
-        """Zmienia model na nowy i przeładowuje widok 3D."""
-        new_model_path = "../generator/model.obj"  # Ścieżka do nowego modelu .obj
-        if os.path.exists(new_model_path):
-            self.opengl_widget.load_model(new_model_path)  # Przeładuj model w widżecie OpenGL
-            print(f"Załadowano nowy model: {new_model_path}")
-        else:
-            print(f"Nie znaleziono pliku modelu: {new_model_path}")

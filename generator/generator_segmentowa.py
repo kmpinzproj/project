@@ -17,10 +17,10 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-        print(f"Obiekt '{object_name}' został usunięty.")
+        # print(f"Obiekt '{object_name}' został usunięty.")
     else:
-        print(f"Obiekt '{object_name}' nie istnieje.")
-
+        # print(f"Obiekt '{object_name}' nie istnieje.")
+        test = 0
 def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczenia"):
     # Nazwy obiektów
     segment_name = "Cube.002"
@@ -28,10 +28,10 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
     # Lista dostępnych segmentów
     available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001","Średnie":  "Cube.002"}
 
-    # Wyświetlenie dostępnych segmentów
-    print("Dostępne segmenty:")
-    for i, segment_name in enumerate(available_segments):
-        print(f"{i + 1}. {segment_name}")
+    # # Wyświetlenie dostępnych segmentów
+    # print("Dostępne segmenty:")
+    # for i, segment_name in enumerate(available_segments):
+    #     print(f"{i + 1}. {segment_name}")
     # Pobranie wyboru użytkownika
     try:
         # segment_choice = przetloczenie #tu było pobieranie segmentu 1, 2, 3
@@ -90,7 +90,7 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
         bpy.context.view_layer.objects.active = joined_gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
-        print(f"Stworzono i połączono {segment_count} segmentów w obiekt 'brama-segmentowa'.")
+        # print(f"Stworzono i połączono {segment_count} segmentów w obiekt 'brama-segmentowa'.")
 
         # Tworzenie kopii szyn i dopasowanie do bramy
         rail_copy = rail.copy()
@@ -136,7 +136,7 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "brama-segmentowa-z-szynami"
 
-        print(f"Dodano i dopasowano szyny do obiektu 'brama-segmentowa'.")
+        # print(f"Dodano i dopasowano szyny do obiektu 'brama-segmentowa'.")
 
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
@@ -193,7 +193,7 @@ def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="
             face_vertices = [str(vert + 1) for vert in poly.vertices]  # +1, bo .obj zaczyna od 1
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
+    # print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
@@ -202,7 +202,7 @@ def read_json(json_path):
 
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
-        if "Rodzaj przetłoczenia" in existing_data:
+        if "Rodzaj przetłoczenia" in existing_data and existing_data["Rodzaj przetłoczenia"] is not None:
             przetloczenie = existing_data["Rodzaj przetłoczenia"]
         else:
             przetloczenie = "Bez przetłoczenia"
@@ -212,7 +212,7 @@ def read_json(json_path):
 dimensions, przetloczenie = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
-
+print(przetloczenie)
 scale_stack_and_align_rails(width, height, przetloczenie)
 # add_cameras_and_render_with_light()
 custom_export_to_obj()

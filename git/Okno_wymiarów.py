@@ -184,7 +184,7 @@ class OknoWymiarow(QMainWindow):
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
 
-            print(f"Wymiary zostały zapisane: {data['Wymiary']}")
+            # print(f"Wymiary zostały zapisane: {data['Wymiary']}")
 
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
@@ -206,12 +206,13 @@ class OknoWymiarow(QMainWindow):
                 if 'Wysokość' in dimensions:
                     self.height_input.setText(str(dimensions['Wysokość']))
 
-                print(f"Wczytano wymiary: {dimensions}")
+                # print(f"Wczytano wymiary: {dimensions}")
 
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 print(f"Błąd podczas wczytywania wymiarów: {e}")
         else:
             print(f"Plik {file_path} nie istnieje. Wymiary nie zostały wczytane.")
+
     @staticmethod
     def clear_json(file_path):
         """
