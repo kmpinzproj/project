@@ -30,6 +30,7 @@ class MainApplication(QMainWindow):
         super().__init__()
         self.gate_creator_view = None
         self.selected_gate_type = None  # Stores the selected gate type
+        self.previous_view = None  # Przechowuje poprzedni indeks
 
         #Initialize DB
         self.initialize_database()
@@ -41,7 +42,6 @@ class MainApplication(QMainWindow):
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
-        self.previous_index = None  # Przechowuje poprzedni indeks
 
 
         # Add views
@@ -80,7 +80,7 @@ class MainApplication(QMainWindow):
 
     def _setup_connections_dimension_view(self):
         """Sets up connections for dimension view buttons."""
-        self.dimension_view.back_button.clicked.connect(self.navigate_to_gate_selection_view)
+        self.dimension_view.back_button.clicked.connect(self.navigate_back)
         self.dimension_view.accept_button.clicked.connect(self.navigate_to_gate_creator_view)
 
     def _setup_connections_contact_form(self):
@@ -91,11 +91,12 @@ class MainApplication(QMainWindow):
     def navigate_to_start_view(self):
         """Przejście do widoku startowego i odświeżenie danych."""
         self.start_view.refresh()  # Odśwież dane w oknie startowym
-        self.previous_index = self.stack.currentWidget()
+        self.previous_view = "start"
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
-        self.previous_index = self.stack.currentWidget()
+        """Przejście do widoku wyboru bramy."""
+        self.previous_view = "gate_selection"  # Poprzednim widokiem jest ekran startowy
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
     def navigate_to_dimension_view(self):
@@ -110,9 +111,14 @@ class MainApplication(QMainWindow):
         self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["dimension"])
         self._setup_connections_dimension_view()
-        # for i in range(self.stack.count()):
-        #     widget = self.stack.widget(i)
-        #     print(f"Widżet na indeksie {i}: {widget}")
+
+    def navigate_back(self):
+        if self.previous_view == "start":
+            self.navigate_to_start_view()
+        elif self.previous_view == "gate_selection":
+            self.navigate_to_gate_selection_view()
+        else:
+            print("Nie można cofnąć - brak poprzedniego widoku.")
 
     def navigate_to_gate_creator_view(self):
         """Creates a new instance of Kreator with the selected gate type and configures buttons."""
@@ -129,7 +135,6 @@ class MainApplication(QMainWindow):
         self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
         self._setup_connections_gate_creator()
-        # print(self.stack.currentWidget())
 
     def _setup_connections_gate_creator(self):
         """Sets up connections for the Kreator view buttons."""
