@@ -63,6 +63,8 @@ htmlcov/
 # Ignorowanie plików danych
 *.sqlite3
 *.db
+*.json
+*.obj
 
 # Ignorowanie buildów
 build/
