@@ -178,42 +178,47 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Usuń zaznaczenie poprzednich opcji w tej samej kategorii
-        for option_widget in self.option_items_by_category.get(category, []):
-            img_label = option_widget.findChild(QLabel, "image_label")
-            if img_label:
-                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-
-        # Specjalne zachowanie dla pól "Kolor standardowy" i "Kolor RAL"
-        if category in ["Kolor standardowy", "Kolor RAL"]:
-            for color_category in ["Kolor standardowy", "Kolor RAL"]:
-                # Usuń czerwone obramowanie z obu pól
-                if color_category in self.category_widgets:
-                    field_group = self.category_widgets[color_category]["field_group"]
-                    field_group.setStyleSheet("")  # Usuń czerwone obramowanie
-
-                # Usuń zaznaczenie opcji w drugiej kategorii
-                if color_category != category:  # Nie usuwaj opcji w bieżącej kategorii
-                    for option_widget in self.option_items_by_category.get(color_category, []):
-                        img_label = option_widget.findChild(QLabel, "image_label")
-                        if img_label:
-                            img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-                    # Usuń klucz z `selected_options` dla przeciwnej kategorii
-                    self.selected_options.pop(color_category, None)
-
+        # Sprawdź, czy kliknięty obrazek jest już zaznaczony
+        if image_label.styleSheet() == "border: 5px solid green; padding: 0px; margin: 0px;":
+            # Usuń zaznaczenie
+            image_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+            # Usuń zaznaczenie w self.selected_options
+            self.selected_options.pop(category, None)
         else:
-            # Dla innych pól usuń czerwone obramowanie tylko z bieżącego pola
-            if category in self.category_widgets:
-                field_group = self.category_widgets[category]["field_group"]
-                field_group.setStyleSheet("")  # Usuń czerwone obramowanie
+            # Usuń zaznaczenie poprzednich opcji w tej samej kategorii
+            for option_widget in self.option_items_by_category.get(category, []):
+                img_label = option_widget.findChild(QLabel, "image_label")
+                if img_label:
+                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-        # Zaznacz klikniętą opcję
-        image_label.setStyleSheet("border: 5px solid green; padding: 0px; margin: 0px;")
+            # Specjalne zachowanie dla pól "Kolor standardowy" i "Kolor RAL"
+            if category in ["Kolor standardowy", "Kolor RAL"]:
+                for color_category in ["Kolor standardowy", "Kolor RAL"]:
+                    if color_category in self.category_widgets:
+                        field_group = self.category_widgets[color_category]["field_group"]
+                        field_group.setStyleSheet("")  # Usuń czerwone obramowanie
 
-        # Pobierz tekst opcji
-        parent_widget = image_label.parent()
-        text_label = parent_widget.findChild(QLabel, "text_label")  # Znajdź QLabel z nazwą opcji
-        selected_text = text_label.text() if text_label else None
+                    if color_category != category:
+                        for option_widget in self.option_items_by_category.get(color_category, []):
+                            img_label = option_widget.findChild(QLabel, "image_label")
+                            if img_label:
+                                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+                        self.selected_options.pop(color_category, None)
+            else:
+                if category in self.category_widgets:
+                    field_group = self.category_widgets[category]["field_group"]
+                    field_group.setStyleSheet("")
+
+            # Zaznacz klikniętą opcję
+            image_label.setStyleSheet("border: 5px solid green; padding: 0px; margin: 0px;")
+
+            # Pobierz tekst opcji
+            parent_widget = image_label.parent()
+            text_label = parent_widget.findChild(QLabel, "text_label")
+            selected_text = text_label.text() if text_label else None
+
+            if selected_text:
+                self.selected_options[category] = selected_text
 
         # Zaktualizuj zaznaczoną opcję
         if selected_text:
