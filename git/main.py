@@ -71,8 +71,12 @@ class MainApplication(QMainWindow):
 
     def _setup_connections_start_view(self):
         """Sets up connections for start view buttons."""
-        self.start_view.create_new_button.clicked.connect(self.navigate_to_gate_selection_view)
-        self.start_view.open_saved_button.clicked.connect(self.navigate_to_dimension_view)
+        self.start_view.create_new_button.clicked.connect(
+            lambda: self.navigate_to_gate_selection_view()
+        )
+        self.start_view.open_saved_button.clicked.connect(
+            lambda: self.navigate_to_dimension_view(is_opened_project=True)
+        )
 
     def _setup_connections_gate_selection(self):
         """Sets up connections for gate selection view buttons."""
@@ -91,28 +95,34 @@ class MainApplication(QMainWindow):
     def navigate_to_start_view(self):
         """Przejście do widoku startowego i odświeżenie danych."""
         self.start_view.refresh()  # Odśwież dane w oknie startowym
-        self.previous_view = "start"
+        self.previous_view = None  # Brak poprzedniego widoku, jesteśmy na początku
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
-        """Przejście do widoku wyboru bramy."""
-        self.previous_view = "gate_selection"  # Poprzednim widokiem jest ekran startowy
+        self.previous_view = "start"  # Poprzedni widok to ekran startowy
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
-    def navigate_to_dimension_view(self):
+    def navigate_to_dimension_view(self, is_opened_project=False):
+        """Przejście do widoku wymiarów."""
         if self.dimension_view:
             self.stack.removeWidget(self.dimension_view)
             self.dimension_view.deleteLater()
             self.dimension_view = None
 
-        # Utwórz nową instancję Kreator
         self.dimension_view = OknoWymiarow()
         self.stack.insertWidget(self.VIEW_INDICES["dimension"], self.dimension_view)
-        self.previous_index = self.stack.currentWidget()
+
+        # Ustaw poprzedni widok
+        if is_opened_project:
+            self.previous_view = "start"  # Jeśli projekt został otwarty, cofamy się do startowego
+        else:
+            self.previous_view = "gate_selection"  # Jeśli stworzono nowy projekt, cofamy się do wyboru bramy
+
         self.stack.setCurrentIndex(self.VIEW_INDICES["dimension"])
         self._setup_connections_dimension_view()
 
     def navigate_back(self):
+        """Cofanie do poprzedniego widoku."""
         if self.previous_view == "start":
             self.navigate_to_start_view()
         elif self.previous_view == "gate_selection":
