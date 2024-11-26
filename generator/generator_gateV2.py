@@ -10,17 +10,17 @@ class BlenderScriptRunner:
         Inicjalizacja obiektu BlenderScriptRunner.
         """
         if gate_type == "Brama Segmentowa":
-            blend_file = "segmentowa_kopia3.blend"
-            script_file = "generator_segmentowa.py"
+            blend_file = "Segmentowa/segmentowa_kopia3.blend"
+            script_file = "Segmentowa/generator_segmentowa.py"
         elif gate_type == "Brama Uchylna":
-            blend_file = "uchylna5.blend"
-            script_file = "generator_uchylna.py"
+            blend_file = "Uchylna/uchylna5.blend"
+            script_file = "Uchylna/generator_uchylna.py"
         elif gate_type == "Brama Roletowa":
-            blend_file = "segmentowa_kopia3.blend"
-            script_file = "generator_segmentowa.py"
+            blend_file = "Segmentowa/segmentowa_kopia3.blend"
+            script_file = "Segmentowa/generator_segmentowa.py"
         elif gate_type == "Brama Rozwierana":
-            blend_file = "segmentowa_kopia3.blend"
-            script_file = "generator_segmentowa.py"
+            blend_file = "Segmentowa/segmentowa_kopia3.blend"
+            script_file = "Segmentowa/generator_segmentowa.py"
 
         # Ścieżka do Blendera
         self.blender_path = self._get_default_blender_path()
