@@ -8,109 +8,89 @@ import mathutils
 object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami"]
 
 for object_name in object_names:
-    # Sprawdzenie, czy obiekt istnieje
     obj = bpy.data.objects.get(object_name)
     if obj:
-        # Ustawienie obiektu jako aktywnego i zaznaczenie
         bpy.context.view_layer.objects.active = obj
         obj.select_set(True)
-
-        # Usunięcie obiektu
         bpy.ops.object.delete()
-        # print(f"Obiekt '{object_name}' został usunięty.")
     else:
-        # print(f"Obiekt '{object_name}' nie istnieje.")
         test = 0
-def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczenia"):
-    # Nazwy obiektów
+
+def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia"):
     segment_name = "Cube.002"
     rail_name = "szyny-na-brame"
-    # Lista dostępnych segmentów
-    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001","Średnie":  "Cube.002"}
+    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002"}
 
-    # # Wyświetlenie dostępnych segmentów
-    # print("Dostępne segmenty:")
-    # for i, segment_name in enumerate(available_segments):
-    #     print(f"{i + 1}. {segment_name}")
-    # Pobranie wyboru użytkownika
     try:
-        # segment_choice = przetloczenie #tu było pobieranie segmentu 1, 2, 3
-
         segment_name = available_segments[przetloczenie]
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
 
-    # Pobierz segment
     segment = bpy.data.objects.get(segment_name)
     if not segment:
         print(f"Obiekt o nazwie '{segment_name}' nie został znaleziony.")
         return
 
-    # Pobierz obiekt szyn
     rail = bpy.data.objects.get(rail_name)
     if not rail:
         print(f"Obiekt o nazwie '{rail_name}' nie został znaleziony.")
         return
 
     try:
-        # Pobranie danych od użytkownika
-        x_length_cm = width
-        x_length_m = x_length_cm / 1000  # Konwersja cm na metry
-        segment_count = height//500
+        x_length_m = width / 1000
+        segment_count = height // 500
 
-        # Aktualne wymiary segmentu
         current_length_x = segment.dimensions[0]
         current_height_z = segment.dimensions[2]
 
-        # Oblicz współczynnik skalowania w osi X
         scale_factor_x = x_length_m / current_length_x
 
-        # Lista kopii segmentów do połączenia
         segment_copies = []
 
-        # Tworzenie i rozmieszczanie kopii segmentów
         for i in range(segment_count):
-            new_segment = segment.copy()  # Tworzenie kopii segmentu
-            new_segment.data = segment.data.copy()  # Niezależna kopia danych siatki
-            new_segment.scale[0] = scale_factor_x  # Skalowanie w osi X
-            new_segment.location.z = i * current_height_z  # Ustawienie w osi Z
-            bpy.context.collection.objects.link(new_segment)  # Dodanie kopii do sceny
+            new_segment = segment.copy()
+            new_segment.data = segment.data.copy()
+            new_segment.scale[0] = scale_factor_x
+            new_segment.location.z = i * current_height_z
+            bpy.context.collection.objects.link(new_segment)
+
+            bpy.context.view_layer.objects.active = new_segment
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.uv.smart_project(angle_limit=66)
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+            uv_layer = new_segment.data.uv_layers.active.data
+            for uv in uv_layer:
+                uv.uv.x *= 1.0
+                uv.uv.y *= 1.0
+                uv.uv.x, uv.uv.y = uv.uv.y, uv.uv.x
+
             segment_copies.append(new_segment)
 
-        # Połączenie segmentów w jeden obiekt
         bpy.context.view_layer.objects.active = segment_copies[0]
         for segment in segment_copies:
-            segment.select_set(True)  # Zaznacz wszystkie kopie
+            segment.select_set(True)
         bpy.ops.object.join()
         joined_gate = bpy.context.view_layer.objects.active
-        joined_gate.name = "brama-segmentowa"  # Zmień nazwę obiektu
+        joined_gate.name = "brama-segmentowa"
 
-        # Ustawienie origin bramy na środek jej geometrii
         bpy.context.view_layer.objects.active = joined_gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
-        # print(f"Stworzono i połączono {segment_count} segmentów w obiekt 'brama-segmentowa'.")
-
-        # Tworzenie kopii szyn i dopasowanie do bramy
         rail_copy = rail.copy()
-        bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
+        bpy.context.collection.objects.link(rail_copy)
 
-        # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
-        original_y = rail.dimensions[1]  # Zachowujemy oryginalny wymiar Y (grubość)
-        scale_x = joined_gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
-        scale_z = joined_gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
+        original_y = rail.dimensions[1]
+        scale_x = joined_gate.dimensions[0] / rail.dimensions[0]
+        scale_z = joined_gate.dimensions[2] / rail.dimensions[2]
 
-        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
-        rail_copy.scale[1] = rail.scale[1]  # Zachowanie oryginalnej skali w osi Y
+        rail_copy.scale[0] = scale_x
+        rail_copy.scale[2] = scale_z
+        rail_copy.scale[1] = rail.scale[1]
 
-        # Ustawienie Location szyn na to samo co brama
         rail_copy.location = joined_gate.location
-
-        # Ustawienie Location szyn na to samo co brama
-        rail_copy.location = joined_gate.location
-        # Ustawienie pozycji obiektów w osi X i Y na (0, 0)
         rail_copy.location.x = 0
         rail_copy.location.y = 0
 
@@ -120,14 +100,12 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
         bpy.context.view_layer.objects.active = rail_copy
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
-        # Oblicz dolną krawędź każdego obiektu
         rail_bottom_z = rail_copy.location.z - (rail_copy.dimensions[2] / 2)
         gate_bottom_z = joined_gate.location.z - (joined_gate.dimensions[2] / 2)
 
-        # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
-        rail_copy.location.z -= rail_bottom_z  # Przesuwamy dolną krawędź szyny na Z = 0
-        joined_gate.location.z -= gate_bottom_z  # Przesuwamy dolną krawędź bramy na Z = 0
-        # Połączenie 'brama-segmentowa' i 'rail_copy'
+        rail_copy.location.z -= rail_bottom_z
+        joined_gate.location.z -= gate_bottom_z
+
         bpy.context.view_layer.objects.active = joined_gate
         joined_gate.select_set(True)
         rail_copy.select_set(True)
@@ -136,87 +114,108 @@ def scale_stack_and_align_rails(width, height, przetloczenie = "Bez przetłoczen
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "brama-segmentowa-z-szynami"
 
-        # print(f"Dodano i dopasowano szyny do obiektu 'brama-segmentowa'.")
-
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def custom_export_to_obj(object_name="brama-segmentowa-z-szynami", output_path="brama-segmentowa.obj"):
-    """
-    Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
-    ukrywając inne obiekty w scenie.
-    """
-    # Sprawdź, czy obiekt istnieje
+# Eksport z teksturą
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-segmentowa-z-szynami",
+                                      output_obj_path="model.obj", output_mtl_path="model.mtl"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
         return
 
-    # Ścieżka wyjściowa
-    output_path = "../generator/model.obj"
+    output_obj_path = "../generator/" + output_obj_path
+    output_mtl_path = "../generator/" + output_mtl_path
 
-    # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
     transformed_matrix = rotation_matrix @ obj.matrix_world
 
-    # Otwórz plik wyjściowy
-    with open(output_path, 'w') as obj_file:
-        # Napisz nagłówek pliku .obj
+    with open(output_mtl_path, 'w') as mtl_file:
+        mtl_file.write(f"# Material file for {object_name}\n")
+        mtl_file.write(f"newmtl BramaMaterial\n")
+        mtl_file.write(f"Ka 0.2 0.2 0.2\n")
+        mtl_file.write(f"Kd 1.0 1.0 1.0\n")
+        mtl_file.write(f"Ks 0.5 0.5 0.5\n")
+        mtl_file.write(f"Ns 50.0\n")
+        mtl_file.write(f"d 1.0\n")
+        mtl_file.write(f"illum 2\n")
+        mtl_file.write(f"map_Kd {texture_path}\n")
+
+    with open(output_obj_path, 'w') as obj_file:
+        obj_file.write(f"mtllib {output_mtl_path}\n")
         obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
         obj_file.write(f"# Object: {object_name}\n\n")
 
-        # Przechodzimy do siatki obiektu
         mesh = obj.data
-
-        # Zapisz wierzchołki (vertices)
         for vertex in mesh.vertices:
-            # Przelicz współrzędne wierzchołków na przestrzeń globalną z rotacją
             world_coord = transformed_matrix @ vertex.co
             obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
 
-        # Zapisz normalne (normals)
         if mesh.polygons:
             for poly in mesh.polygons:
                 rotated_normal = rotation_matrix @ poly.normal
                 obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
 
-        # Zapisz współrzędne UV (jeśli istnieją)
         if mesh.uv_layers:
             uv_layer = mesh.uv_layers.active.data
             for loop in uv_layer:
                 obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
 
-        # Zapisz powierzchnie (faces)
+        obj_file.write(f"usemtl BramaMaterial\n")
         for poly in mesh.polygons:
-            face_vertices = [str(vert + 1) for vert in poly.vertices]  # +1, bo .obj zaczyna od 1
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                uv_index = loop_index + 1
+                face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    # print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
+    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
+
+# Przykład użycia
+texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
+custom_export_to_obj_with_texture(texture_path=texture_path)
+
+# # Przykład użycia
+# custom_export_to_obj_with_mtl(color=(0.3, 0.5, 0.8))  # Eksport z kolorem niebieskim
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'
-
+        print(existing_data)
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
         if "Rodzaj przetłoczenia" in existing_data and existing_data["Rodzaj przetłoczenia"] is not None:
             przetloczenie = existing_data["Rodzaj przetłoczenia"]
         else:
             przetloczenie = "Bez przetłoczenia"
-        return [wymiary, przetloczenie]
+        if "Kolor standardowy" in existing_data:
+            name = existing_data["Kolor standardowy"]
+            print(existing_data)
+            base_path = "../jpg/Kolor_Standardowy/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        elif "Kolor RAL" in existing_data:
+            name = existing_data["Kolor RAL"]
+            base_path = "../jpg/Kolor_RAL/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        else:
+            kolor = f"../jpg/Kolor_RAL/7040.png"
+        return [wymiary, przetloczenie, kolor]
 
 # Uruchom funkcję
-dimensions, przetloczenie = read_json("../resources/selected_options.json")
+dimensions, przetloczenie, kolor = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 print(przetloczenie)
 scale_stack_and_align_rails(width, height, przetloczenie)
 # add_cameras_and_render_with_light()
-custom_export_to_obj()
-
+custom_export_to_obj_with_texture(kolor)
 
 
 

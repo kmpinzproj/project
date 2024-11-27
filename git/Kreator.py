@@ -126,23 +126,9 @@ class Kreator(QMainWindow):
 
     def change_model(self):
         """Zmienia model na nowy i przeładowuje widok 3D."""
-        texture_path = None
         new_model_path = "../generator/model.obj"  # Ścieżka do nowego modelu .obj
-        self.selected_options = self.navigation_menu.get_selected_options()
-        print(self.selected_options)
-        if "Kolor standardowy" in self.selected_options:
-            name = self.selected_options["Kolor standardowy"]
-            base_path = "../jpg/Kolor_Standardowy/"
-            sanitized_name = name.strip()
-            texture_path = f"{base_path}{sanitized_name}.png"
-        elif "Kolor RAL" in self.selected_options:
-            name = self.selected_options["Kolor RAL"]
-            base_path = "../jpg/Kolor_RAL/"
-            sanitized_name = name.strip()
-            texture_path = f"{base_path}{sanitized_name}.png"
         if os.path.exists(new_model_path):
             self.opengl_widget.load_model(new_model_path)  # Przeładuj model w widżecie OpenGL
-            self.opengl_widget.set_texture(texture_path)
         else:
             print(f"Nie znaleziono pliku modelu: {new_model_path}")
 
