@@ -1,24 +1,24 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QLineEdit, QTextEdit, QMainWindow, QSizePolicy
+    QLineEdit, QTextEdit, QMainWindow, QSizePolicy, QSpacerItem
 )
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from button import StyledButton
-from Widget3D import OpenGLWidget  # Import widżetu 3D
-import os
+
 
 class ContactForm(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setObjectName("ContactForm")  # Ustawiamy nazwę klasy CSS
+        self.generate_pdf_button = None
+        self.price_calculator_button = None
         self.submit_button = None
         self.back_button = None
         self.comments_input = None
         self.email_input = None
         self.name_input = None
         self.phone_input = None
-        self.opengl_widget = None  # Widżet 3D
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
@@ -34,16 +34,16 @@ class ContactForm(QMainWindow):
 
         # Left and Right panels
         navigation_panel = self.create_navigation_panel()
-        view_panel = self.create_view_panel()  # Utwórz widok z widżetem 3D
+        buttons_panel = self.create_buttons_panel()  # Panel z przyciskami
 
         main_layout.addWidget(navigation_panel)
-        main_layout.addWidget(view_panel)
+        main_layout.addWidget(buttons_panel)
 
         main_layout.setStretch(0, 2)  # Navigation panel
-        main_layout.setStretch(1, 2)  # View panel
+        main_layout.setStretch(1, 1)  # Buttons panel
 
     def create_navigation_panel(self):
-        """Creates the left panel with contact form fields and action buttons."""
+        """Creates the left panel with contact form fields."""
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
@@ -62,21 +62,13 @@ class ContactForm(QMainWindow):
         self.phone_input = self._create_form_field("Telefon*", QLineEdit(), form_layout)
         self.comments_input = self._create_form_field("Dodatkowe uwagi", QTextEdit(), form_layout)
 
-        # Button layout centered at the bottom
-        button_layout = QHBoxLayout()
-        button_layout.setAlignment(Qt.AlignCenter)
-
-        self.back_button = StyledButton("Cofnij")
-        self.submit_button = StyledButton("Wyślij")
-
-        button_layout.addWidget(self.back_button)
-        button_layout.addWidget(self.submit_button)
-
-        # Add layouts to the main panel layout
+        # Add form layout to the main panel layout
         layout.addLayout(form_layout)
-        layout.addLayout(button_layout)
 
+        # Upewnij się, że panel i widżety są interaktywne
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        panel.setFocusPolicy(Qt.ClickFocus)
+
         return panel
 
     @staticmethod
@@ -91,29 +83,32 @@ class ContactForm(QMainWindow):
         layout.addLayout(field_layout)
         return widget
 
-    def create_view_panel(self):
-        """Creates the right panel with a 3D view."""
+    from PySide6.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
+
+    def create_buttons_panel(self):
+        """Creates the right panel with action buttons spread over half the height."""
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
-        # Ścieżka do modelu 3D
-        obj_file = "../generator/model.obj"
+        # Dodaj odstęp nad przyciskami, aby zaczęły się od 1/4 wysokości
+        layout.addSpacerItem(QSpacerItem(20, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        if os.path.exists(obj_file):
-            # Tworzenie widżetu OpenGL z załadowanym modelem
-            self.opengl_widget = OpenGLWidget(obj_file)
+        # Dodaj przyciski z odstępami między nimi
+        self.generate_pdf_button = StyledButton("Generuj PDF")
+        self.price_calculator_button = StyledButton("Kalkulator cen")
+        self.submit_button = StyledButton("Wyślij")
+        self.back_button = StyledButton("Cofnij")
 
-            # Ograniczenie wysokości widoku 3D
-            self.opengl_widget.setFixedHeight(250)  # Ustawienie stałej wysokości
+        layout.addWidget(self.generate_pdf_button)
+        layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        layout.addWidget(self.price_calculator_button)
+        layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        layout.addWidget(self.submit_button)
+        layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        layout.addWidget(self.back_button)
 
-            # Dodanie widżetu do układu
-            layout.addWidget(self.opengl_widget)
-        else:
-            # Placeholder jeśli model nie istnieje
-            placeholder_label = QLabel("Widok 3D: Nie znaleziono modelu.")
-            placeholder_label.setAlignment(Qt.AlignCenter)
-            placeholder_label.setFont(QFont("Arial", 12, QFont.Bold))
-            layout.addWidget(placeholder_label)
+        # Dodaj odstęp pod przyciskami, aby zakończyły się w 3/4 wysokości
+        layout.addSpacerItem(QSpacerItem(20, 100, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return panel
