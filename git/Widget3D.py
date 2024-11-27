@@ -5,7 +5,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import pywavefront
 import numpy as np
-
+from PIL import Image
 
 def compute_normals(vertices, faces):
     """Oblicza normalne dla podanych wierzchołków i ścian."""
@@ -25,7 +25,6 @@ def compute_normals(vertices, faces):
     normals = np.array([normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal for normal in normals])
     return normals
 
-
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, obj_file, parent=None):
         super().__init__(parent)
@@ -35,6 +34,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.vertices = None
         self.faces = None
         self.normals = None
+        self.texture_id = None
         self.rotation_x = 0
         self.rotation_y = 0
         self.last_mouse_position = None
@@ -79,6 +79,21 @@ class OpenGLWidget(QOpenGLWidget):
         self.vertices -= adjusted_center
         self.normals = compute_normals(self.vertices, self.faces)
 
+    def load_texture(self, texture_file):
+        """Ładuje teksturę z pliku i ustawia ją jako aktywną teksturę."""
+        image = Image.open(texture_file)
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+        image_data = image.convert("RGBA").tobytes()
+        width, height = image.size
+
+        self.texture_id = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glEnable(GL_TEXTURE_2D)
+
     def resizeGL(self, width, height):
         glViewport(0, 0, width * 2, height * 2)
         glMatrixMode(GL_PROJECTION)
@@ -98,6 +113,12 @@ class OpenGLWidget(QOpenGLWidget):
             self.draw_model()
 
     def draw_model(self):
+        if self.texture_id:
+            glEnable(GL_TEXTURE_2D)
+            glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        else:
+            glDisable(GL_TEXTURE_2D)
+
         glBegin(GL_TRIANGLES)
         for face in self.faces:
             vertices = [self.vertices[vertex_index] for vertex_index in face]
@@ -110,6 +131,10 @@ class OpenGLWidget(QOpenGLWidget):
             for vertex in vertices:
                 glVertex3fv(vertex)
         glEnd()
+
+        if self.texture_id:
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glDisable(GL_TEXTURE_2D)
 
     def load_model(self, obj_file):
         self.obj_file = obj_file
@@ -132,6 +157,11 @@ class OpenGLWidget(QOpenGLWidget):
         centroid = np.mean(vertices, axis=0)
         adjusted_center = np.array([centroid[0], center_y, centroid[2]])
         return adjusted_center
+
+    def set_texture(self, texture_file):
+        self.load_texture(texture_file)
+        print(texture_file)
+        self.update()
 
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()
