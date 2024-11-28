@@ -139,7 +139,7 @@ class OpenGLWidget(QOpenGLWidget):
     def parse_mtl_file(mtl_path):
         texture_map = {}
         try:
-            with open(mtl_path, 'r') as file:
+            with open(mtl_path, 'r', encoding='utf-8') as file:
                 material_name = None
                 for line in file:
                     if line.startswith("newmtl"):

@@ -100,7 +100,7 @@ class Kreator(QMainWindow):
         """
         Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
         """
-        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
@@ -114,7 +114,7 @@ class Kreator(QMainWindow):
         """
         Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
         """
-        self.selected_options.update(self.navigation_menu.get_selected_options())
+        self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.default_options)
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
@@ -183,7 +183,6 @@ class Kreator(QMainWindow):
         """Prompt user for a project name before saving."""
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
         if ok and project_name.strip():
-            self.selected_options.clear()
             self.selected_options["Nazwa projektu"] = project_name.strip()
             self.selected_options.update(self.navigation_menu.get_selected_options())
             # print(self.selected_options)

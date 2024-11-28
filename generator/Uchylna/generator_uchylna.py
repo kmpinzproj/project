@@ -236,10 +236,16 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
         print(f"Wystąpił błąd: {e}")
 
 
-def custom_export_to_obj(object_name="brama-uchylna-z-szynami"):
+def custom_export_to_obj_with_texture(
+    texture_path,
+    object_name="brama-uchylna-z-szynami",
+    output_obj_path="model.obj",
+    output_mtl_path="model.mtl"
+):
     """
     Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
     ukrywając inne obiekty w scenie.
+    Tworzy również plik .mtl z odniesieniem do tekstury.
     """
     # Sprawdź, czy obiekt istnieje
     obj = bpy.data.objects.get(object_name)
@@ -247,16 +253,30 @@ def custom_export_to_obj(object_name="brama-uchylna-z-szynami"):
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
         return
 
-    # Ścieżka wyjściowa
-    output_path = "../generator/model.obj"
+    # Ścieżki wyjściowe
+    output_obj_path = "../generator/" + output_obj_path
+    output_mtl_path = "../generator/" + output_mtl_path
 
     # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
     transformed_matrix = rotation_matrix @ obj.matrix_world
 
-    # Otwórz plik wyjściowy
-    with open(output_path, 'w') as obj_file:
-        # Napisz nagłówek pliku .obj
+    # Tworzenie pliku MTL z teksturą
+    with open(output_mtl_path, 'w') as mtl_file:
+        mtl_file.write(f"# Material file for {object_name}\n")
+        mtl_file.write(f"newmtl BramaMaterial\n")
+        mtl_file.write(f"Ka 0.2 0.2 0.2\n")  # Ambient color
+        mtl_file.write(f"Kd 1.0 1.0 1.0\n")  # Diffuse color (white for full texture)
+        mtl_file.write(f"Ks 0.5 0.5 0.5\n")  # Specular color
+        mtl_file.write(f"Ns 50.0\n")  # Shininess
+        mtl_file.write(f"d 1.0\n")  # Opacity
+        mtl_file.write(f"illum 2\n")  # Illumination model
+        mtl_file.write(f"map_Kd {texture_path}\n")  # Odniesienie do tekstury
+
+    # Tworzenie pliku OBJ
+    with open(output_obj_path, 'w') as obj_file:
+        # Dodanie odniesienia do pliku MTL
+        obj_file.write(f"mtllib {output_mtl_path}\n")
         obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
         obj_file.write(f"# Object: {object_name}\n\n")
 
@@ -282,35 +302,56 @@ def custom_export_to_obj(object_name="brama-uchylna-z-szynami"):
                 obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
 
         # Zapisz powierzchnie (faces)
+        obj_file.write(f"usemtl BramaMaterial\n")  # Przypisz materiał do powierzchni
         for poly in mesh.polygons:
-            face_vertices = [str(vert + 1) for vert in poly.vertices]  # +1, bo .obj zaczyna od 1
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                uv_index = loop_index + 1  # UV index (OBJ numbering starts from 1)
+                face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do pliku: {output_path}")
+    print(f"Obiekt '{object_name}' został wyeksportowany do plików:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
+
+
+# Uruchomienie funkcji eksportu z teksturą
+texture_path = "../textures/sapeli.png"  # Ścieżka do tekstury
+custom_export_to_obj_with_texture(texture_path=texture_path)
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
-        # Zachowaj 'Typ bramy' i 'Wymiary'
 
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
-        if "Układ wypełnienia" in existing_data:
+        if "Układ wypełnienia" in existing_data and existing_data["Układ wypełnienia"] is not None:
             wypelnienie = existing_data["Układ wypełnienia"]
-            print("TESTTESTET")
         else:
             wypelnienie = "Pionowe"
-        return [wymiary, wypelnienie]
+        if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
+            name = existing_data["Kolor standardowy"]
+            print(existing_data)
+            base_path = "../jpg/Kolor_Standardowy/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        elif "Kolor RAL" in existing_data and existing_data["Kolor standardowy"] is not None:
+            name = existing_data["Kolor RAL"]
+            base_path = "../jpg/Kolor_RAL/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        else:
+            kolor = f"../jpg/Kolor_RAL/7040.png"
+        return [wymiary, wypelnienie, kolor]
 
 
-dimensions, wypelnienie = read_json("../resources/selected_options.json")
+dimensions, wypelnienie, kolor = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 
 # Uruchom funkcję
 tilt_gate(width, height, wypelnienie)
-custom_export_to_obj()
-
+texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
+custom_export_to_obj_with_texture(kolor)
 
 
 

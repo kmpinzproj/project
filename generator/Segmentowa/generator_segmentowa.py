@@ -216,9 +216,3 @@ print(przetloczenie)
 scale_stack_and_align_rails(width, height, przetloczenie)
 # add_cameras_and_render_with_light()
 custom_export_to_obj_with_texture(kolor)
-
-
-
-
-
-
