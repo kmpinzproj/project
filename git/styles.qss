@@ -63,14 +63,14 @@ QMainWindow {
 
 #wyborBramyWindow QLabel#gateTitleLabel {
     font-family: "Arial";
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(105, 64, 14);
     text-align: center;
 }
 
 #wyborBramyWindow QLabel#gateDescriptionLabel {
     font-size: 12px;
-    color: rgb(74, 68, 61);
+    color: rgb(64, 58, 51);
 }
 
 #wyborBramyWindow QFrame#gateFrame {
