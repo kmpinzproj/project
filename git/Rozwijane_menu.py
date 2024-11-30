@@ -105,15 +105,18 @@ class ScrollableMenu(QWidget):
 
         for option in options:
             image_path = os.path.join(folder_path, f"{option}.png")
-            option_widget = self._create_image_option(option, image_path, category)  # Pass category here
+            option_widget = self._create_image_option(option, image_path, category)
             option_items.append(option_widget)
 
         # Store layout and items for this category
         self.option_items_by_category[category] = option_items
         self.options_layout_by_category[category] = options_layout
 
-        # Populate grid layout with default 3 columns
-        self._populate_grid_layout(option_items, options_layout, 3)
+        # **Force one column for "Przeszklenia"**
+        if category == "Przeszklenia":
+            self._populate_grid_layout(option_items, options_layout, columns=1)
+        else:
+            self._populate_grid_layout(option_items, options_layout, columns=3)
 
         return options_widget
 
@@ -129,29 +132,40 @@ class ScrollableMenu(QWidget):
         pixmap = QPixmap(image_path)
         if pixmap.isNull():
             pixmap = QPixmap("../jpg/placeholder.jpg")
-        image_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+        # Check for specific category to adjust the size
+        if category == "Przeszklenia":
+            image_label.setPixmap(pixmap.scaled(303, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            image_label.setFixedSize(303, 60)
+        else:
+            image_label.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            image_label.setFixedSize(70, 70)
+
         image_label.setAlignment(Qt.AlignCenter)
         image_label.setObjectName("image_label")
 
-        # Wymuszenie stałego rozmiaru dla obrazka
-        image_label.setFixedSize(70, 70)
-
         # Text
         text_label = QLabel(option_name)
-        text_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         text_label.setWordWrap(True)
         text_label.setObjectName("text_label")
-        text_label.setMaximumWidth(70)
-        text_label.setFixedHeight(40)
 
-        # Dodaj obrazek i tekst do układu
+        # Dostosowanie wyrównania dla kategorii "Przeszklenia"
+        if category == "Przeszklenia":
+            text_label.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+            text_label.setFixedWidth(303)  # Dostosuj szerokość do przeszklenia
+        else:
+            text_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+            text_label.setMaximumWidth(70)
+
+        text_label.setFixedHeight(40)
         layout.addWidget(image_label)
         layout.addWidget(text_label)
 
-        # Wymuszenie stałego rozmiaru widgetu
-        option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], 120)
+        if category == "Przeszklenia":
+            option_widget.setFixedSize(303, 120)  # Full width for przeszklenia
+        else:
+            option_widget.setFixedSize(self.OPTION_WIDGET_SIZE[0], 120)
 
-        # Połącz zdarzenie kliknięcia
         option_widget.mousePressEvent = lambda event: self._on_option_click(category, image_label)
 
         return option_widget
@@ -291,7 +305,12 @@ class ScrollableMenu(QWidget):
                 option_width = self.OPTION_WIDGET_SIZE[0]
                 spacing = 10
 
-                columns = max(3, available_width // (option_width + spacing))
+                # Ustaw liczbę kolumn na 1 dla kategorii "Przeszklenia"
+                if category == "Przeszklenia":
+                    columns = 1
+                else:
+                    columns = max(3, available_width // (option_width + spacing))
+
                 self._populate_grid_layout(option_items, layout, columns)
 
             # Calculate and adjust the height of the field group
@@ -301,33 +320,6 @@ class ScrollableMenu(QWidget):
 
             toggle_button.setText("↑")
 
-    def eventFilter(self, source, event):
-        """Handle resize events for dynamic updates."""
-        if event.type() == QEvent.Resize:
-            self._update_grid_columns()
-        return super().eventFilter(source, event)
-
-    def _update_grid_columns(self):
-        """Update grid columns dynamically based on available width."""
-        available_width = self.scroll_area.viewport().width()
-        option_width = self.OPTION_WIDGET_SIZE[0]
-        spacing = 10
-
-        columns = max(3, available_width // (option_width + spacing))
-        for category, data in self.category_widgets.items():
-            option_items = self.option_items_by_category.get(category, [])
-            layout = self.options_layout_by_category.get(category)
-
-            if not option_items or layout is None:
-                continue
-
-            # Update grid layout
-            self._populate_grid_layout(option_items, layout, columns)
-
-            # Manually enforce consistent heights for all rows
-            if data["options_widget"].isVisible():
-                self._adjust_field_group_height(option_items, columns, data["field_group"])
-
     def _populate_grid_layout(self, option_items, layout, columns):
         """Populate a grid layout with option widgets."""
         for i in reversed(range(layout.count())):
@@ -335,6 +327,55 @@ class ScrollableMenu(QWidget):
             if widget:
                 layout.removeWidget(widget)
 
+        for index, widget in enumerate(option_items):
+            row = index // columns
+            column = index % columns
+            layout.addWidget(widget, row, column)
+
+    def eventFilter(self, source, event):
+        """Handle resize events for dynamic updates."""
+        if event.type() == QEvent.Resize:
+            self._update_grid_columns()
+        return super().eventFilter(source, event)
+
+    def _update_grid_columns(self):
+        """Dynamically update grid columns based on available width."""
+        available_width = self.scroll_area.viewport().width()
+        spacing = 10  # Margines między elementami
+
+        for category, data in self.category_widgets.items():
+            option_items = self.option_items_by_category.get(category, [])
+            layout = self.options_layout_by_category.get(category)
+
+            if not option_items or layout is None:
+                continue
+
+            # Specjalna obsługa dla kategorii "Przeszklenia"
+            if category == "Przeszklenia":
+                # Szerokość "Przeszklenia" jest większa (303 px)
+                option_width = 303
+                columns = max(1, available_width // (option_width + spacing))
+            else:
+                # Domyślna szerokość opcji (100 px)
+                option_width = self.OPTION_WIDGET_SIZE[0]
+                columns = max(1, available_width // (option_width + spacing))
+
+            # Aktualizuj układ siatki dla opcji w tej kategorii
+            self._populate_grid_layout(option_items, layout, columns)
+
+            # Dostosuj wysokość grupy pola, jeśli opcje są widoczne
+            if data["options_widget"].isVisible():
+                self._adjust_field_group_height(option_items, columns, data["field_group"])
+
+    def _populate_grid_layout(self, option_items, layout, columns):
+        """Populate a grid layout with option widgets."""
+        # Usuń wszystkie istniejące widgety z układu
+        for i in reversed(range(layout.count())):
+            widget = layout.itemAt(i).widget()
+            if widget:
+                layout.removeWidget(widget)
+
+        # Dodaj widgety w nowym układzie
         for index, widget in enumerate(option_items):
             row = index // columns
             column = index % columns
