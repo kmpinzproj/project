@@ -15,6 +15,74 @@ for object_name in object_names:
         bpy.ops.object.delete()
     else:
         test = 0
+#metoda na kasetony
+def create_gate():
+    # Nazwy obiektów
+    segment_name = "Cube.003"
+    # Pobierz segment
+    segment = bpy.data.objects.get(segment_name)
+    if not segment:
+        print(f"Obiekt o nazwie '{segment_name}' nie został znaleziony.")
+        return
+
+    try:
+        # Pobranie danych od użytkownika
+
+        x_length_cm = float(input("Podaj długość całkowitą w osi X (w cm): "))
+        x_length_m = x_length_cm / 100  # Konwersja cm na metry
+        z_height_cm = float(input("Podaj wysokość całkowitą w osi Z (w cm): "))
+        z_height_m = z_height_cm / 100  # Konwersja cm na metry
+        segment_width_m = 0.4  # Stała szerokość segmentu (40 cm w metrach)
+        segment_height_m = 0.4  # Wysokość jednego segmentu w metrach
+
+        # Oblicz liczbę segmentów w osi X i Z
+        segment_count_x = max(1, int(x_length_m // segment_width_m))  # Co najmniej 1 segment w osi X
+        print(segment_count_x)
+        segment_count_z = max(1, int(z_height_m // segment_height_m))  # Co najmniej 1 segment w osi Z
+        print(segment_count_z)
+
+        # Oblicz nową szerokość segmentu w osi X
+        segment_width_per_unit = round(x_length_m / segment_count_x, 3)
+        print(segment_width_per_unit)
+        segment_height_per_unit = round(z_height_m / segment_count_z, 3)
+        print(segment_height_per_unit)
+
+        # Lista kopii segmentów do połączenia
+        segment_copies = []
+
+        # Tworzenie i rozmieszczanie kopii segmentów w siatce (X, Z)
+        for row in range(segment_count_z):
+            for col in range(segment_count_x):
+                new_segment = segment.copy()  # Tworzenie kopii segmentu
+                new_segment.data = segment.data.copy()  # Niezależna kopia danych siatki
+                new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]  # Skalowanie w osi X
+                new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]  # Skalowanie w osi Z
+                new_segment.location.x = col * segment_width_per_unit  # Ustawienie w osi X
+                new_segment.location.z = row * segment_height_per_unit  # Ustawienie w osi Z
+                bpy.context.collection.objects.link(new_segment)  # Dodanie kopii do sceny
+                segment_copies.append(new_segment)
+
+        # Połączenie segmentów w jeden obiekt
+        bpy.context.view_layer.objects.active = segment_copies[0]
+        for segment in segment_copies:
+            segment.select_set(True)  # Zaznacz wszystkie kopie
+        bpy.ops.object.join()
+        joined_gate = bpy.context.view_layer.objects.active
+        joined_gate.name = "brama-segmentowa"  # Zmień nazwę obiektu
+
+        # Ustawienie origin bramy na środek jej geometrii
+        bpy.context.view_layer.objects.active = joined_gate
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        joined_gate.location = (0, 0, joined_gate.dimensions[2]/2)
+
+        print(f"Stworzono bramę o wymiarach {segment_count_x} segmentów w poziomie i {segment_count_z} segmentów w pionie.")
+        print(f"Wymiary pojedynczego segmentu: szerokość = {segment_width_per_unit}m, wysokość = {segment_height_per_unit}m.")
+        return joined_gate
+
+    except ValueError:
+        print("Podano nieprawidłowe dane. Spróbuj ponownie.")
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
 
 def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia"):
     segment_name = "Cube.002"
@@ -38,6 +106,7 @@ def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia
         return
 
     try:
+        #dałbym już tu if na kasetony
         x_length_m = width / 1000
         segment_count = height // 500
 
@@ -56,16 +125,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia
             bpy.context.collection.objects.link(new_segment)
 
             bpy.context.view_layer.objects.active = new_segment
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.uv.smart_project(angle_limit=66)
-
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-            uv_layer = new_segment.data.uv_layers.active.data
-            for uv in uv_layer:
-                uv.uv.x *= 1.0
-                uv.uv.y *= 1.0
-                uv.uv.x, uv.uv.y = uv.uv.y, uv.uv.x
 
             segment_copies.append(new_segment)
 
