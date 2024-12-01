@@ -26,7 +26,7 @@ for object_name in object_names:
 def tilt_gate(width, height, wypelnienie = "Poziome"):
     # Nazwa segmentu bazowego
     segment_name = "Cube.002"
-    available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003"}
+    available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003","Jodełka": "Cube.005"}
     # kopia szyny
     rail_name = "szyny-na-brame"
 
@@ -64,7 +64,55 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
         # Wymiary segmentu
         segment_width = segment.dimensions[0]
         segment_height = segment.dimensions[2]
-
+        # if segment.name == available_segments[2]:
+        #
+        #     print("czesc")
+        #     # Skalowanie segmentu do podanych wymiarów
+        #     joined_gate = segment.copy()
+        #     joined_gate.data = segment.data.copy()
+        #     bpy.context.collection.objects.link(joined_gate)
+        #     joined_gate.dimensions = (x_length_m, joined_gate.dimensions[1], z_height_m)
+        #     joined_gate.location = (0, 0, z_height_m / 2)
+        #     print(f"joined: {joined_gate}")
+        #     # Tworzenie kopii szyn i dopasowanie do bramy
+        #     rail_copy = rail.copy()
+        #     bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
+        #
+        #     # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
+        #     rail_copy.dimensions = (x_length_m, rail_copy.dimensions[1], z_height_m)
+        #
+        #     # Ustawienie Location szyn na to samo co brama
+        #     rail_copy.location = joined_gate.location
+        #
+        #     # Ustawienie Location szyn na to samo co brama
+        #     rail_copy.location = joined_gate.location
+        #     # Ustawienie pozycji obiektów w osi X i Y na (0, 0)
+        #     rail_copy.location.x = 0
+        #     rail_copy.location.y = 0
+        #
+        #     joined_gate.location.x = 0
+        #     joined_gate.location.y = 0
+        #     print(bpy.context.view_layer.objects.active)
+        #     bpy.context.view_layer.objects.active = rail_copy
+        #     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        #
+        #     # Oblicz dolną krawędź każdego obiektu
+        #     rail_bottom_z = rail_copy.location.z - (rail_copy.dimensions[2] / 2)
+        #     gate_bottom_z = joined_gate.location.z - (joined_gate.dimensions[2] / 2)
+        #
+        #     # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
+        #     rail_copy.location.z -= rail_bottom_z  # Przesuwamy dolną krawędź szyny na Z = 0
+        #     joined_gate.location.z -= gate_bottom_z  # Przesuwamy dolną krawędź bramy na Z = 0
+        #     # Połączenie 'brama-segmentowa' i 'rail_copy'
+        #     bpy.context.view_layer.objects.active = joined_gate
+        #     joined_gate.select_set(True)
+        #     rail_copy.select_set(True)
+        #     bpy.ops.object.join()
+        #
+        #     final_gate = bpy.context.view_layer.objects.active
+        #     final_gate.name = "brama-uchylna-z-szynami"
+        #
+        # else:
         # Tworzenie segmentów w osi X
         current_x = 0
         segment_copies_x = []
