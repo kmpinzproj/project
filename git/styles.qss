@@ -197,6 +197,14 @@ QMainWindow#OknoWymiarow QPushButton:hover {
     padding: 0px;
 }
 
+#kreator_view QGroupBox QLabel#title {
+    color: white; /* Ustaw biały tekst */
+    font-size: 14px; /* Spójny rozmiar czcionki */
+    text-align: center; /* Wyśrodkuj tekst */
+    margin: 0px;
+    padding: 0px;
+}
+
 #kreator_view QGroupBox QLabel#image_label {
     border: none; /* Usuń ramkę obrazów */
     margin: 0px;

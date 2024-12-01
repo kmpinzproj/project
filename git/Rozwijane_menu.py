@@ -60,6 +60,7 @@ class ScrollableMenu(QWidget):
         # Header with toggle button
         header_layout = QHBoxLayout()
         header_label = QLabel(field_name)
+        header_label.setObjectName("title")
         header_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         header_layout.addWidget(header_label)
 
