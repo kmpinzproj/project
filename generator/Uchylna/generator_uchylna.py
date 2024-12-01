@@ -137,10 +137,9 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             joined_segments.append(new_segment)
             current_z += segment_height
             counter += 1
-        print(counter)
-        print(segment_height)
+
         remaining_height = round(z_height_m - (counter * segment_height), 6)
-        print(remaining_height)
+
         if remaining_height > 0.0001:
             # Kopiowanie ostatniego segmentu
             last_segment_z = joined_gate_x.copy()
