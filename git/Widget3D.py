@@ -49,7 +49,7 @@ class OpenGLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glEnable(GL_NORMALIZE)
-        glShadeModel(GL_SMOOTH)
+        glShadeModel(GL_FLAT)
         glEnable(GL_MULTISAMPLE)
         glClearColor(0.1, 0.2, 0.3, 1.0)
 

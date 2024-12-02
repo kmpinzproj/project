@@ -18,6 +18,7 @@ for object_name in object_names:
 
 
 def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia"):
+
     segment_name = "Cube.002"
     rail_name = "szyny-na-brame"
     available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002", "Kasetony": "Cube.003"}
@@ -87,35 +88,41 @@ def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
             joined_gate.location = (0, 0, joined_gate.dimensions[2] / 2)
         else:
-            for i in range(segment_count):
-                new_segment = segment.copy()
-                new_segment.data = segment.data.copy()
-                new_segment.scale[0] = scale_factor_x
-                new_segment.location.z = i * current_height_z
-                bpy.context.collection.objects.link(new_segment)
-                bpy.context.view_layer.objects.active = new_segment
-                segment_copies.append(new_segment)
+            segment_count_x = max(1, int(x_length_m // segment_width_m))  # Co najmniej 1 segment w osi X
+            print(segment_count_x)
+            segment_count_z = max(1, int(z_height_m // segment_height_m))  # Co najmniej 1 segment w osi Z
+            print(segment_count_z)
 
-            # Sprawdzenie, czy pozostała wysokość wymaga przycięcia ostatniego segmentu
-            remaining_height = height % 500  # Pozostała wysokość w milimetrach
-            if remaining_height > 0:
-                new_segment = segment.copy()
-                new_segment.data = segment.data.copy()
-                new_segment.scale[0] = scale_factor_x
-                new_segment.scale[2] = remaining_height / 1000 / current_height_z  # Skalowanie na wysokość
-                # Ustawienie ostatniego segmentu dokładnie na wierzchu ostatniego pełnego segmentu
-                new_segment.location.z = segment_count * current_height_z - (current_height_z - remaining_height / 1000)
-                bpy.context.collection.objects.link(new_segment)
-                bpy.context.view_layer.objects.active = new_segment
-                segment_copies.append(new_segment)
+            # Oblicz nową szerokość segmentu w osi X
+            segment_width_per_unit = round(x_length_m / segment_count_x, 3)
+            print(segment_width_per_unit)
+            segment_height_per_unit = round(z_height_m / segment_count_z, 3)
+            print(segment_height_per_unit)
 
+            # Lista kopii segmentów do połączenia
+            segment_copies = []
+
+            # Tworzenie i rozmieszczanie kopii segmentów w siatce (X, Z)
+            for row in range(segment_count_z):
+                for col in range(segment_count_x):
+                    new_segment = segment.copy()  # Tworzenie kopii segmentu
+                    new_segment.data = segment.data.copy()  # Niezależna kopia danych siatki
+                    new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]  # Skalowanie w osi X
+                    new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]  # Skalowanie w osi Z
+                    new_segment.location.x = col * segment_width_per_unit  # Ustawienie w osi X
+                    new_segment.location.z = row * segment_height_per_unit  # Ustawienie w osi Z
+                    bpy.context.collection.objects.link(new_segment)  # Dodanie kopii do sceny
+                    segment_copies.append(new_segment)
+
+            # Połączenie segmentów w jeden obiekt
             bpy.context.view_layer.objects.active = segment_copies[0]
             for segment in segment_copies:
-                segment.select_set(True)
+                segment.select_set(True)  # Zaznacz wszystkie kopie
             bpy.ops.object.join()
             joined_gate = bpy.context.view_layer.objects.active
-            joined_gate.name = "brama-segmentowa"
+            joined_gate.name = "brama-segmentowa"  # Zmień nazwę obiektu
 
+            # Ustawienie origin bramy na środek jej geometrii
             bpy.context.view_layer.objects.active = joined_gate
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
