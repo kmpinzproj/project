@@ -90,10 +90,11 @@ class Kreator(QMainWindow):
         self.gate_render_start()
 
         # Ścieżka do pliku .obj
-        obj_file = "../generator/model.obj"
+        gate_file = "../generator/model.obj"
+        rail_file = "../generator/szyny.obj"
 
         # Tworzenie widżetu OpenGL
-        self.opengl_widget = OpenGLWidget(obj_file)
+        self.opengl_widget = OpenGLWidget(gate_file, rail_file)
         return self.opengl_widget
 
     def gate_render(self):
@@ -126,11 +127,15 @@ class Kreator(QMainWindow):
 
     def change_model(self):
         """Zmienia model na nowy i przeładowuje widok 3D."""
-        new_model_path = "../generator/model.obj"  # Ścieżka do nowego modelu .obj
-        if os.path.exists(new_model_path):
-            self.opengl_widget.load_model(new_model_path)  # Przeładuj model w widżecie OpenGL
+        # Ścieżka do pliku .obj
+        gate_file = "../generator/model.obj"
+        rail_file = "../generator/szyny.obj"
+
+        if os.path.exists(gate_file):
+            self.opengl_widget.load_model(gate_file)  # Przeładuj model w widżecie OpenGL
+            self.opengl_widget.load_rails(rail_file)
         else:
-            print(f"Nie znaleziono pliku modelu: {new_model_path}")
+            print(f"Nie znaleziono pliku modelu: {gate_file}")
 
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""

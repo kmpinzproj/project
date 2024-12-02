@@ -27,10 +27,17 @@ def compute_normals(vertices, faces):
 
 
 class OpenGLWidget(QOpenGLWidget):
-    def __init__(self, obj_file, parent=None):
+    def __init__(self, obj_file, rails_obj_file, parent=None):
         super().__init__(parent)
-        self.obj_file = obj_file
+        self.obj_file = obj_file  # Plik .obj dla bramy
+        self.rails_obj_file = rails_obj_file  # Plik .obj dla szyn
         self.scene = None
+        self.rails_scene = None
+        self.gate_vertices = None
+        self.gate_faces = None
+        self.rails_vertices = None
+        self.rails_faces = None
+
         self.vertices = None
         self.faces = None
         self.normals = None
@@ -71,14 +78,7 @@ class OpenGLWidget(QOpenGLWidget):
         glLightfv(GL_LIGHT1, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
 
         self.load_model(self.obj_file)
-
-        print("Materiały załadowane:")
-        for material_name, material in self.scene.materials.items():
-            print(f"Material: {material_name}")
-            if material_name in self.material_textures:
-                print(f"  Tekstura: {self.material_textures[material_name]}")
-            else:
-                print(f"  Brak tekstury dla materiału {material_name}.")
+        self.load_rails(self.rails_obj_file)  # Szyny
 
     def load_texture(self, texture_file, rotation_angle=90):
         if not os.path.exists(texture_file):
@@ -198,15 +198,82 @@ class OpenGLWidget(QOpenGLWidget):
         glLoadIdentity()
         gluPerspective(45, width / height, 0.1, 100.0)
         glMatrixMode(GL_MODELVIEW)
+    @staticmethod
+    def load_obj_simple(filepath):
+        vertices = []
+        faces = []
+        try:
+            with open(filepath, 'r') as file:
+                for line in file:
+                    if line.startswith('v '):  # Wczytaj wierzchołki
+                        vertices.append([float(v) for v in line.split()[1:]])
+                    elif line.startswith('f '):  # Wczytaj twarze
+                        face = [int(idx.split('/')[0]) - 1 for idx in line.split()[1:]]
+                        faces.append(face)
+            return np.array(vertices, dtype=np.float32), np.array(faces, dtype=np.int32)
+        except Exception as e:
+            print(f"Error loading OBJ file {filepath}: {e}")
+            return None, None
+
+    def load_rails(self, obj_file):
+        """Ładowanie szyn z pliku .obj za pomocą własnego parsera."""
+        vertices, faces = self.load_obj_simple(obj_file)
+        self.vertices = np.array(self.scene.vertices)
+
+        if vertices is not None and faces is not None:
+            self.rails_vertices = vertices
+            self.rails_faces = faces
+            print(f"Loaded rails: {obj_file}")
+            print(f"- Vertices: {len(vertices)}")
+            print(f"- Faces: {len(faces)}")
+        else:
+            print("Error loading rails data.")
+
+    def draw_rails(self):
+        """Renderowanie szyn z ustalonym kolorem."""
+        if not hasattr(self, 'rails_vertices') or not hasattr(self, 'rails_faces'):
+            print("No rails data to render.")
+            return
+
+        glDisable(GL_TEXTURE_2D)
+        glColor3f(0.5, 0.5, 0.5)  # Kolor szary dla szyn
+        glPushMatrix()
+        glTranslatef(0.0, 0.0, 0.0)  # Tymczasowe przesunięcie szyn w stronę kamery
+        glBegin(GL_TRIANGLES)
+        for face in self.rails_faces:
+            # Sprawdź, czy twarz ma więcej niż trzy wierzchołki
+            for i in range(1, len(face) - 1):
+                v1 = self.rails_vertices[face[0]]
+                v2 = self.rails_vertices[face[i]]
+                v3 = self.rails_vertices[face[i + 1]]
+                # Oblicz normalne dla trójkąta
+                normal = np.cross(v2 - v1, v3 - v1)
+                normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal
+                glNormal3fv(normal)
+                glVertex3fv(v1)
+                glVertex3fv(v2)
+                glVertex3fv(v3)
+        glEnd()
+        glPopMatrix()
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glTranslatef(self.pan_x, self.pan_y, self.zoom)
+        glTranslatef(self.pan_x, self.pan_y - 1.2, self.zoom)
         glRotatef(self.rotation_x, 1.0, 0.0, 0.0)
         glRotatef(self.rotation_y, 0.0, 1.0, 0.0)
+
+        # Renderowanie bramy
         if self.scene:
+            print("Rendering gate...")
             self.draw_model()
+
+        # Renderowanie szyn
+        if self.rails_vertices is not None and self.rails_faces is not None:
+            print("Rendering rails...")
+            self.draw_rails()
+        else:
+            print("No rails to render.")
 
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()
@@ -245,3 +312,4 @@ class OpenGLWidget(QOpenGLWidget):
         self.pan_x = 0.0
         self.pan_y = 0.0
         self.update()
+

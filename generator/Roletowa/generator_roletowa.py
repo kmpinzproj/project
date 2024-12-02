@@ -237,12 +237,55 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-roletowa"
 
     print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
 
-# Przykład użycia
-texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
-custom_export_to_obj_with_texture(texture_path=texture_path)
+def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    obj = bpy.data.objects.get(object_name)
+    if not obj:
+        print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
+        return
 
-# # Przykład użycia
-# custom_export_to_obj_with_mtl(color=(0.3, 0.5, 0.8))  # Eksport z kolorem niebieskim
+    output_obj_path = "../generator/" + output_obj_path
+
+    # Obrót obiektu o -90 stopni w osi X
+    rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
+    transformed_matrix = rotation_matrix @ obj.matrix_world
+
+    with open(output_obj_path, 'w') as obj_file:
+        obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
+        obj_file.write(f"# Object: {object_name}\n\n")
+
+        # Eksportuj wierzchołki
+        mesh = obj.data
+        for vertex in mesh.vertices:
+            world_coord = transformed_matrix @ vertex.co
+            obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
+
+        # Eksportuj normalne (opcjonalnie, jeśli istnieją wielokąty)
+        if mesh.polygons:
+            for poly in mesh.polygons:
+                rotated_normal = rotation_matrix @ poly.normal
+                obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
+
+        # Eksportuj współrzędne UV (jeśli istnieją warstwy UV)
+        if mesh.uv_layers:
+            uv_layer = mesh.uv_layers.active.data
+            for loop in uv_layer:
+                obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
+
+        # Eksportuj twarze
+        for poly in mesh.polygons:
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                if mesh.uv_layers:
+                    uv_index = loop_index + 1
+                    face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
+                else:
+                    face_vertices.append(f"{vertex_index + 1}")
+            obj_file.write(f"f {' '.join(face_vertices)}\n")
+
+    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
+
+
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
@@ -277,7 +320,7 @@ height = dimensions.get("Wysokość")
 
 tilt_gate(width, height, wysokosc_profilu)
 custom_export_to_obj_with_texture(kolor)
-
+custom_export_to_obj_without_mtl()
 #add_cameras_and_render_with_light()
 
 
