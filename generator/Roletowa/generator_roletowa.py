@@ -1,7 +1,8 @@
 import bpy
 import os
 import math
-
+import mathutils
+import json
 import bmesh
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
@@ -22,23 +23,17 @@ for object_name in object_names:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
 
-def tilt_gate():
+def tilt_gate(width, height, wysokosc_profilu):
     # Nazwa segmentu bazowego
     segment_name = "Cube.002"
     available_segments = ["seg1", "seg2"]
 
     # Wyświetlenie dostępnych segmentów
-    print("Dostępne segmenty:")
-    for i, seg_name in enumerate(available_segments):
-        print(f"{i + 1}. {seg_name}")
+    available_segments = {"77 mm": "seg1", "100 mm": "seg2"}
 
     # Wybór segmentu
     try:
-        segment_choice = int(input("Wybierz numer segmentu (1, 2): "))
-        if segment_choice < 1 or segment_choice > len(available_segments):
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
-            return
-        segment_name = available_segments[segment_choice - 1]
+        segment_name = available_segments[wysokosc_profilu]
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -51,10 +46,8 @@ def tilt_gate():
 
     try:
         # Pobranie wymiarów bramy od użytkownika
-        x_length_cm = float(input("Podaj szerokość bramy w osi X (w cm): "))
-        z_height_cm = float(input("Podaj wysokość bramy w osi Z (w cm): "))
-        x_length_m = x_length_cm / 100  # Konwersja cm na metry
-        z_height_m = z_height_cm / 100  # Konwersja cm na metry
+        x_length_m = width / 1000  # Konwersja cm na metry
+        z_height_m = height / 1000  # Konwersja cm na metry
 
         # Wymiary segmentu
         segment_width = segment.dimensions[0]
@@ -189,9 +182,102 @@ def add_and_align_rails(gate):
 
 
 # Uruchom funkcję
-tilt_gate()
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-roletowa",
+                                      output_obj_path="model.obj", output_mtl_path="model.mtl"):
+    obj = bpy.data.objects.get(object_name)
+    if not obj:
+        print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
+        return
 
-    
+    output_obj_path = "../generator/" + output_obj_path
+    output_mtl_path = "../generator/" + output_mtl_path
+
+    rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
+    transformed_matrix = rotation_matrix @ obj.matrix_world
+
+    with open(output_mtl_path, 'w') as mtl_file:
+        mtl_file.write(f"# Material file for {object_name}\n")
+        mtl_file.write(f"newmtl BramaMaterial\n")
+        mtl_file.write(f"Ka 0.2 0.2 0.2\n")
+        mtl_file.write(f"Kd 1.0 1.0 1.0\n")
+        mtl_file.write(f"Ks 0.5 0.5 0.5\n")
+        mtl_file.write(f"Ns 50.0\n")
+        mtl_file.write(f"d 1.0\n")
+        mtl_file.write(f"illum 2\n")
+        mtl_file.write(f"map_Kd {texture_path}\n")
+
+    with open(output_obj_path, 'w') as obj_file:
+        obj_file.write(f"mtllib {output_mtl_path}\n")
+        obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
+        obj_file.write(f"# Object: {object_name}\n\n")
+
+        mesh = obj.data
+        for vertex in mesh.vertices:
+            world_coord = transformed_matrix @ vertex.co
+            obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
+
+        if mesh.polygons:
+            for poly in mesh.polygons:
+                rotated_normal = rotation_matrix @ poly.normal
+                obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
+
+        if mesh.uv_layers:
+            uv_layer = mesh.uv_layers.active.data
+            for loop in uv_layer:
+                obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
+
+        obj_file.write(f"usemtl BramaMaterial\n")
+        for poly in mesh.polygons:
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                uv_index = loop_index + 1
+                face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
+            obj_file.write(f"f {' '.join(face_vertices)}\n")
+
+    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
+
+# Przykład użycia
+texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
+custom_export_to_obj_with_texture(texture_path=texture_path)
+
+# # Przykład użycia
+# custom_export_to_obj_with_mtl(color=(0.3, 0.5, 0.8))  # Eksport z kolorem niebieskim
+
+def read_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as file:
+        existing_data = json.load(file)
+        # Zachowaj 'Typ bramy' i 'Wymiary'
+        print(existing_data)
+        if "Wymiary" in existing_data:
+            wymiary = existing_data["Wymiary"]
+        if "Wysokość profili" in existing_data and existing_data["Wysokość profili"] is not None:
+            przetloczenie = existing_data["Wysokość profili"]
+        else:
+            przetloczenie = "77 mm"
+        if "Kolor standardowy" in existing_data:
+            name = existing_data["Kolor standardowy"]
+            print(existing_data)
+            base_path = "../jpg/Kolor_Standardowy/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        elif "Kolor RAL" in existing_data:
+            name = existing_data["Kolor RAL"]
+            base_path = "../jpg/Kolor_RAL/"
+            sanitized_name = name.strip()
+            kolor = f"{base_path}{sanitized_name}.png"
+        else:
+            kolor = f"../jpg/Kolor_RAL/7040.png"
+        return [wymiary, przetloczenie, kolor]
+
+# Uruchom funkcję
+dimensions, wysokosc_profilu, kolor = read_json("../resources/selected_options.json")
+width = dimensions.get("Szerokość")
+height = dimensions.get("Wysokość")
+
+tilt_gate(width, height, wysokosc_profilu)
+custom_export_to_obj_with_texture(kolor)
+
 #add_cameras_and_render_with_light()
 
 
