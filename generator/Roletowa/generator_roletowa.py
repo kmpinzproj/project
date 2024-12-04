@@ -56,7 +56,11 @@ def tilt_gate(width, height, wysokosc_profilu):
         # Tworzenie głównego segmentu w osi X
         joined_gate_x = segment.copy()
         joined_gate_x.data = segment.data.copy()
+
+
         joined_gate_x.location = (0, 0, segment_height / 2)  # Umieszczamy główny segment na dolnej krawędzi
+
+
         bpy.context.collection.objects.link(joined_gate_x)
         joined_gate_x.dimensions[0] = x_length_m
         joined_gate_x.name = "brama-segmentowa-x"
@@ -127,6 +131,13 @@ def tilt_gate(width, height, wysokosc_profilu):
         # Informacje końcowe
         print(f"Stworzono bramę o wymiarach: {x_length_m} m (X) x {z_height_m} m (Z).")
         add_and_align_rails(joined_gate)
+
+        gate = bpy.data.objects.get("brama-roletowa")
+        if gate:
+            print(f"Location: {gate.location}")
+            print(f"Dimensions: {gate.dimensions}")
+        else:
+            print("Brama nie została znaleziona.")
         
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
@@ -141,7 +152,6 @@ def add_and_align_rails(gate):
     if not rail:
         print(f"Obiekt o nazwie '{rail_name}' nie został znaleziony.")
         return
-
     try:
         # Tworzenie kopii szyn i dopasowanie do bramy
         rail_copy = rail.copy()
@@ -156,7 +166,6 @@ def add_and_align_rails(gate):
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
-        
 
         bpy.context.view_layer.objects.active = rail_copy
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
@@ -169,17 +178,20 @@ def add_and_align_rails(gate):
         rail_copy.location.z -= rail_bottom_z
         gate.location.z -= gate_bottom_z
 
-        print(f"Dodano i dopasowano szyny do obiektu '{gate.name}'.")
-
-        
-
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "szyny"
+        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
+
+        gate = bpy.data.objects.get("szyny")
+        if gate:
+            print(f"Location: {gate.location}")
+            print(f"Dimensions: {gate.dimensions}")
+        else:
+            print("Brama nie została znaleziona.")
 
         print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
-
 
 # Uruchom funkcję
 def custom_export_to_obj_with_texture(texture_path, object_name="brama-roletowa",
@@ -285,8 +297,6 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
 
     print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
 
-
-
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
@@ -321,7 +331,6 @@ height = dimensions.get("Wysokość")
 tilt_gate(width, height, wysokosc_profilu)
 custom_export_to_obj_with_texture(kolor)
 custom_export_to_obj_without_mtl()
-#add_cameras_and_render_with_light()
 
 
 

@@ -6,7 +6,7 @@ import bmesh
 import json
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami"]
+object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "szyny"]
 
 for object_name in object_names:
     # Sprawdzenie, czy obiekt istnieje
@@ -111,7 +111,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             bpy.ops.object.join()
 
             final_gate = bpy.context.view_layer.objects.active
-            final_gate.name = "brama-uchylna-z-szynami"
+            final_gate.name = "brama-uchylna"
 
         else:
             # Tworzenie segmentów w osi X
@@ -232,49 +232,11 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                 joined_gate.name = "brama-uchylna"  # Zmień nazwę obiektu
                 bpy.context.view_layer.objects.active = joined_gate
                 bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-            # Tworzenie kopii szyn i dopasowanie do bramy
-            rail_copy = rail.copy()
-            bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
 
-            # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
-            original_y = rail.dimensions[1]  # Zachowujemy oryginalny wymiar Y (grubość)
-            scale_x = joined_gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
-            scale_z = joined_gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
+            joined_gate.location = (0,0, joined_gate.dimensions[2]/2)
+            add_and_align_rails(joined_gate)
 
-            rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-            rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
-            rail_copy.scale[1] = rail.scale[1]  # Zachowanie oryginalnej skali w osi Y
 
-            # Ustawienie Location szyn na to samo co brama
-            rail_copy.location = joined_gate.location
-
-            # Ustawienie Location szyn na to samo co brama
-            rail_copy.location = joined_gate.location
-            # Ustawienie pozycji obiektów w osi X i Y na (0, 0)
-            rail_copy.location.x = 0
-            rail_copy.location.y = 0
-
-            joined_gate.location.x = 0
-            joined_gate.location.y = 0
-
-            bpy.context.view_layer.objects.active = rail_copy
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-
-            # Oblicz dolną krawędź każdego obiektu
-            rail_bottom_z = rail_copy.location.z - (rail_copy.dimensions[2] / 2)
-            gate_bottom_z = joined_gate.location.z - (joined_gate.dimensions[2] / 2)
-
-            # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
-            rail_copy.location.z -= rail_bottom_z  # Przesuwamy dolną krawędź szyny na Z = 0
-            joined_gate.location.z -= gate_bottom_z  # Przesuwamy dolną krawędź bramy na Z = 0
-            # Połączenie 'brama-segmentowa' i 'rail_copy'
-            bpy.context.view_layer.objects.active = joined_gate
-            joined_gate.select_set(True)
-            rail_copy.select_set(True)
-            bpy.ops.object.join()
-
-            final_gate = bpy.context.view_layer.objects.active
-            final_gate.name = "brama-uchylna-z-szynami"
 
         print(f"Stworzono bramę o wymiarach: {x_length_m}m x {z_height_m}m.")
 
@@ -284,9 +246,52 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
         print(f"Wystąpił błąd: {e}")
 
 
+def add_and_align_rails(gate):
+    rail_name = "szyny-na-brame"
+
+    # Pobierz obiekt szyn
+    rail = bpy.data.objects.get(rail_name)
+    if not rail:
+        print(f"Obiekt o nazwie '{rail_name}' nie został znaleziony.")
+        return
+
+    try:
+        # Tworzenie kopii szyn i dopasowanie do bramy
+        rail_copy = rail.copy()
+        bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
+
+        # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
+        scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
+        scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
+
+        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
+
+        # Ustawienie Location szyn na to samo co brama
+        rail_copy.location = gate.location
+
+        bpy.context.view_layer.objects.active = rail_copy
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
+        # Oblicz dolną krawędź każdego obiektu
+        rail_bottom_z = rail_copy.location.z - (rail_copy.dimensions[2] / 2)
+        gate_bottom_z = gate.location.z - (gate.dimensions[2] / 2)
+
+        # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
+        rail_copy.location.z -= rail_bottom_z
+        gate.location.z -= gate_bottom_z
+
+        final_gate = bpy.context.view_layer.objects.active
+        final_gate.name = "szyny"
+        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
+
+        print("Połączono bramę i szyny w jeden obiekt.")
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+
 def custom_export_to_obj_with_texture(
     texture_path,
-    object_name="brama-uchylna-z-szynami",
+    object_name="brama-uchylna",
     output_obj_path="model.obj",
     output_mtl_path="model.mtl"
 ):
@@ -361,10 +366,53 @@ def custom_export_to_obj_with_texture(
 
     print(f"Obiekt '{object_name}' został wyeksportowany do plików:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
 
+def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    obj = bpy.data.objects.get(object_name)
+    if not obj:
+        print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
+        return
 
-# Uruchomienie funkcji eksportu z teksturą
-texture_path = "../textures/sapeli.png"  # Ścieżka do tekstury
-custom_export_to_obj_with_texture(texture_path=texture_path)
+    output_obj_path = "../generator/" + output_obj_path
+
+    # Obrót obiektu o -90 stopni w osi X
+    rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
+    transformed_matrix = rotation_matrix @ obj.matrix_world
+
+    with open(output_obj_path, 'w') as obj_file:
+        obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
+        obj_file.write(f"# Object: {object_name}\n\n")
+
+        # Eksportuj wierzchołki
+        mesh = obj.data
+        for vertex in mesh.vertices:
+            world_coord = transformed_matrix @ vertex.co
+            obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
+
+        # Eksportuj normalne (opcjonalnie, jeśli istnieją wielokąty)
+        if mesh.polygons:
+            for poly in mesh.polygons:
+                rotated_normal = rotation_matrix @ poly.normal
+                obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
+
+        # Eksportuj współrzędne UV (jeśli istnieją warstwy UV)
+        if mesh.uv_layers:
+            uv_layer = mesh.uv_layers.active.data
+            for loop in uv_layer:
+                obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
+
+        # Eksportuj twarze
+        for poly in mesh.polygons:
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                if mesh.uv_layers:
+                    uv_index = loop_index + 1
+                    face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
+                else:
+                    face_vertices.append(f"{vertex_index + 1}")
+            obj_file.write(f"f {' '.join(face_vertices)}\n")
+
+    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
@@ -398,8 +446,8 @@ height = dimensions.get("Wysokość")
 
 # Uruchom funkcję
 tilt_gate(width, height, wypelnienie)
-texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
 custom_export_to_obj_with_texture(kolor)
+custom_export_to_obj_without_mtl()
 
 
 

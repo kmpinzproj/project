@@ -5,7 +5,7 @@ import json
 import mathutils
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami"]
+object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "szyny"]
 
 for object_name in object_names:
     obj = bpy.data.objects.get(object_name)
@@ -18,9 +18,7 @@ for object_name in object_names:
 
 
 def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia"):
-
     segment_name = "Cube.002"
-    rail_name = "szyny-na-brame"
     available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002", "Kasetony": "Cube.003"}
 
     try:
@@ -34,140 +32,104 @@ def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia
         print(f"Obiekt o nazwie '{segment_name}' nie został znaleziony.")
         return
 
+    try:
+        x_length_m = width / 1000
+        z_height_m = height / 1000
+        segment_width_m = 0.4  # Stała szerokość segmentu (40 cm w metrach)
+        segment_height_m = 0.4  # Wysokość jednego segmentu w metrach
+
+        segment_count_x = max(1, int(x_length_m // segment_width_m))
+        segment_count_z = max(1, int(z_height_m // segment_height_m))
+
+        segment_width_per_unit = round(x_length_m / segment_count_x, 3)
+        segment_height_per_unit = round(z_height_m / segment_count_z, 3)
+
+        segment_copies = []
+
+        for row in range(segment_count_z):
+            for col in range(segment_count_x):
+                new_segment = segment.copy()
+                new_segment.data = segment.data.copy()
+                new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]
+                new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]
+                new_segment.location.x = col * segment_width_per_unit
+                new_segment.location.z = row * segment_height_per_unit
+                bpy.context.collection.objects.link(new_segment)
+                segment_copies.append(new_segment)
+
+        for segment in segment_copies:
+            segment.select_set(True)
+        bpy.context.view_layer.objects.active = segment_copies[0]
+        bpy.ops.object.join()
+
+        joined_gate = bpy.context.view_layer.objects.active
+        joined_gate.name = "brama-segmentowa"
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
+        joined_gate.location = (0,0,joined_gate.dimensions[2]/2)
+
+        add_and_align_rails(joined_gate)
+
+
+
+        return joined_gate
+    except Exception as e:
+        print(f"Wystąpił błąd podczas tworzenia bramy: {e}")
+        return None
+
+
+def add_and_align_rails(gate):
+    rail_name = "szyny-na-brame"
+
+    # Pobierz obiekt szyn
     rail = bpy.data.objects.get(rail_name)
     if not rail:
         print(f"Obiekt o nazwie '{rail_name}' nie został znaleziony.")
         return
 
     try:
-        #dałbym już tu if na kasetony
-        x_length_m = width / 1000
-        z_height_m = height / 1000
-        segment_count = height // 400
-        segment_width_m = 0.4  # Stała szerokość segmentu (40 cm w metrach)
-        segment_height_m = 0.4  # Wysokość jednego segmentu w metrach
-
-        current_length_x = segment.dimensions[0]
-        current_height_z = segment.dimensions[2]
-
-        scale_factor_x = x_length_m / current_length_x
-
-        segment_copies = []
-        if przetloczenie == "Kasetony":
-            pass
-            # # Oblicz liczbę segmentów w osi X i Z
-            segment_count_x = max(1, int(x_length_m // segment_width_m))  # Co najmniej 1 segment w osi X
-            segment_count_z = max(1, int(z_height_m // segment_height_m))  # Co najmniej 1 segment w osi Z
-
-            # Oblicz nową szerokość segmentu w osi X
-            segment_width_per_unit = round(x_length_m / segment_count_x, 3)
-            segment_height_per_unit = round(z_height_m / segment_count_z, 3)
-
-            # Tworzenie i rozmieszczanie kopii segmentów w siatce (X, Z)
-            for row in range(segment_count_z):
-                for col in range(segment_count_x):
-                    new_segment = segment.copy()  # Tworzenie kopii segmentu
-                    new_segment.data = segment.data.copy()  # Niezależna kopia danych siatki
-                    new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]  # Skalowanie w osi X
-                    new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]  # Skalowanie w osi Z
-                    new_segment.location.x = col * segment_width_per_unit  # Ustawienie w osi X
-                    new_segment.location.z = row * segment_height_per_unit  # Ustawienie w osi Z
-                    bpy.context.collection.objects.link(new_segment)  # Dodanie kopii do sceny
-                    segment_copies.append(new_segment)
-
-            # Połączenie segmentów w jeden obiekt
-            bpy.context.view_layer.objects.active = segment_copies[0]
-            for segment in segment_copies:
-                segment.select_set(True)  # Zaznacz wszystkie kopie
-            bpy.ops.object.join()
-            joined_gate = bpy.context.view_layer.objects.active
-            joined_gate.name = "brama-segmentowa"  # Zmień nazwę obiektu
-
-            # Ustawienie origin bramy na środek jej geometrii
-            bpy.context.view_layer.objects.active = joined_gate
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-            joined_gate.location = (0, 0, joined_gate.dimensions[2] / 2)
-        else:
-            segment_count_x = max(1, int(x_length_m // segment_width_m))  # Co najmniej 1 segment w osi X
-            print(segment_count_x)
-            segment_count_z = max(1, int(z_height_m // segment_height_m))  # Co najmniej 1 segment w osi Z
-            print(segment_count_z)
-
-            # Oblicz nową szerokość segmentu w osi X
-            segment_width_per_unit = round(x_length_m / segment_count_x, 3)
-            print(segment_width_per_unit)
-            segment_height_per_unit = round(z_height_m / segment_count_z, 3)
-            print(segment_height_per_unit)
-
-            # Lista kopii segmentów do połączenia
-            segment_copies = []
-
-            # Tworzenie i rozmieszczanie kopii segmentów w siatce (X, Z)
-            for row in range(segment_count_z):
-                for col in range(segment_count_x):
-                    new_segment = segment.copy()  # Tworzenie kopii segmentu
-                    new_segment.data = segment.data.copy()  # Niezależna kopia danych siatki
-                    new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]  # Skalowanie w osi X
-                    new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]  # Skalowanie w osi Z
-                    new_segment.location.x = col * segment_width_per_unit  # Ustawienie w osi X
-                    new_segment.location.z = row * segment_height_per_unit  # Ustawienie w osi Z
-                    bpy.context.collection.objects.link(new_segment)  # Dodanie kopii do sceny
-                    segment_copies.append(new_segment)
-
-            # Połączenie segmentów w jeden obiekt
-            bpy.context.view_layer.objects.active = segment_copies[0]
-            for segment in segment_copies:
-                segment.select_set(True)  # Zaznacz wszystkie kopie
-            bpy.ops.object.join()
-            joined_gate = bpy.context.view_layer.objects.active
-            joined_gate.name = "brama-segmentowa"  # Zmień nazwę obiektu
-
-            # Ustawienie origin bramy na środek jej geometrii
-            bpy.context.view_layer.objects.active = joined_gate
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-
+        # Tworzenie kopii szyn i dopasowanie do bramy
         rail_copy = rail.copy()
-        bpy.context.collection.objects.link(rail_copy)
+        bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
 
-        original_y = rail.dimensions[1]
-        scale_x = joined_gate.dimensions[0] / rail.dimensions[0]
-        scale_z = joined_gate.dimensions[2] / rail.dimensions[2]
+        # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
+        scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
+        scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
 
-        rail_copy.scale[0] = scale_x
-        rail_copy.scale[2] = scale_z
-        rail_copy.scale[1] = rail.scale[1]
+        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
 
-        rail_copy.location = joined_gate.location
-        rail_copy.location.x = 0
-        rail_copy.location.y = 0
-
-        joined_gate.location.x = 0
-        joined_gate.location.y = 0
+        # Ustawienie Location szyn na to samo co brama
+        rail_copy.location = gate.location
 
         bpy.context.view_layer.objects.active = rail_copy
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
+        # Oblicz dolną krawędź każdego obiektu
         rail_bottom_z = rail_copy.location.z - (rail_copy.dimensions[2] / 2)
-        gate_bottom_z = joined_gate.location.z - (joined_gate.dimensions[2] / 2)
+        gate_bottom_z = gate.location.z - (gate.dimensions[2] / 2)
 
+        # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
         rail_copy.location.z -= rail_bottom_z
-        joined_gate.location.z -= gate_bottom_z
-
-        bpy.context.view_layer.objects.active = joined_gate
-        joined_gate.select_set(True)
-        rail_copy.select_set(True)
-        bpy.ops.object.join()
+        gate.location.z -= gate_bottom_z
 
         final_gate = bpy.context.view_layer.objects.active
-        final_gate.name = "brama-segmentowa-z-szynami"
+        final_gate.name = "szyny"
+        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
 
-    except ValueError:
-        print("Podano nieprawidłowe dane. Spróbuj ponownie.")
+        gate = bpy.data.objects.get("szyny")
+        if gate:
+            print(f"Location: {final_gate.location}")
+            print(f"Dimensions: {final_gate.dimensions}")
+        else:
+            print("Brama nie została znaleziona.")
+
+        print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
 # Eksport z teksturą
-def custom_export_to_obj_with_texture(texture_path, object_name="brama-segmentowa-z-szynami",
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-segmentowa",
                                       output_obj_path="model.obj", output_mtl_path="model.mtl"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -222,12 +184,53 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-segmentow
 
     print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
 
-# Przykład użycia
-texture_path = "../textures/sapeli.png"  # Ścieżka do pliku z teksturą
-custom_export_to_obj_with_texture(texture_path=texture_path)
+def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    obj = bpy.data.objects.get(object_name)
+    if not obj:
+        print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
+        return
 
-# # Przykład użycia
-# custom_export_to_obj_with_mtl(color=(0.3, 0.5, 0.8))  # Eksport z kolorem niebieskim
+    output_obj_path = "../generator/" + output_obj_path
+
+    # Obrót obiektu o -90 stopni w osi X
+    rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
+    transformed_matrix = rotation_matrix @ obj.matrix_world
+
+    with open(output_obj_path, 'w') as obj_file:
+        obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
+        obj_file.write(f"# Object: {object_name}\n\n")
+
+        # Eksportuj wierzchołki
+        mesh = obj.data
+        for vertex in mesh.vertices:
+            world_coord = transformed_matrix @ vertex.co
+            obj_file.write(f"v {world_coord.x} {world_coord.y} {world_coord.z}\n")
+
+        # Eksportuj normalne (opcjonalnie, jeśli istnieją wielokąty)
+        if mesh.polygons:
+            for poly in mesh.polygons:
+                rotated_normal = rotation_matrix @ poly.normal
+                obj_file.write(f"vn {rotated_normal.x} {rotated_normal.y} {rotated_normal.z}\n")
+
+        # Eksportuj współrzędne UV (jeśli istnieją warstwy UV)
+        if mesh.uv_layers:
+            uv_layer = mesh.uv_layers.active.data
+            for loop in uv_layer:
+                obj_file.write(f"vt {loop.uv.x} {loop.uv.y}\n")
+
+        # Eksportuj twarze
+        for poly in mesh.polygons:
+            face_vertices = []
+            for loop_index in poly.loop_indices:
+                vertex_index = mesh.loops[loop_index].vertex_index
+                if mesh.uv_layers:
+                    uv_index = loop_index + 1
+                    face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
+                else:
+                    face_vertices.append(f"{vertex_index + 1}")
+            obj_file.write(f"f {' '.join(face_vertices)}\n")
+
+    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
@@ -259,7 +262,7 @@ def read_json(json_path):
 dimensions, przetloczenie, kolor = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
-print(przetloczenie)
+
 scale_stack_and_align_rails(width, height, przetloczenie)
-# add_cameras_and_render_with_light()
 custom_export_to_obj_with_texture(kolor)
+custom_export_to_obj_without_mtl()
