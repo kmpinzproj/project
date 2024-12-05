@@ -27,7 +27,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
 
     # Nazwa segmentu bazowego
     segment_name = "Cube.002"
-    available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003","Jodełka w górę": "Cube.005"}
+    available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003","Jodełka w górę": "Cube.005", "START": "Cube.004"}
     # kopia szyny
     rail_name = "szyny-na-brame"
 
@@ -264,8 +264,8 @@ def add_and_align_rails(gate):
         scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
         scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
 
-        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
+        rail_copy.scale[0] = scale_x + 0.001 # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z + 0.001 # Dopasowanie wysokości
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
@@ -423,7 +423,7 @@ def read_json(json_path):
         if "Układ wypełnienia" in existing_data and existing_data["Układ wypełnienia"] is not None:
             wypelnienie = existing_data["Układ wypełnienia"]
         else:
-            wypelnienie = "Pionowe"
+            wypelnienie = "START"
         if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             print(existing_data)

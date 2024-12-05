@@ -40,8 +40,9 @@ def cut_object(obj, plane_co, plane_no, clear_outer):
 
 def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
     # Nazwa segmentu bazowego
-    available_cube = {"Poziome": "Cube.002", "Pionowe":"Cube.003", "Brak": "Cube"}
+    available_cube = {"Poziome": "Cube.002", "Pionowe":"Cube.003", "START": "Cube.004"}
     segment_name = available_cube[uklad_wypelnienia]
+    print(segment_name)
     available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2,"Dwuskrzydłowe": 3}
     segment_choice = available_segments[ilosc_skrzydel]
 
@@ -326,8 +327,8 @@ def add_and_align_rails(gate):
         scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
         scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
 
-        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
+        rail_copy.scale[0] = scale_x + 0.001 # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z + 0.001 # Dopasowanie wysokości
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
@@ -524,7 +525,7 @@ def read_json(json_path):
         if "Układ wypełnienia" in existing_data and existing_data["Układ wypełnienia"] is not None:
             uklad_wypelnienia = existing_data["Układ wypełnienia"]
         else:
-            uklad_wypelnienia = "Brak"
+            uklad_wypelnienia = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
             print(existing_data)

@@ -29,7 +29,7 @@ def tilt_gate(width, height, wysokosc_profilu):
     available_segments = ["seg1", "seg2"]
 
     # Wyświetlenie dostępnych segmentów
-    available_segments = {"77 mm": "seg1", "100 mm": "seg2"}
+    available_segments = {"77 mm": "seg1", "100 mm": "seg2", "START": "seg0"}
 
     # Wybór segmentu
     try:
@@ -161,8 +161,8 @@ def add_and_align_rails(gate):
         scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
         scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
 
-        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
+        rail_copy.scale[0] = scale_x + 0.001 # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z + 0.001 # Dopasowanie wysokości
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
@@ -307,7 +307,7 @@ def read_json(json_path):
         if "Wysokość profili" in existing_data and existing_data["Wysokość profili"] is not None:
             przetloczenie = existing_data["Wysokość profili"]
         else:
-            przetloczenie = "77 mm"
+            przetloczenie = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
             print(existing_data)

@@ -17,12 +17,13 @@ for object_name in object_names:
         test = 0
 
 
-def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia"):
+def scale_stack_and_align_rails(width, height, przetloczenie):
     segment_name = "Cube.002"
-    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002", "Kasetony": "Cube.003"}
+    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002", "Kasetony": "Cube.003", "START": "Cube.004"}
 
     try:
         segment_name = available_segments[przetloczenie]
+        print(segment_name)
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -70,8 +71,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie="Bez przetłoczenia
 
         add_and_align_rails(joined_gate)
 
-
-
         return joined_gate
     except Exception as e:
         print(f"Wystąpił błąd podczas tworzenia bramy: {e}")
@@ -93,11 +92,11 @@ def add_and_align_rails(gate):
         bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
 
         # Skalowanie szyn - ustawienie Dimensions w osiach X i Z takie same jak brama, Y pozostaje oryginalne
-        scale_x = gate.dimensions[0] / rail.dimensions[0]  # Skalowanie szerokości (X)
+        scale_x = (gate.dimensions[0] / rail.dimensions[0])  # Skalowanie szerokości (X)
         scale_z = gate.dimensions[2] / rail.dimensions[2]  # Skalowanie wysokości (Z)
 
-        rail_copy.scale[0] = scale_x  # Dopasowanie szerokości
-        rail_copy.scale[2] = scale_z  # Dopasowanie wysokości
+        rail_copy.scale[0] = scale_x + 0.001 # Dopasowanie szerokości
+        rail_copy.scale[2] = scale_z + 0.001 # Dopasowanie wysokości
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
@@ -242,7 +241,7 @@ def read_json(json_path):
         if "Rodzaj przetłoczenia" in existing_data and existing_data["Rodzaj przetłoczenia"] is not None:
             przetloczenie = existing_data["Rodzaj przetłoczenia"]
         else:
-            przetloczenie = "Bez przetłoczenia"
+            przetloczenie = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
             print(existing_data)
