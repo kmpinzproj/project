@@ -19,8 +19,8 @@ class BlenderScriptRunner:
             blend_file = "Roletowa/roletowa7.blend"
             script_file = "Roletowa/generator_roletowa.py"
         elif gate_type == "Brama Rozwierana":
-            blend_file = "Segmentowa/segmentowa_kopia3.blend"
-            script_file = "Segmentowa/generator_segmentowa.py"
+            blend_file = "Rozwierana/rozwierana3.blend"
+            script_file = "Rozwierana/generator_rozwierana.py"
 
         # Ścieżka do Blendera
         self.blender_path = self._get_default_blender_path()
