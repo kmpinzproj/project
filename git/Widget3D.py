@@ -223,9 +223,6 @@ class OpenGLWidget(QOpenGLWidget):
         if vertices is not None and faces is not None:
             self.rails_vertices = vertices
             self.rails_faces = faces
-            print(f"Loaded rails: {obj_file}")
-            print(f"- Vertices: {len(vertices)}")
-            print(f"- Faces: {len(faces)}")
         else:
             print("Error loading rails data.")
 
@@ -265,12 +262,10 @@ class OpenGLWidget(QOpenGLWidget):
 
         # Renderowanie bramy
         if self.scene:
-            print("Rendering gate...")
             self.draw_model()
 
         # Renderowanie szyn
         if self.rails_vertices is not None and self.rails_faces is not None:
-            print("Rendering rails...")
             self.draw_rails()
         else:
             print("No rails to render.")

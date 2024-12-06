@@ -58,22 +58,66 @@ class OknoWymiarow(QMainWindow):
         dimensions_label.setAlignment(Qt.AlignCenter)
         left_layout.addWidget(dimensions_label)
 
-        # Input fields for dimensions
-        self.width_input = self._create_int_input("Szerokość", left_layout, 2200, 9999)
-        self.height_input = self._create_int_input("Wysokość", left_layout, 2000, 9999)
+        # Input field for width
+        self.width_layout = QVBoxLayout()
+        width_label = QLabel("Szerokość")
+        self.width_error_label = QLabel("Minimalna szerokość: 2200 mm")
+        self.width_error_label.setStyleSheet("color: red;")
+        self.width_error_label.setAlignment(Qt.AlignLeft)
+        self.width_error_label.hide()  # Ukryte na początku
+        self.width_input = self._create_int_input_field()
 
-        # Podłącz sygnały `textChanged` do walidacji
+        self.width_layout.addWidget(width_label)  # Napis "Szerokość"
+        self.width_layout.addWidget(self.width_error_label)  # Komunikat o błędzie
+        self.width_layout.addWidget(self.width_input)  # Pole do wprowadzania danych
+        left_layout.addLayout(self.width_layout)
+
+        # Input field for height
+        self.height_layout = QVBoxLayout()
+        height_label = QLabel("Wysokość")
+        self.height_error_label = QLabel("Minimalna wysokość: 2000 mm")
+        self.height_error_label.setStyleSheet("color: red;")
+        self.height_error_label.setAlignment(Qt.AlignLeft)
+        self.height_error_label.hide()  # Ukryte na początku
+        self.height_input = self._create_int_input_field()
+
+        self.height_layout.addWidget(height_label)  # Napis "Wysokość"
+        self.height_layout.addWidget(self.height_error_label)  # Komunikat o błędzie
+        self.height_layout.addWidget(self.height_input)  # Pole do wprowadzania danych
+        left_layout.addLayout(self.height_layout)
+
+        # Connect textChanged signals to validation
         self.width_input.textChanged.connect(self.validate_inputs)
         self.height_input.textChanged.connect(self.validate_inputs)
 
-        # Spacer to center input fields vertically
         self._add_spacer(left_layout)
 
-        # Add navigation buttons at the bottom
         self._add_navigation_buttons(left_layout)
 
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return left_widget
+
+    def _create_int_input_field(self):
+        """Helper to create an integer input field with a validator."""
+        input_field = QLineEdit()
+        validator = QIntValidator(1000, 9999)  # Ograniczenie do czterech cyfr
+        input_field.setValidator(validator)
+        return input_field
+
+    def validate_inputs(self):
+        """Enable or disable the accept button based on whether the inputs are filled and valid."""
+        width = self.width_input.text()
+        height = self.height_input.text()
+
+        width_valid = width.isdigit() and int(width) >= 2200
+        height_valid = height.isdigit() and int(height) >= 2000
+
+        # Obsługa komunikatów błędów
+        self.width_error_label.setVisible(not width_valid)
+        self.height_error_label.setVisible(not height_valid)
+
+        # Aktywacja przycisku, jeśli oba pola są poprawne
+        self.accept_button.setEnabled(width_valid and height_valid)
 
     @staticmethod
     def _create_right_panel():
@@ -143,23 +187,21 @@ class OknoWymiarow(QMainWindow):
             # Zapisz wymiary do pliku JSON
             self.save_dimensions_to_file()
 
-
     def validate_inputs(self):
         """Enable or disable the accept button based on whether the inputs are filled and valid."""
         width = self.width_input.text()
         height = self.height_input.text()
 
-        # Sprawdzamy, czy oba pola są wypełnione i czy wartości są w odpowiednim zakresie
-        if width.isdigit() and height.isdigit():  # Dodatkowa weryfikacja, czy są to liczby
-            width = int(width)
-            height = int(height)
+        # Sprawdzamy, czy liczby są czterocyfrowe i czy są w odpowiednim zakresie
+        width_valid = len(width) == 4 and width.isdigit() and int(width) >= 2200
+        height_valid = len(height) == 4 and height.isdigit() and int(height) >= 2000
 
-            if width >= 2200 and height >= 2000:
-                self.accept_button.setEnabled(True)
-                return
+        # Obsługa komunikatów błędów
+        self.width_error_label.setVisible(len(width) == 4 and not width_valid)
+        self.height_error_label.setVisible(len(height) == 4 and not height_valid)
 
-        # Jeśli wartości są nieprawidłowe, przycisk pozostaje wyłączony
-        self.accept_button.setEnabled(False)
+        # Aktywacja przycisku, jeśli oba pola są poprawne
+        self.accept_button.setEnabled(width_valid and height_valid)
 
     def save_dimensions_to_file(self):
         """Saves the gate dimensions to a JSON file."""
