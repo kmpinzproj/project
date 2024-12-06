@@ -137,6 +137,10 @@ class Kreator(QMainWindow):
         else:
             print(f"Nie znaleziono pliku modelu: {gate_file}")
 
+    def render_and_change(self):
+        self.gate_render()
+        self.change_model()
+
     def _create_navigation_buttons(self):
         """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
         buttons_widget = QWidget()
@@ -148,9 +152,8 @@ class Kreator(QMainWindow):
         self.render_button = StyledButton("Renderuj")
         self.save_button = StyledButton("Zapisz")
 
-        self.save_button.clicked.connect(self.prompt_project_name)
-        self.render_button.clicked.connect(self.gate_render)
-        self.render_button.clicked.connect(self.change_model)
+        self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
+        self.render_button.clicked.connect(self.render_and_change)
 
         # Dodaj przyciski w układzie 2x2
         buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
@@ -184,21 +187,27 @@ class Kreator(QMainWindow):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
         return self.navigation_menu.validate_required_fields(self.required_fields)
 
-    def prompt_project_name(self):
+    def prompt_project_name(self, render = False):
         """Prompt user for a project name before saving."""
+        if render == True:
+            self.render_and_change()
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
         if ok and project_name.strip():
+            # Zapisz projekt tylko, jeśli nazwa została podana
             self.selected_options["Nazwa projektu"] = project_name.strip()
             self.selected_options.update(self.navigation_menu.get_selected_options())
-            # print(self.selected_options)
+
+            # Zapisz zaznaczone opcje do pliku
+            self.save_selected_options("../resources/selected_options.json", self.selected_options)
+            self.save_json_to_db("../resources/selected_options.json", self.selected_options)
+
+            print("Projekt został zapisany.")
+            return True  # Projekt został pomyślnie zapisany
         else:
             print("Anulowano zapis projektu.")
+            return False  # Użytkownik anulował zapis
 
-        # Zapisz zaznaczone opcje do pliku
-        # print(f"Zaznaczone opcje: {self.selected_options}")
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
-        self.save_json_to_db("../resources/selected_options.json", self.selected_options)
-        # print("Opcje zapisane do pliku.")
+
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
