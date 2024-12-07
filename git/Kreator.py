@@ -34,6 +34,7 @@ class Kreator(QMainWindow):
         self.default_options = {key: value for key, value in data.items() if key != "Typ bramy"}
         self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
         self.selected_options = {}
+
         # Initialize UI
         self._setup_ui()
 
@@ -103,6 +104,7 @@ class Kreator(QMainWindow):
         """
         self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
+
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
             gate_type = self.gate_type
@@ -117,6 +119,7 @@ class Kreator(QMainWindow):
         """
         self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.default_options)
+
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
             gate_type = self.gate_type
@@ -170,17 +173,10 @@ class Kreator(QMainWindow):
     def validate_and_proceed(self):
         """Validates required fields and triggers the transition if valid."""
         if self.validate_fields():
-            # print("Przeszło walidacje")
-            # Pobierz zaznaczone opcje z ScrollableMenu
-            # self.selected_options = self.navigation_menu.get_selected_options()
-
-            # Zapisz zaznaczone opcje do pliku
-            # print(f"Zaznaczone opcje: {self.selected_options}")
             self.prompt_project_name()
-            # print("Opcje zapisane do pliku. Przejście do kolejnego widoku...")
             return True
         else:
-            # print("Dlaczego działasz drugi raz?")
+            print("Coś tu nie działa")
             return False
 
     def validate_fields(self):
@@ -201,13 +197,10 @@ class Kreator(QMainWindow):
             self.save_selected_options("../resources/selected_options.json", self.selected_options)
             self.save_json_to_db("../resources/selected_options.json", self.selected_options)
 
-            print("Projekt został zapisany.")
             return True  # Projekt został pomyślnie zapisany
         else:
             print("Anulowano zapis projektu.")
             return False  # Użytkownik anulował zapis
-
-
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
@@ -316,7 +309,6 @@ class Kreator(QMainWindow):
 
         # Połącz dane bazowe z nowymi wybranymi opcjami
         base_data.update(selected_options)
-        # print(selected_options)
 
         # Zapisz dane z powrotem do pliku
         try:

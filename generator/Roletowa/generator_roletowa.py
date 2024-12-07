@@ -1,5 +1,4 @@
 import bpy
-import os
 import math
 import mathutils
 import json
@@ -18,7 +17,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-        print(f"Obiekt '{object_name}' został usunięty.")
     else:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
@@ -50,7 +48,6 @@ def tilt_gate(width, height, wysokosc_profilu):
         z_height_m = height / 1000  # Konwersja cm na metry
 
         # Wymiary segmentu
-        segment_width = segment.dimensions[0]
         segment_height = round(segment.dimensions[2], 3)
 
         # Tworzenie głównego segmentu w osi X
@@ -82,7 +79,6 @@ def tilt_gate(width, height, wysokosc_profilu):
 
         # Sprawdzenie, czy pozostała reszta do uzupełnienia
         remaining_height = round(z_height_m - current_z, 3)
-        print(f"pozostała długość : {remaining_height} , z_height_m {z_height_m}, current_z{current_z}")
         if remaining_height > 0:
             last_segment_z = joined_gate_x.copy()
             last_segment_z.data = joined_gate_x.data.copy()
@@ -129,16 +125,8 @@ def tilt_gate(width, height, wysokosc_profilu):
         bpy.context.view_layer.objects.active = joined_gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
         # Informacje końcowe
-        print(f"Stworzono bramę o wymiarach: {x_length_m} m (X) x {z_height_m} m (Z).")
         add_and_align_rails(joined_gate)
 
-        gate = bpy.data.objects.get("brama-roletowa")
-        if gate:
-            print(f"Location: {gate.location}")
-            print(f"Dimensions: {gate.dimensions}")
-        else:
-            print("Brama nie została znaleziona.")
-        
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
     except Exception as e:
@@ -177,17 +165,6 @@ def add_and_align_rails(gate):
         # Przesuń obiekty w osi Z tak, aby dolna krawędź była dokładnie na Z = 0
         rail_copy.location.z -= rail_bottom_z
         gate.location.z -= gate_bottom_z
-
-        final_gate = bpy.context.view_layer.objects.active
-        final_gate.name = "szyny"
-        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
-
-        gate = bpy.data.objects.get("szyny")
-        if gate:
-            print(f"Location: {gate.location}")
-            print(f"Dimensions: {gate.dimensions}")
-        else:
-            print("Brama nie została znaleziona.")
 
         print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
@@ -247,8 +224,6 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-roletowa"
                 face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
-
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -295,13 +270,10 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
                     face_vertices.append(f"{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
-
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'
-        print(existing_data)
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
         if "Wysokość profili" in existing_data and existing_data["Wysokość profili"] is not None:
@@ -310,7 +282,6 @@ def read_json(json_path):
             przetloczenie = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
-            print(existing_data)
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"

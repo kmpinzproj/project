@@ -5,8 +5,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from button import StyledButton
-from PySide6.QtGui import QRegularExpressionValidator
-from PySide6.QtCore import QRegularExpression
 import json
 import os
 
@@ -18,7 +16,6 @@ class OknoWymiarow(QMainWindow):
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
-
         self.dimensions = {}  # Zmienna do przechowywania wymiarów
 
         # Initialize UI
@@ -226,8 +223,6 @@ class OknoWymiarow(QMainWindow):
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
 
-            # print(f"Wymiary zostały zapisane: {data['Wymiary']}")
-
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
 
@@ -247,8 +242,6 @@ class OknoWymiarow(QMainWindow):
                     self.width_input.setText(str(dimensions['Szerokość']))
                 if 'Wysokość' in dimensions:
                     self.height_input.setText(str(dimensions['Wysokość']))
-
-                # print(f"Wczytano wymiary: {dimensions}")
 
             except (json.JSONDecodeError, FileNotFoundError) as e:
                 print(f"Błąd podczas wczytywania wymiarów: {e}")

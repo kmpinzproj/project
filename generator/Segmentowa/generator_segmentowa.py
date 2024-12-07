@@ -1,5 +1,4 @@
 import bpy
-import os
 import math
 import json
 import mathutils
@@ -23,7 +22,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie):
 
     try:
         segment_name = available_segments[przetloczenie]
-        print(segment_name)
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -114,16 +112,9 @@ def add_and_align_rails(gate):
 
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "szyny"
-        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
 
         gate = bpy.data.objects.get("szyny")
-        if gate:
-            print(f"Location: {final_gate.location}")
-            print(f"Dimensions: {final_gate.dimensions}")
-        else:
-            print("Brama nie została znaleziona.")
 
-        print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
@@ -181,8 +172,6 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-segmentow
                 face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
-
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -229,13 +218,10 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
                     face_vertices.append(f"{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
-
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'
-        print(existing_data)
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
         if "Rodzaj przetłoczenia" in existing_data and existing_data["Rodzaj przetłoczenia"] is not None:
@@ -244,7 +230,6 @@ def read_json(json_path):
             przetloczenie = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
-            print(existing_data)
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"

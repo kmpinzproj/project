@@ -221,11 +221,7 @@ class ScrollableMenu(QWidget):
         # Zaktualizuj zaznaczoną opcję
         if selected_text:
             self.selected_options[category] = selected_text
-            # print(f"Zaznaczono opcję: {selected_text} w kategorii: {category}")
-        # else:
-        #     print(f"Nie udało się pobrać nazwy opcji dla kategorii: {category}")
 
-        # print(f"To jest wybrane i przekazywane do kreatora{self.selected_options}")
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
@@ -275,7 +271,6 @@ class ScrollableMenu(QWidget):
             else:
                 # Usuń opcję z zaznaczeń, jeśli checkbox został odznaczony
                 self.selected_options.pop(category, None)
-        # print(self.selected_options)
 
     def _create_toggle_button(self):
         """Create a toggle button for collapsing/expanding options."""

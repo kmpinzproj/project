@@ -1,5 +1,4 @@
 import bpy
-import os
 import math
 import mathutils
 import bmesh
@@ -18,7 +17,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-        print(f"Obiekt '{object_name}' został usunięty.")
     else:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
@@ -31,16 +29,9 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
     # kopia szyny
     rail_name = "szyny-na-brame"
 
-    # Wyświetlenie dostępnych segmentów
-    print("Dostępne segmenty:")
-    for i, seg_name in enumerate(available_segments):
-        print(f"{i + 1}. {seg_name}")
-
     # Wybór segmentu
     try:
         segment_name = available_segments[wypelnienie]
-        print(f"Przetłoczenie   {wypelnienie}")
-        print(f"Wybrany segment   {segment_name}")
     except ValueError:
         print("Podano nieprawidłowy numer. Spróbuj ponownie.")
         return
@@ -66,15 +57,12 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
         segment_width = segment.dimensions[0]
         segment_height = segment.dimensions[2]
         if wypelnienie == "Jodełka w górę":
-
-            print("czesc")
             # Skalowanie segmentu do podanych wymiarów
             joined_gate = segment.copy()
             joined_gate.data = segment.data.copy()
             bpy.context.collection.objects.link(joined_gate)
             joined_gate.dimensions = (x_length_m, joined_gate.dimensions[1], z_height_m)
             joined_gate.location = (0, 0, z_height_m / 2)
-            print(f"joined: {joined_gate}")
             # Tworzenie kopii szyn i dopasowanie do bramy
             rail_copy = rail.copy()
             bpy.context.collection.objects.link(rail_copy)  # Dodanie kopii szyn do sceny
@@ -93,7 +81,6 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
 
             joined_gate.location.x = 0
             joined_gate.location.y = 0
-            print(bpy.context.view_layer.objects.active)
             bpy.context.view_layer.objects.active = rail_copy
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
@@ -128,7 +115,6 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
 
             # Przycięcie ostatniego segmentu w osi X
             remaining_width = round(x_length_m - current_x, 6)
-            print(f"pozostala szerokosc {remaining_width}")
             if remaining_width > 0.0001:
                 last_segment_x = segment.copy()
                 last_segment_x.data = segment.data.copy()
@@ -153,7 +139,6 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                 segment_copies_x.append(last_segment_x)
 
             # Łączenie wszystkich x w jeden obiekt
-            print(segment_copies_x)
             for segment in segment_copies_x:
                 segment.select_set(True)  # Zaznacz wszystkie kopie
             # Przykład: Zaznaczanie i łączenie obiektów
@@ -162,7 +147,6 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             if objects_to_join:  # Sprawdź, czy są obiekty do złączenia
                 bpy.context.view_layer.objects.active = objects_to_join[0]  # Ustaw aktywny obiekt
                 bpy.ops.object.join()  # Połącz obiekty
-                print("Obiekty zostały połączone.")
             else:
                 print("Brak zaznaczonych obiektów do połączenia.")
 
@@ -178,6 +162,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             current_z = base_z
             joined_segments = []
             counter = 1
+
             # Tworzenie segmentów w osi Z, bez przycinania ostatniego
             while round(current_z + segment_height, 6) <= z_height_m + base_z - segment_height:
                 new_segment = joined_gate_x.copy()
@@ -212,6 +197,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                 bm.free()
                 bpy.context.view_layer.objects.active = last_segment_z
                 bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
                 if joined_segments:  # Jeśli istnieją inne segmenty
                     last_segment_z.location.z = joined_segments[-1].location.z + (joined_segments[-1].dimensions[2] / 2) + (
                                 remaining_height / 2)
@@ -219,10 +205,10 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                     last_segment_z.location.z = current_z + (remaining_height / 2)
 
                 joined_segments.append(last_segment_z)  # Dodanie przyciętego segmentu do listy
-                print(f"Dodano segment o wysokości {remaining_height}m na górę.")
-                print(joined_segments)
+
                 for seg in joined_segments:
                     seg.select_set(True)
+
                 # Ustaw pierwszy obiekt jako aktywny
                 bpy.context.view_layer.objects.active = joined_segments[0]
 
@@ -235,10 +221,6 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
 
             joined_gate.location = (0,0, joined_gate.dimensions[2]/2)
             add_and_align_rails(joined_gate)
-
-
-
-        print(f"Stworzono bramę o wymiarach: {x_length_m}m x {z_height_m}m.")
 
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
@@ -283,18 +265,11 @@ def add_and_align_rails(gate):
 
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "szyny"
-        print(f"Stworzono bramę o wymiarach: {rail.dimensions[0]} m (X) x {rail.dimensions[2]} m (Z).")
 
-        print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def custom_export_to_obj_with_texture(
-    texture_path,
-    object_name="brama-uchylna",
-    output_obj_path="model.obj",
-    output_mtl_path="model.mtl"
-):
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-uchylna", output_obj_path="model.obj", output_mtl_path="model.mtl"):
     """
     Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
     ukrywając inne obiekty w scenie.
@@ -364,8 +339,6 @@ def custom_export_to_obj_with_texture(
                 face_vertices.append(f"{vertex_index + 1}/{uv_index}/{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Obiekt '{object_name}' został wyeksportowany do plików:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
-
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -411,8 +384,6 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
                 else:
                     face_vertices.append(f"{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
-
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:

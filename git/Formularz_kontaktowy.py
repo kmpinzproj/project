@@ -83,8 +83,6 @@ class ContactForm(QMainWindow):
         layout.addLayout(field_layout)
         return widget
 
-    from PySide6.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
-
     def create_buttons_panel(self):
         """Creates the right panel with action buttons spread over half the height."""
         panel = QWidget()

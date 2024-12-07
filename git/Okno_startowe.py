@@ -65,9 +65,6 @@ class OknoStartowe(QMainWindow):
         self.clear_selected_options()
 
         selected_items = self.project_table.selectedItems()
-        if not selected_items:
-            print("Nie zaznaczono żadnego projektu.")
-            return
 
         selected_row = self.project_table.row(selected_items[0])
         project_name_item = self.project_table.item(selected_row, 1)

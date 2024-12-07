@@ -29,8 +29,8 @@ def compute_normals(vertices, faces):
 class OpenGLWidget(QOpenGLWidget):
     def __init__(self, obj_file, rails_obj_file, parent=None):
         super().__init__(parent)
-        self.obj_file = obj_file  # Plik .obj dla bramy
-        self.rails_obj_file = rails_obj_file  # Plik .obj dla szyn
+        self.obj_file = obj_file
+        self.rails_obj_file = rails_obj_file
         self.scene = None
         self.rails_scene = None
         self.gate_vertices = None
@@ -102,7 +102,6 @@ class OpenGLWidget(QOpenGLWidget):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glEnable(GL_TEXTURE_2D)
-        print(f"Załadowano teksturę: {texture_file} (ID: {texture_id}, obrót: {rotation_angle}°)")
         return texture_id
 
     def load_model(self, obj_file):
@@ -118,7 +117,6 @@ class OpenGLWidget(QOpenGLWidget):
         for material_name, material in self.scene.materials.items():
             if material_name in material_textures:
                 texture_path = material_textures[material_name]
-                print(f"Ładowanie tekstury: {texture_path}")
                 self.material_textures[material_name] = self.load_texture(texture_path)
             else:
                 print(f"Brak tekstury dla materiału {material_name}")
@@ -126,7 +124,6 @@ class OpenGLWidget(QOpenGLWidget):
         # Debug UV współrzędnych
         if hasattr(self.scene.parser, 'tex_coords'):
             self.uv_coordinates = np.array(self.scene.parser.tex_coords, dtype=np.float32)
-            print(f"Wczytano {len(self.uv_coordinates)} UV współrzędnych.")
         else:
             print("Brak UV współrzędnych w modelu.")
 

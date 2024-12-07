@@ -35,6 +35,7 @@ class MainApplication(QMainWindow):
         #Initialize DB
         self.initialize_database()
 
+        #Initialize app
         self.setWindowTitle("Main Application")
         self.background_label = QLabel(self)
         self.background_label.setScaledContents(True)
@@ -42,7 +43,6 @@ class MainApplication(QMainWindow):
         # Initialize QStackedWidget
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
-
 
         # Add views
         self._initialize_views()
@@ -94,12 +94,12 @@ class MainApplication(QMainWindow):
 
     def navigate_to_start_view(self):
         """Przejście do widoku startowego i odświeżenie danych."""
-        self.start_view.refresh()  # Odśwież dane w oknie startowym
-        self.previous_view = None  # Brak poprzedniego widoku, jesteśmy na początku
+        self.start_view.refresh()
+        self.previous_view = None
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
-        self.previous_view = "start"  # Poprzedni widok to ekran startowy
+        self.previous_view = "start"
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
     def navigate_to_dimension_view(self, is_opened_project=False):
