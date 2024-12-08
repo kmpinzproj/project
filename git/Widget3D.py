@@ -121,7 +121,6 @@ class OpenGLWidget(QOpenGLWidget):
             else:
                 print(f"Brak tekstury dla materiału {material_name}")
 
-        # Debug UV współrzędnych
         if hasattr(self.scene.parser, 'tex_coords'):
             self.uv_coordinates = np.array(self.scene.parser.tex_coords, dtype=np.float32)
         else:
@@ -130,6 +129,9 @@ class OpenGLWidget(QOpenGLWidget):
         self.normals = compute_normals(self.vertices, self.faces)
         adjusted_center = self.compute_adjusted_center(self.vertices)
         self.vertices -= adjusted_center
+
+        # Obliczenie przekątnej i ustawienie zoomu
+        self.set_camera_based_on_model_size()
         self.update()
 
     @staticmethod
@@ -251,17 +253,19 @@ class OpenGLWidget(QOpenGLWidget):
         glPopMatrix()
 
     def paintGL(self):
+        """
+        Metoda malowania sceny OpenGL.
+        """
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glTranslatef(self.pan_x, self.pan_y - 1.2, self.zoom)
+        # Dodanie `self.pan_y` dostosowanego dynamicznie do wysokości obiektu
+        glTranslatef(self.pan_x, self.pan_y, self.zoom)
         glRotatef(self.rotation_x, 1.0, 0.0, 0.0)
         glRotatef(self.rotation_y, 0.0, 1.0, 0.0)
 
-        # Renderowanie bramy
         if self.scene:
             self.draw_model()
 
-        # Renderowanie szyn
         if self.rails_vertices is not None and self.rails_faces is not None:
             self.draw_rails()
         else:
@@ -296,12 +300,40 @@ class OpenGLWidget(QOpenGLWidget):
         self.update()
 
     def mouseDoubleClickEvent(self, event):
+        """
+        Ustaw widok początkowy po podwójnym kliknięciu.
+        """
+        self.set_camera_based_on_model_size()
         self.rotation_x = 0
         self.rotation_y = 0
-        bounding_box = np.ptp(self.vertices, axis=0)
-        max_dimension = np.max(bounding_box)
-        self.zoom = -(max_dimension * 1.5)
-        self.pan_x = 0.0
-        self.pan_y = 0.0
         self.update()
+
+    def set_camera_based_on_model_size(self):
+        """
+        Oblicza wymiary obiektu i dostosowuje zoom oraz pozycję Y, aby obiekt mieścił się w widoku.
+        """
+        min_coords = np.min(self.vertices, axis=0)  # Najmniejsze współrzędne (x, y, z)
+        max_coords = np.max(self.vertices, axis=0)  # Największe współrzędne (x, y, z)
+        dimensions = max_coords - min_coords  # Rozmiar modelu (szerokość, wysokość, głębokość)
+        diagonal = np.linalg.norm(dimensions)  # Długość przekątnej bryły (wymiary 3D)
+        print(f"Rozmiary modelu: {dimensions}, Przekątna: {diagonal}")
+
+        # Obliczamy dolną krawędź Y (dla OpenGL to "góra-dół")
+        min_y = min_coords[1]  # Dolna krawędź bramy
+        height = dimensions[1]  # Wysokość bramy
+        center_y = (min_y + max_coords[1]) / 2  # Środek osi Y (do debugowania, ale już niepotrzebny)
+
+        # Ustawienie pozycji zoomu
+        self.zoom = -(diagonal * 1)  # Pomnóż przez współczynnik, aby było trochę miejsca wokół obiektu
+
+        # Przesunięcie bramy tak, aby dolna krawędź bramy była na Y = 0
+        # Opcja 1: Dynamiczne przesunięcie (oparte na wysokości bramy)
+        self.pan_y = -min_y - 1 * height  # 10% wysokości bramy dodatkowo w dół
+
+        # Opcja 2: Stałe przesunięcie (zawsze ta sama wartość)
+        # self.pan_y = -min_y - 0.5  # Przesunięcie o stałą wartość 0.5 w dół
+
+        self.pan_x = 0.0  # Ustaw pozycję X na środek ekranu
+
+        print(f"Pan Y ustawione na {self.pan_y} dla minimalnego Y: {min_y}")
 
