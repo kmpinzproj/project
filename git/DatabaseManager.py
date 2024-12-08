@@ -387,6 +387,22 @@ class DatabaseManager:
         except Exception as e:
            print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
+    def check_project_existence(self, project_name):
+        """
+        Sprawdza, czy projekt o podanej nazwie istnieje w bazie danych.
+        Zwraca True, jeśli projekt istnieje, w przeciwnym razie False.
+        """
+        try:
+            conn = self.connect()  # Nawiązanie połączenia z bazą
+            cursor = conn.cursor()
+            query = "SELECT COUNT(*) FROM Projekt WHERE nazwa = ?"
+            cursor.execute(query, (project_name,))
+            result = cursor.fetchone()
+            conn.close()
+            return result[0] > 0  # Zwraca True, jeśli istnieje przynajmniej 1 rekord z tą nazwą projektu
+        except sqlite3.Error as e:
+            print(f"Błąd podczas sprawdzania istnienia projektu: {e}")
+            return False
 
 # TESTOWANIE BAZY DANYCH
 if __name__ == "__main__":

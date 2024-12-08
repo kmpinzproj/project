@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout, QInputDialog
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout, QInputDialog,
+    QMessageBox
 )
 from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
@@ -183,24 +184,67 @@ class Kreator(QMainWindow):
         """Validates required fields in the ScrollableMenu and returns True if all are valid."""
         return self.navigation_menu.validate_required_fields(self.required_fields)
 
-    def prompt_project_name(self, render = False):
+    def prompt_project_name(self, render=False):
         """Prompt user for a project name before saving."""
-        if render == True:
+        if render:
             self.render_and_change()
+
         project_name, ok = QInputDialog.getText(self, "Nazwa projektu", "Podaj nazwę projektu:")
+
         if ok and project_name.strip():
-            # Zapisz projekt tylko, jeśli nazwa została podana
-            self.selected_options["Nazwa projektu"] = project_name.strip()
-            self.selected_options.update(self.navigation_menu.get_selected_options())
+            project_name = project_name.strip()
 
-            # Zapisz zaznaczone opcje do pliku
-            self.save_selected_options("../resources/selected_options.json", self.selected_options)
-            self.save_json_to_db("../resources/selected_options.json", self.selected_options)
+            # Sprawdzenie, czy projekt istnieje
+            should_save = self.check_project_existence_and_prompt(project_name)
 
-            return True  # Projekt został pomyślnie zapisany
+            if should_save:
+                # Zapisz projekt tylko, jeśli nazwa została podana
+                self.selected_options["Nazwa projektu"] = project_name
+                self.selected_options.update(self.navigation_menu.get_selected_options())
+
+                # Zapisz zaznaczone opcje do pliku
+                self.save_selected_options("../resources/selected_options.json", self.selected_options)
+                self.save_json_to_db("../resources/selected_options.json", self.selected_options)
+
+                return True  # Projekt został pomyślnie zapisany
+            else:
+                print("Użytkownik anulował nadpisanie projektu.")
+                return False  # Użytkownik anulował nadpisanie
         else:
             print("Anulowano zapis projektu.")
             return False  # Użytkownik anulował zapis
+
+    from PySide6.QtWidgets import QMessageBox
+
+    def check_project_existence_and_prompt(self, project_name):
+        """
+        Sprawdza, czy projekt o podanej nazwie istnieje w bazie danych.
+        Jeśli tak, pyta użytkownika, czy chce nadpisać istniejący projekt.
+        """
+        try:
+            db_manager = DatabaseManager()
+            project_exists = db_manager.check_project_existence(
+                project_name)  # Funkcja musi zostać zaimplementowana w DatabaseManager
+
+            if project_exists:
+                # Tworzenie okna dialogowego z pytaniem o nadpisanie
+                msg_box = QMessageBox(self)
+                msg_box.setIcon(QMessageBox.Question)
+                msg_box.setWindowTitle("Nadpisz projekt")
+                msg_box.setText(f"Projekt o nazwie '{project_name}' już istnieje. Czy chcesz go nadpisać?")
+                msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                msg_box.setDefaultButton(QMessageBox.No)
+                result = msg_box.exec()
+
+                if result == QMessageBox.Yes:
+                    return True  # Użytkownik zatwierdził nadpisanie
+                else:
+                    return False  # Użytkownik anulował operację
+            else:
+                return True  # Projekt nie istnieje, można kontynuować zapis
+        except Exception as e:
+            print(f"Wystąpił błąd podczas sprawdzania istnienia projektu: {e}")
+            return False
 
     def set_default_options(self):
         """Sets default options based on loaded data."""
