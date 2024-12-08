@@ -71,7 +71,7 @@ class ScrollableMenu(QWidget):
 
         # Options widget
         if field_name in ["Kolor standardowy", "Kolor RAL", "Układ wypełnienia", "Wysokość profili",
-                          "Struktura powierzchni", "Rodzaj przetłoczenia", "Przeszklenia"]:
+                          "Struktura powierzchni", "Rodzaj przetłoczenia", "Przeszklenia", "Klamka do bramy"]:
             options_widget = self._create_image_options_widget(field_name, options)
         else:
             options_widget = self._create_checkbox_options_widget(options, field_name)
@@ -221,7 +221,6 @@ class ScrollableMenu(QWidget):
         # Zaktualizuj zaznaczoną opcję
         if selected_text:
             self.selected_options[category] = selected_text
-
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
