@@ -301,11 +301,13 @@ class OpenGLWidget(QOpenGLWidget):
 
     def mouseDoubleClickEvent(self, event):
         """
-        Ustaw widok początkowy po podwójnym kliknięciu.
+        Resetowanie widoku kamery po podwójnym kliknięciu.
         """
-        self.set_camera_based_on_model_size()
-        self.rotation_x = 0
-        self.rotation_y = 0
+        previous_pan_y = self.pan_y  # Zapisujemy bieżącą pozycję Y, aby jej nie zmieniać
+        self.set_camera_based_on_model_size()  # Ustaw ponownie widok kamery
+        self.pan_y = previous_pan_y  # Przywróć pan_y, aby nie zmieniać pozycji bramy
+        self.rotation_x = 0  # Reset obrotu X
+        self.rotation_y = 0  # Reset obrotu Y
         self.update()
 
     def set_camera_based_on_model_size(self):
