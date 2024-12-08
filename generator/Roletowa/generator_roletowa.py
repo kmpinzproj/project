@@ -134,12 +134,13 @@ def tilt_gate(width, height, wysokosc_profilu):
         
 def add_and_align_rails(gate):
     rail_name = "szyny-na-brame"
-    
+
     # Pobierz obiekt szyn
     rail = bpy.data.objects.get(rail_name)
     if not rail:
         print(f"Obiekt o nazwie '{rail_name}' nie został znaleziony.")
         return
+
     try:
         # Tworzenie kopii szyn i dopasowanie do bramy
         rail_copy = rail.copy()
@@ -166,7 +167,9 @@ def add_and_align_rails(gate):
         rail_copy.location.z -= rail_bottom_z
         gate.location.z -= gate_bottom_z
 
-        print("Połączono bramę i szyny w jeden obiekt.")
+        final_gate = bpy.context.view_layer.objects.active
+        final_gate.name = "szyny"
+
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 

@@ -23,27 +23,29 @@ for object_name in object_names:
         print(f"Obiekt '{object_name}' został usunięty.")
     else:
         print(f"Obiekt '{object_name}' nie istnieje.")
-def cut_object(obj, plane_co, plane_no, clear_outer):
-                bpy.context.view_layer.objects.active = obj
-                bm = bmesh.new()
-                bm.from_mesh(obj.data)
-                result = bmesh.ops.bisect_plane(
-                    bm,
-                    geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
-                    plane_co=plane_co,
-                    plane_no=plane_no,
-                    clear_outer=clear_outer,
-                )
-                bmesh.ops.contextual_create(bm, geom=result['geom'])
-                bm.to_mesh(obj.data)
-                bm.free()
 
-def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
+
+def cut_object(obj, plane_co, plane_no, clear_outer):
+    bpy.context.view_layer.objects.active = obj
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    result = bmesh.ops.bisect_plane(
+        bm,
+        geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+        plane_co=plane_co,
+        plane_no=plane_no,
+        clear_outer=clear_outer,
+    )
+    bmesh.ops.contextual_create(bm, geom=result['geom'])
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
+def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia=None):
     # Nazwa segmentu bazowego
-    available_cube = {"Poziome": "Cube.002", "Pionowe":"Cube.003", "START": "Cube.004"}
+    available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "START": "Cube.004"}
     segment_name = available_cube[uklad_wypelnienia]
-    print(segment_name)
-    available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2,"Dwuskrzydłowe": 3}
+    available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2, "Dwuskrzydłowe": 3}
     segment_choice = available_segments[ilosc_skrzydel]
 
     # Pobierz segment bazowy
@@ -75,7 +77,6 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
 
         # Przycięcie ostatniego segmentu w osi X
         remaining_width = round(x_length_m - current_x, 6)
-        print(f"pozostala szerokosc {remaining_width}")
         if remaining_width > 0.0001:
             last_segment_x = segment.copy()
             last_segment_x.data = segment.data.copy()
@@ -89,7 +90,7 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             result = bmesh.ops.bisect_plane(
                 bm,
                 geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
-                plane_co=(-(segment_width/2)+remaining_width, 0, 0),
+                plane_co=(-(segment_width / 2) + remaining_width, 0, 0),
                 plane_no=(1, 0, 0),
                 clear_outer=True
             )
@@ -100,7 +101,6 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             segment_copies_x.append(last_segment_x)
 
         # Łączenie wszystkich x w jeden obiekt
-        print(segment_copies_x)
         for segment in segment_copies_x:
             segment.select_set(True)  # Zaznacz wszystkie kopie
         # Przykład: Zaznaczanie i łączenie obiektów
@@ -109,7 +109,6 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
         if objects_to_join:  # Sprawdź, czy są obiekty do złączenia
             bpy.context.view_layer.objects.active = objects_to_join[0]  # Ustaw aktywny obiekt
             bpy.ops.object.join()  # Połącz obiekty
-            print("Obiekty zostały połączone.")
         else:
             print("Brak zaznaczonych obiektów do połączenia.")
 
@@ -133,10 +132,7 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             joined_segments.append(new_segment)
             current_z += segment_height
             counter += 1
-        print(counter)
-        print(segment_height)
         remaining_height = round(z_height_m - (counter * segment_height), 6)
-        print(remaining_height)
         if remaining_height > 0.0001:
             # Kopiowanie ostatniego segmentu
             last_segment_z = joined_gate_x.copy()
@@ -151,7 +147,7 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             result = bmesh.ops.bisect_plane(
                 bm,
                 geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
-                plane_co=(0, 0, -(segment_height/2)+remaining_height),  # Płaszczyzna cięcia w osi Z
+                plane_co=(0, 0, -(segment_height / 2) + remaining_height),  # Płaszczyzna cięcia w osi Z
                 plane_no=(0, 0, 1),  # Normalna osi Z (cięcie w pionie)
                 clear_outer=True  # Usuń górną część
             )
@@ -161,13 +157,12 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             bpy.context.view_layer.objects.active = last_segment_z
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
             if joined_segments:  # Jeśli istnieją inne segmenty
-                last_segment_z.location.z = joined_segments[-1].location.z + (joined_segments[-1].dimensions[2] / 2) + (remaining_height / 2)
+                last_segment_z.location.z = joined_segments[-1].location.z + (joined_segments[-1].dimensions[2] / 2) + (
+                            remaining_height / 2)
             else:  # Jeśli to pierwszy segment w osi Z
                 last_segment_z.location.z = current_z + (remaining_height / 2)
 
             joined_segments.append(last_segment_z)  # Dodanie przyciętego segmentu do listy
-            print(f"Dodano segment o wysokości {remaining_height}m na górę.")
-            print(joined_segments)
             for seg in joined_segments:
                 seg.select_set(True)
             # Ustaw pierwszy obiekt jako aktywny
@@ -179,13 +174,12 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             joined_gate.name = "brama-rozwierana"  # Zmień nazwę obiektu
             bpy.context.view_layer.objects.active = joined_gate
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-        print(f"joined: {joined_gate}")
-        
+
         joined_gate.location.x = 0
         joined_gate.location.y = 0
         add_and_align_rails(joined_gate)
 
-        if segment_choice == 3: #----------------------------------------------------- tu masz na podwójną warunek
+        if segment_choice == 3:  # ----------------------------------------------------- tu masz na podwójną warunek
             # Pobierz wymiary obiektu i jego połowę w osi X
             dimension_x = joined_gate.dimensions.x
             half_x = dimension_x / 2
@@ -204,16 +198,16 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             cut_object(
                 left_door,
                 plane_co=(0, 0, 0),  # Płaszczyzna cięcia na połowie wymiaru X
-                plane_no=(1, 0, 0),       # Normalna płaszczyzny cięcia (w kierunku dodatniego X)
-                clear_outer=True          # Usuń wszystko na prawo od płaszczyzny
+                plane_no=(1, 0, 0),  # Normalna płaszczyzny cięcia (w kierunku dodatniego X)
+                clear_outer=True  # Usuń wszystko na prawo od płaszczyzny
             )
 
             # Przycinamy prawą część (usuń lewą stronę)
             cut_object(
                 right_door,
                 plane_co=(0, 0, 0),  # Płaszczyzna cięcia na połowie wymiaru X
-                plane_no=(-1, 0, 0),      # Normalna płaszczyzny cięcia (w kierunku ujemnego X)
-                clear_outer=True          # Usuń wszystko na lewo od płaszczyzny
+                plane_no=(-1, 0, 0),  # Normalna płaszczyzny cięcia (w kierunku ujemnego X)
+                clear_outer=True  # Usuń wszystko na lewo od płaszczyzny
             )
 
             # Nadajemy nazwy
@@ -226,7 +220,7 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             # Maksymalna wartość X (prawo) i maksymalna wartość Y (tył)
             right_back_x = min(v.x for v in bounding_box)  # Maksymalny X
             right_back_y = max(v.y for v in bounding_box)  # Maksymalny Y
-            right_back_z = left_door.dimensions[2]/2  # Połowa wysokości Z
+            right_back_z = left_door.dimensions[2] / 2  # Połowa wysokości Z
 
             # Utwórz współrzędne punktu
             right_back_corner = Vector((right_back_x, right_back_y, right_back_z))
@@ -239,19 +233,18 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             left_door.select_set(True)  # Zaznacz tylko obiekt joined_gate
             bpy.context.view_layer.objects.active = left_door  # Ustaw go jako aktywny
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR')  # Ustaw origin na kursorze
-            left_door.rotation_euler[2] -= radians(5) 
-            
+            left_door.rotation_euler[2] -= radians(5)
+
             right_door.name = "Right_Door"
-            #przesuwam pivot prawych drzwi------------------------------------------------------------------------------------------
+            # przesuwam pivot prawych drzwi------------------------------------------------------------------------------------------
             # Pobierz bounding box obiektu w przestrzeni lokalnej
-            dimensions = right_door.dimensions
             bounding_box = [right_door.matrix_world @ Vector(corner) for corner in right_door.bound_box]
 
             # Znajdź prawą, pionową krawędź z tyłu
             # Maksymalna wartość X (prawo) i maksymalna wartość Y (tył)
             right_back_x = max(v.x for v in bounding_box)  # Maksymalny X
             right_back_y = max(v.y for v in bounding_box)  # Maksymalny Y
-            right_back_z = joined_gate.dimensions[2]/2  # Połowa wysokości Z
+            right_back_z = joined_gate.dimensions[2] / 2  # Połowa wysokości Z
 
             # Utwórz współrzędne punktu
             right_back_corner = Vector((right_back_x, right_back_y, right_back_z))
@@ -264,25 +257,23 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             right_door.select_set(True)  # Zaznacz tylko obiekt joined_gate
             bpy.context.view_layer.objects.active = joined_gate  # Ustaw go jako aktywny
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR')  # Ustaw origin na kursorze
-            right_door.rotation_euler[2] += radians(10) 
+            right_door.rotation_euler[2] += radians(10)
             # Ukrycie oryginalnego obiektu
             joined_gate.hide_set(True)
         else:
             # Przesuwam pivot
-            print(bpy.context.view_layer.objects.active)
-            
+
             # Pobierz bounding box obiektu w przestrzeni lokalnej
-            dimensions = joined_gate.dimensions
             bounding_box = [joined_gate.matrix_world @ Vector(corner) for corner in joined_gate.bound_box]
 
             # Znajdź prawą, pionową krawędź z tyłu
             # Maksymalna wartość X (prawo) i maksymalna wartość Y (tył)
-            if segment_choice == 1: #--------------------------------------------------------jeśli lewo stronnna
+            if segment_choice == 1:  # --------------------------------------------------------jeśli lewo stronnna
                 right_back_x = min(v.x for v in bounding_box)  # Maksymalny X
-            elif segment_choice == 2: #--------------------------------------------------------jeśli prawo stronnna
+            elif segment_choice == 2:  # --------------------------------------------------------jeśli prawo stronnna
                 right_back_x = max(v.x for v in bounding_box)  # Maksymalny X
             right_back_y = max(v.y for v in bounding_box)  # Maksymalny Y
-            right_back_z = joined_gate.dimensions[2]/2  # Połowa wysokości Z
+            right_back_z = joined_gate.dimensions[2] / 2  # Połowa wysokości Z
 
             # Utwórz współrzędne punktu
             right_back_corner = Vector((right_back_x, right_back_y, right_back_z))
@@ -295,23 +286,22 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia = None):
             joined_gate.select_set(True)  # Zaznacz tylko obiekt joined_gate
             bpy.context.view_layer.objects.active = joined_gate  # Ustaw go jako aktywny
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR')  # Ustaw origin na kursorze
-            if segment_choice == 1: #--------------------------------------------------------jeśli lewo stronnna
+            if segment_choice == 1:  # --------------------------------------------------------jeśli lewo stronnna
                 joined_gate.rotation_euler[2] -= radians(10)
                 joined_gate.name = "Left_Door"
-            elif segment_choice == 2: #--------------------------------------------------------jeśli prawo stronnna
+            elif segment_choice == 2:  # --------------------------------------------------------jeśli prawo stronnna
                 joined_gate.rotation_euler[2] += radians(10)
                 joined_gate.name = "Right_Door"
-
-        print(f"Stworzono bramę o wymiarach: {x_length_m}m x {z_height_m}m.")
 
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
-        
+
+
 def add_and_align_rails(gate):
     rail_name = "szyny-na-brame"
-    
+
     # Pobierz obiekt szyn
     rail = bpy.data.objects.get(rail_name)
     if not rail:
@@ -332,7 +322,6 @@ def add_and_align_rails(gate):
 
         # Ustawienie Location szyn na to samo co brama
         rail_copy.location = gate.location
-        
 
         bpy.context.view_layer.objects.active = rail_copy
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
@@ -345,16 +334,12 @@ def add_and_align_rails(gate):
         rail_copy.location.z -= rail_bottom_z
         gate.location.z -= gate_bottom_z
 
-        print(f"Dodano i dopasowano szyny do obiektu '{gate.name}'.")
-
-        
-
         final_gate = bpy.context.view_layer.objects.active
         final_gate.name = "szyny"
 
-        print("Połączono bramę i szyny w jeden obiekt.")
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
+
 
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
     obj = bpy.data.objects.get(object_name)
@@ -401,9 +386,6 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
                 else:
                     face_vertices.append(f"{vertex_index + 1}")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
-
-    print(f"Obiekt '{object_name}' został wyeksportowany do:\n - OBJ: {output_obj_path}")
-
 
 def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right_door_name="Right_Door",
                                  output_obj_path="model.obj", output_mtl_path="model.mtl"):
@@ -506,16 +488,14 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
             obj_file.write(f"usemtl DoorMaterial\n")
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
-    print(f"Drzwi zostały wyeksportowane do plików:\n - OBJ: {output_obj_path}\n - MTL: {output_mtl_path}")
-
     # Usuń tymczasowe obiekty
     bpy.data.objects.remove(combined_doors)
+
 
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'
-        print(existing_data)
         if "Wymiary" in existing_data:
             wymiary = existing_data["Wymiary"]
         if "Ilość skrzydeł" in existing_data and existing_data["Ilość skrzydeł"] is not None:
@@ -528,7 +508,6 @@ def read_json(json_path):
             uklad_wypelnienia = "START"
         if "Kolor standardowy" in existing_data:
             name = existing_data["Kolor standardowy"]
-            print(existing_data)
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
@@ -541,14 +520,13 @@ def read_json(json_path):
             kolor = f"../jpg/Kolor_RAL/7040.png"
         return [wymiary, przetloczenie, kolor, uklad_wypelnienia]
 
+
 # Uruchom funkcję
 dimensions, wysokosc_profilu, kolor, uklad_wypelnienia = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 
 tilt_gate(width, height, wysokosc_profilu, uklad_wypelnienia)
-# custom_export_to_obj_with_texture(kolor)
-print(kolor)
 export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
 
