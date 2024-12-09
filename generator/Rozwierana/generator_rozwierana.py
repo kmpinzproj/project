@@ -508,7 +508,7 @@ def read_json(json_path):
             uklad_wypelnienia = existing_data["Układ wypełnienia"]
         else:
             uklad_wypelnienia = "START"
-        if "Kolor standardowy" in existing_data and existing_data["Kolor Standardowy"] is not None:
+        if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
