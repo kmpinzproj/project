@@ -1,17 +1,13 @@
 import sys
 import os
 import sqlite3
-
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel
-
 from Formularz_kontaktowy import ContactForm
 from Kreator import Kreator
 from Okno_startowe import OknoStartowe
 from Okno_wymiarów import OknoWymiarow
 from Wybór_bramy import WyborBramy
-
 from PySide6.QtGui import QSurfaceFormat
 
 QApplication.setStyle("Fusion")
