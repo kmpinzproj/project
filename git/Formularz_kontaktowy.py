@@ -5,6 +5,10 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from button import StyledButton
+from generator.generator_gateV2 import BlenderScriptRunner
+import os
+import json
+
 
 
 class ContactForm(QMainWindow):
@@ -22,6 +26,7 @@ class ContactForm(QMainWindow):
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
+        self.selected_options = None
 
         # Set up the main interface
         self.setup_ui()
@@ -97,6 +102,8 @@ class ContactForm(QMainWindow):
         self.submit_button = StyledButton("Wyślij")
         self.back_button = StyledButton("Cofnij")
 
+        self.generate_pdf_button.clicked.connect(self.gate_render)
+
         layout.addWidget(self.generate_pdf_button)
         layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
         layout.addWidget(self.price_calculator_button)
@@ -110,3 +117,32 @@ class ContactForm(QMainWindow):
 
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return panel
+
+    def gate_render(self):
+        """
+        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        """
+        self.selected_options = self.load_selected_options("../resources/selected_options.json")
+        print(self.selected_options)
+        # Uruchomienie Blendera za pomocą BlenderScriptRunner
+        try:
+            gate_type = self.selected_options["Typ bramy"]
+            test = BlenderScriptRunner(gate_type, True)
+            test.run()
+        except Exception as e:
+            print(f"Wystąpił błąd podczas renderowania: {e}")
+
+    @staticmethod
+    def load_selected_options(file_path):
+        """Loads selected options from a JSON file."""
+        if not os.path.exists(file_path):
+            print(f"Plik {file_path} nie istnieje. Zwracanie pustych opcji.")
+            return {}
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                return data  # Zwraca pełne dane z JSON-a, w tym gate_type
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Błąd podczas wczytywania pliku {file_path}: {e}")
+            return {}
