@@ -89,3 +89,5 @@ docker-compose.override.yml
 /generator/model.mtl
 /generator/render_camera2.png
 /generator/render_camera1.png
+/generator/sketch_final.png
+/generator/image_with_arrows.png

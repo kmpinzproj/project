@@ -6,6 +6,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from button import StyledButton
 from generator.generator_gateV2 import BlenderScriptRunner
+from generator.szkic.szkic_prosty import draw_non_diagonal_edges
 import os
 import json
 
@@ -102,7 +103,7 @@ class ContactForm(QMainWindow):
         self.submit_button = StyledButton("Wyślij")
         self.back_button = StyledButton("Cofnij")
 
-        self.generate_pdf_button.clicked.connect(self.gate_render)
+        self.generate_pdf_button.clicked.connect(self.sketch)
 
         layout.addWidget(self.generate_pdf_button)
         layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -118,20 +119,6 @@ class ContactForm(QMainWindow):
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return panel
 
-    def gate_render(self):
-        """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
-        """
-        self.selected_options = self.load_selected_options("../resources/selected_options.json")
-        print(self.selected_options)
-        # Uruchomienie Blendera za pomocą BlenderScriptRunner
-        try:
-            gate_type = self.selected_options["Typ bramy"]
-            test = BlenderScriptRunner(gate_type, True)
-            test.run()
-        except Exception as e:
-            print(f"Wystąpił błąd podczas renderowania: {e}")
-
     @staticmethod
     def load_selected_options(file_path):
         """Loads selected options from a JSON file."""
@@ -146,3 +133,10 @@ class ContactForm(QMainWindow):
         except (json.JSONDecodeError, FileNotFoundError) as e:
             print(f"Błąd podczas wczytywania pliku {file_path}: {e}")
             return {}
+
+    def sketch(self):
+        input_obj_file = "../generator/model.obj"
+        output_image_file = "../generator/sketch_final.png"
+
+        # Rysowanie szkicu
+        draw_non_diagonal_edges(input_obj_file, output_image_file)
