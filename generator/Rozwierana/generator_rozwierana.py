@@ -8,7 +8,7 @@ from math import radians
 import json
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["szyny", "szyny-na-brame.001", "brama-uchylna-z-szynami", "Right_Door", "Left_Door", "brama-uchylna"]
+object_names = ["szyny", "szyny-na-brame.001", "brama-uchylna-z-szynami", "Right_Door", "Left_Door", "brama-uchylna", "brama-koniec"]
 
 for object_name in object_names:
     # Sprawdzenie, czy obiekt istnieje
@@ -171,7 +171,7 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia=None):
             # Połącz wszystkie wybrane obiekty
             bpy.ops.object.join()
             joined_gate = bpy.context.view_layer.objects.active
-            joined_gate.name = "brama-rozwierana"  # Zmień nazwę obiektu
+            joined_gate.name = "brama-koniec"  # Zmień nazwę obiektu
             bpy.context.view_layer.objects.active = joined_gate
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
@@ -292,6 +292,8 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia=None):
             elif segment_choice == 2:  # --------------------------------------------------------jeśli prawo stronnna
                 joined_gate.rotation_euler[2] += radians(10)
                 joined_gate.name = "Right_Door"
+
+
 
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
@@ -506,12 +508,12 @@ def read_json(json_path):
             uklad_wypelnienia = existing_data["Układ wypełnienia"]
         else:
             uklad_wypelnienia = "START"
-        if "Kolor standardowy" in existing_data:
+        if "Kolor standardowy" in existing_data and existing_data["Kolora Standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
-        elif "Kolor RAL" in existing_data:
+        elif "Kolor RAL" in existing_data and existing_data["Kolora RAL"] is not None:
             name = existing_data["Kolor RAL"]
             base_path = "../jpg/Kolor_RAL/"
             sanitized_name = name.strip()
@@ -531,7 +533,15 @@ export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
 
 
+# Ścieżka do zapisu pliku
+blend_file_path = bpy.data.filepath  # Obecna ścieżka do pliku .blend
+output_directory = os.path.dirname(blend_file_path)
+new_blend_file_path = os.path.join(output_directory, "rozwierana3.blend")
 
+# Zapisz zmiany do nowego pliku .blend (z nową nazwą)
+bpy.context.preferences.filepaths.save_version = 0
+bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath, check_existing=True, compress=True, relative_remap=True)
+print(f"Plik .blend zapisany jako: {new_blend_file_path}")
 
 
 

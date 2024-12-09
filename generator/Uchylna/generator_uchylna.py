@@ -3,9 +3,9 @@ import math
 import mathutils
 import bmesh
 import json
-
+import os
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "szyny"]
+object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "szyny", "brama-koniec"]
 
 for object_name in object_names:
     # Sprawdzenie, czy obiekt istnieje
@@ -98,7 +98,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             bpy.ops.object.join()
 
             final_gate = bpy.context.view_layer.objects.active
-            final_gate.name = "brama-uchylna"
+            final_gate.name = "brama-koniec"
 
         else:
             # Tworzenie segmentów w osi X
@@ -215,7 +215,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                 # Połącz wszystkie wybrane obiekty
                 bpy.ops.object.join()
                 joined_gate = bpy.context.view_layer.objects.active
-                joined_gate.name = "brama-uchylna"  # Zmień nazwę obiektu
+                joined_gate.name = "brama-koniec"  # Zmień nazwę obiektu
                 bpy.context.view_layer.objects.active = joined_gate
                 bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
@@ -269,7 +269,7 @@ def add_and_align_rails(gate):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def custom_export_to_obj_with_texture(texture_path, object_name="brama-uchylna", output_obj_path="model.obj", output_mtl_path="model.mtl"):
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", output_obj_path="model.obj", output_mtl_path="model.mtl"):
     """
     Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
     ukrywając inne obiekty w scenie.
@@ -422,7 +422,15 @@ custom_export_to_obj_without_mtl()
 
 
 
+# Ścieżka do zapisu pliku
+blend_file_path = bpy.data.filepath  # Obecna ścieżka do pliku .blend
+output_directory = os.path.dirname(blend_file_path)
+new_blend_file_path = os.path.join(output_directory, "uchylna5.blend")
 
+# Zapisz zmiany do nowego pliku .blend (z nową nazwą)
+bpy.context.preferences.filepaths.save_version = 0
+bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath, check_existing=True, compress=True, relative_remap=True)
+print(f"Plik .blend zapisany jako: {new_blend_file_path}")
 
 
 

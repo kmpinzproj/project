@@ -3,9 +3,9 @@ import math
 import mathutils
 import json
 import bmesh
-
+import os
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
-object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "brama-roletowa","szyny"]
+object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "brama-roletowa","szyny", "brama-koniec"]
 
 for object_name in object_names:
     # Sprawdzenie, czy obiekt istnieje
@@ -121,7 +121,7 @@ def tilt_gate(width, height, wysokosc_profilu):
         # Połącz wszystkie wybrane obiekty
         bpy.ops.object.join()
         joined_gate = bpy.context.view_layer.objects.active
-        joined_gate.name = "brama-roletowa"  # Zmień nazwę obiektu
+        joined_gate.name = "brama-koniec" # Zmień nazwę obiektu
         bpy.context.view_layer.objects.active = joined_gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
         # Informacje końcowe
@@ -174,7 +174,7 @@ def add_and_align_rails(gate):
         print(f"Wystąpił błąd: {e}")
 
 # Uruchom funkcję
-def custom_export_to_obj_with_texture(texture_path, object_name="brama-roletowa",
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
                                       output_obj_path="model.obj", output_mtl_path="model.mtl"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -283,12 +283,12 @@ def read_json(json_path):
             przetloczenie = existing_data["Wysokość profili"]
         else:
             przetloczenie = "START"
-        if "Kolor standardowy" in existing_data:
+        if "Kolor standardowy" in existing_data and existing_data["Kolora Standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
-        elif "Kolor RAL" in existing_data:
+        elif "Kolor RAL" in existing_data and existing_data["Kolora RAL"] is not None:
             name = existing_data["Kolor RAL"]
             base_path = "../jpg/Kolor_RAL/"
             sanitized_name = name.strip()
@@ -309,6 +309,14 @@ custom_export_to_obj_without_mtl()
 
 
 
+# Ścieżka do zapisu pliku
+blend_file_path = bpy.data.filepath  # Obecna ścieżka do pliku .blend
+output_directory = os.path.dirname(blend_file_path)
+new_blend_file_path = os.path.join(output_directory, "roletowa7.blend")
 
+# Zapisz zmiany do nowego pliku .blend (z nową nazwą)
+bpy.context.preferences.filepaths.save_version = 0
+bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath, check_existing=True, compress=True, relative_remap=True)
+print(f"Plik .blend zapisany jako: {new_blend_file_path}")
 
 
