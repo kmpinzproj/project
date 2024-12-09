@@ -214,8 +214,6 @@ class Kreator(QMainWindow):
             print("Anulowano zapis projektu.")
             return False  # Użytkownik anulował zapis
 
-    from PySide6.QtWidgets import QMessageBox
-
     def check_project_existence_and_prompt(self, project_name):
         """
         Sprawdza, czy projekt o podanej nazwie istnieje w bazie danych.
