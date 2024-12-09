@@ -25,12 +25,26 @@ class DatabaseManager:
     def add_project_from_json(self, project_json):
         """
         Dodaje projekt i powiązaną bramę na podstawie danych z JSON.
+        Jeśli projekt o tej samej nazwie już istnieje, usuwa go przed dodaniem nowego.
 
         :param project_json: Słownik reprezentujący dane projektu i bramy.
         :return: None
         """
-
         try:
+            # Pobranie nazwy projektu
+            project_name = project_json.get("Nazwa projektu")
+            if not project_name:
+                raise ValueError("JSON musi zawierać klucz 'Nazwa projektu'.")
+
+            # Sprawdzenie, czy projekt o tej nazwie już istnieje
+            if self.check_project_existence(project_name):
+                conn = self.connect()
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM Projekt WHERE nazwa = ?", (project_name,))
+                conn.commit()
+                print(f"Usunięto istniejący projekt o nazwie '{project_name}'.")
+                conn.close()
+
             # Pobranie typu bramy
             gate_type = project_json.get("Typ bramy")
             if not gate_type:
@@ -46,7 +60,7 @@ class DatabaseManager:
 
             if gate_type not in typ_bramy_map:
                 raise ValueError(f"Nieznany typ bramy: {gate_type}")
-            conn = self.connect()
+
             typ_bramy = typ_bramy_map[gate_type]
 
             # Pobranie wymiarów
@@ -54,15 +68,10 @@ class DatabaseManager:
             width = dimensions.get("Szerokość")
             height = dimensions.get("Wysokość")
 
-            # if not width or not height:
-            #     raise ValueError("Brama musi mieć określone szerokość i wysokość (wymiary).")
-
-            # Nawiązanie połączenia z bazą danych
-
+            conn = self.connect()
             cursor = conn.cursor()
 
             # Dodanie projektu do tabeli Projekt
-            project_name = project_json.get("Nazwa projektu")
             cursor.execute(
                 "INSERT INTO Projekt (nazwa, data_zapisu, typ_bramy) VALUES (?, CURRENT_TIMESTAMP, ?)",
                 (project_name, typ_bramy)
@@ -403,6 +412,7 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Błąd podczas sprawdzania istnienia projektu: {e}")
             return False
+
 
 # TESTOWANIE BAZY DANYCH
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 CREATE TABLE Projekt (
-    id INTEGER PRIMARY KEY, -- SQLite traktuje INTEGER PRIMARY KEY jako auto-increment
-    nazwa TEXT NOT NULL UNIQUE, -- Nazwa projektu musi być unikalna
+    id INTEGER PRIMARY KEY,
+    nazwa TEXT NOT NULL UNIQUE,
     data_zapisu DATETIME NOT NULL,
     typ_bramy TEXT NOT NULL
 );
@@ -19,9 +19,8 @@ CREATE TABLE BramaSegmentowa (
     klamka_do_bramy TEXT,
     szerokosc INTEGER,
     wysokosc INTEGER,
-    FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
+    FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
 );
-
 
 CREATE TABLE BramaRoletowa (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,9 +30,9 @@ CREATE TABLE BramaRoletowa (
     kolor_ral TEXT,
     sposob_otwierania_bramy TEXT,
     przeszklenia TEXT,
-    szerokosc INTEGER, -- Dodano szerokość bramy
-    wysokosc INTEGER,  -- Dodano wysokość bramy
-    FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
+    szerokosc INTEGER,
+    wysokosc INTEGER,
+    FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
 );
 
 CREATE TABLE BramaRozwierana (
@@ -46,9 +45,9 @@ CREATE TABLE BramaRozwierana (
     kolor_ral TEXT,
     przeszklenia TEXT,
     opcje_dodatkowe TEXT,
-    szerokosc INTEGER, -- Dodano szerokość bramy
-    wysokosc INTEGER,  -- Dodano wysokość bramy
-    FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
+    szerokosc INTEGER,
+    wysokosc INTEGER,
+    FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
 );
 
 CREATE TABLE BramaUchylna (
@@ -60,7 +59,7 @@ CREATE TABLE BramaUchylna (
     sposob_otwierania_drzwi TEXT,
     przeszklenia TEXT,
     opcje_dodatkowe TEXT,
-    szerokosc INTEGER, -- Dodano szerokość bramy
-    wysokosc INTEGER,  -- Dodano wysokość bramy
-    FOREIGN KEY (projekt_id) REFERENCES Projekt(id)
+    szerokosc INTEGER,
+    wysokosc INTEGER,
+    FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
 );
