@@ -40,9 +40,22 @@ class DatabaseManager:
             if self.check_project_existence(project_name):
                 conn = self.connect()
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM Projekt WHERE nazwa = ?", (project_name,))
+
+                # Pobranie ID projektu
+                cursor.execute("SELECT id FROM Projekt WHERE nazwa = ?", (project_name,))
+                projekt_id = cursor.fetchone()[0]  # Pobranie ID projektu
+
+                # Usuwanie powiązanych rekordów z tabel bram
+                cursor.execute("DELETE FROM BramaSegmentowa WHERE projekt_id = ?", (projekt_id,))
+                cursor.execute("DELETE FROM BramaRoletowa WHERE projekt_id = ?", (projekt_id,))
+                cursor.execute("DELETE FROM BramaRozwierana WHERE projekt_id = ?", (projekt_id,))
+                cursor.execute("DELETE FROM BramaUchylna WHERE projekt_id = ?", (projekt_id,))
+
+                # Usuwanie rekordu z tabeli Projekt
+                cursor.execute("DELETE FROM Projekt WHERE id = ?", (projekt_id,))
+
                 conn.commit()
-                print(f"Usunięto istniejący projekt o nazwie '{project_name}'.")
+                print(f"Usunięto istniejący projekt o nazwie '{project_name}' oraz powiązane rekordy.")
                 conn.close()
 
             # Pobranie typu bramy
