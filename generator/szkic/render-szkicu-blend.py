@@ -1,12 +1,15 @@
+import bpy
+import os
+import math
 def sketch_and_export(model_name: str, export_path: str, file_format: str = 'PNG'):
     """
     Tworzy szkic modelu 3D i eksportuje go do pliku PNG lub JPG z dodatkowym oświetleniem i obudową.
-    
+
     Args:
         model_name (str): Nazwa obiektu w Blenderze, który ma być wyrenderowany jako szkic.
         export_path (str): Ścieżka do katalogu wyjściowego (np. '/home/user/Desktop/').
         file_format (str): Format pliku wyjściowego ('PNG' lub 'JPEG').
-        
+
     Returns:
         None
     """
@@ -20,7 +23,7 @@ def sketch_and_export(model_name: str, export_path: str, file_format: str = 'PNG
     if obj is None:
         print(f"Obiekt '{model_name}' nie został znaleziony w scenie.")
         return
-    
+
     # Pobranie wymiarów obiektu
     dimensions = obj.dimensions
     max_dim = max(dimensions)
@@ -187,7 +190,7 @@ def sketch_and_export(model_name: str, export_path: str, file_format: str = 'PNG
         center[2] + max_dim * 0.5  # Na środku wysokości
     )
     fill_light3.data.energy = 500  # Mniejsza intensywność
-    
+
     # Obudowanie płaszczyznami
     # Plane za obiektem
         # Materiał wspólny dla wszystkich płaszczyzn
@@ -225,8 +228,8 @@ def sketch_and_export(model_name: str, export_path: str, file_format: str = 'PNG
         bottom_plane.location = (center[0], center[1], center[2] - dimensions[2] / 2 - 0.01)
         bottom_plane.rotation_euler = (0, 0, 0)
         bottom_plane.data.materials.append(mat)
-    
-        
+
+
     # Renderowanie z pierwszej kamery
     bpy.context.scene.camera = camera
     bpy.context.scene.render.filepath = os.path.join(output_directory, "render_camera1.png")
@@ -242,7 +245,7 @@ def sketch_and_export(model_name: str, export_path: str, file_format: str = 'PNG
 
 # Przykładowe użycie metody
 sketch_and_export(
-    model_name='brama-uchylna-z-szynami',  # Nazwa obiektu 3D w Blenderze
-    export_path='./tmp',  # Ścieżka do pliku wyjściowego
+    model_name="brama-koniec",  # zmiana nazwy na plik OBJ
+    export_path='../generator',  # Ścieżka do pliku wyjściowego
     file_format='PNG'  # Możliwe wartości: 'PNG', 'JPEG'
 )

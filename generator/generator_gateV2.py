@@ -1,14 +1,22 @@
 import os
 import subprocess
 
+
 class BlenderScriptRunner:
     """
-    Klasa obsługująca uruchamianie Blendera w tle z plikiem .blend i skryptem Python.
+    Klasa obsługująca uruchamianie Blendera w tle z plikiem .blend i skryptami Python.
     """
-    def __init__(self, gate_type = "Segmentowa"):
+
+    def __init__(self, gate_type="Segmentowa", szkic=False):
         """
         Inicjalizacja obiektu BlenderScriptRunner.
+
+        Args:
+            gate_type (str): Typ bramy (np. "Segmentowa", "Uchylna", "Roletowa", "Rozwierana").
+            additional_script (str, optional): Ścieżka do dodatkowego skryptu Python do uruchomienia po głównym skrypcie.
         """
+        self.szkic = szkic
+        additional_script = "Szkic/render-szkicu-blend.py"
         if gate_type == "Brama Segmentowa":
             blend_file = "Segmentowa/segmentowa_kopia3.blend"
             script_file = "Segmentowa/generator_segmentowa.py"
@@ -29,6 +37,7 @@ class BlenderScriptRunner:
         self.project_root = os.path.abspath(os.path.dirname(__file__))  # Główny folder projektu
         self.blend_file = os.path.join(self.project_root, blend_file)
         self.script_file = os.path.join(self.project_root, script_file)
+        self.additional_script_file = os.path.join(self.project_root, additional_script)
 
     def _get_default_blender_path(self):
         """
@@ -49,7 +58,8 @@ class BlenderScriptRunner:
             raise FileNotFoundError(f"Błąd: Plik .blend nie istnieje: {self.blend_file}")
         if not os.path.exists(self.script_file):
             raise FileNotFoundError(f"Błąd: Skrypt Blenderowy nie istnieje: {self.script_file}")
-        # print("Wszystkie pliki istnieją.")
+        if not os.path.exists(self.additional_script_file):
+            raise FileNotFoundError(f"Błąd: Dodatkowy skrypt Blenderowy nie istnieje: {self.additional_script_file}")
 
     def run(self):
         """
@@ -58,17 +68,30 @@ class BlenderScriptRunner:
         # Sprawdzanie ścieżek
         self.validate_paths()
 
-        # Uruchamianie Blendera
         try:
-            subprocess.run([
-                self.blender_path,
-                "--background",  # Tryb bez interfejsu graficznego
-                self.blend_file,  # Plik .blend do otwarcia
-                "--python", self.script_file  # Skrypt do wykonania
-            ], check=True)
-            # print("Blender zakończył działanie pomyślnie.")
+            # Uruchom dodatkowy skrypt, jeśli istnieje
+            if self.szkic:
+                print(f"Uruchamianie dodatkowego skryptu: {self.additional_script_file}")
+                subprocess.run([
+                    self.blender_path,
+                    "--background",  # Tryb bez interfejsu graficznego
+                    self.blend_file,  # Plik .blend do otwarcia
+                    "--python", self.additional_script_file  # Drugi skrypt do wykonania
+                ], check=True)
+                print(f"Dodatkowy skrypt zakończony pomyślnie: {self.additional_script_file}")
+            else:
+                # Uruchom pierwszy skrypt Blenderowy
+                print(f"Uruchamianie pierwszego skryptu: {self.script_file}")
+                subprocess.run([
+                    self.blender_path,
+                    "--background",  # Tryb bez interfejsu graficznego
+                    self.blend_file,  # Plik .blend do otwarcia
+                    "--python", self.script_file  # Skrypt do wykonania
+                ], check=True)
+                print(f"Pierwszy skrypt zakończony pomyślnie: {self.script_file}")
+
+
         except subprocess.CalledProcessError as e:
             print(f"Błąd podczas działania Blendera: {e}")
         except FileNotFoundError:
             print(f"Nie znaleziono Blendera w lokalizacji: {self.blender_path}")
-
