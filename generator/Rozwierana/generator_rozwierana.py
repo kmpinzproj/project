@@ -533,15 +533,7 @@ export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
 
 
-# Ścieżka do zapisu pliku
-blend_file_path = bpy.data.filepath  # Obecna ścieżka do pliku .blend
-output_directory = os.path.dirname(blend_file_path)
-new_blend_file_path = os.path.join(output_directory, "rozwierana3.blend")
 
-# Zapisz zmiany do nowego pliku .blend (z nową nazwą)
-bpy.context.preferences.filepaths.save_version = 0
-bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath, check_existing=True, compress=True, relative_remap=True)
-print(f"Plik .blend zapisany jako: {new_blend_file_path}")
 
 
 
