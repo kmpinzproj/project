@@ -5,7 +5,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from button import StyledButton
-from generator.generator_gateV2 import BlenderScriptRunner
+from generator.szkic.szkic_prosty import (draw_orthogonal_edges, draw_filtered_edges_isometric)
+from generator.szkic.szkic_opencv import detect_and_draw_arrows
 import os
 import json
 
@@ -102,7 +103,7 @@ class ContactForm(QMainWindow):
         self.submit_button = StyledButton("Wyślij")
         self.back_button = StyledButton("Cofnij")
 
-        self.generate_pdf_button.clicked.connect(self.gate_render)
+        self.generate_pdf_button.clicked.connect(self.sketch)
 
         layout.addWidget(self.generate_pdf_button)
         layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -118,20 +119,6 @@ class ContactForm(QMainWindow):
         panel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return panel
 
-    def gate_render(self):
-        """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
-        """
-        self.selected_options = self.load_selected_options("../resources/selected_options.json")
-        print(self.selected_options)
-        # Uruchomienie Blendera za pomocą BlenderScriptRunner
-        try:
-            gate_type = self.selected_options["Typ bramy"]
-            test = BlenderScriptRunner(gate_type, True)
-            test.run()
-        except Exception as e:
-            print(f"Wystąpił błąd podczas renderowania: {e}")
-
     @staticmethod
     def load_selected_options(file_path):
         """Loads selected options from a JSON file."""
@@ -146,3 +133,19 @@ class ContactForm(QMainWindow):
         except (json.JSONDecodeError, FileNotFoundError) as e:
             print(f"Błąd podczas wczytywania pliku {file_path}: {e}")
             return {}
+
+    def sketch(self):
+        selected_options = self.load_selected_options("../resources/selected_options.json")
+        input_obj_file = "../generator/model.obj"
+        output_isometric_file = "../generator/sketch_iso_no_diagonals.png"
+        output_orthogonal_file = "../generator/sketch_orthogonal.png"
+        final_output_path = '../generator/image_with_arrows.png'
+        dimensions = selected_options["Wymiary"]
+        width = dimensions["Szerokość"]
+        height = dimensions["Wysokość"]
+        # Generowanie rzutu izometrycznego
+        draw_filtered_edges_isometric(input_obj_file, output_isometric_file)
+        # Generowanie zwykłego rzutu
+        draw_orthogonal_edges(input_obj_file, output_orthogonal_file)
+
+        detect_and_draw_arrows(output_orthogonal_file, final_output_path, width, height)

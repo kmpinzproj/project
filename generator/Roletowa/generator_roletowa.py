@@ -283,12 +283,12 @@ def read_json(json_path):
             przetloczenie = existing_data["Wysokość profili"]
         else:
             przetloczenie = "START"
-        if "Kolor standardowy" in existing_data and existing_data["Kolora Standardowy"] is not None:
+        if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
-        elif "Kolor RAL" in existing_data and existing_data["Kolora RAL"] is not None:
+        elif "Kolor RAL" in existing_data and existing_data["Kolor RAL"] is not None:
             name = existing_data["Kolor RAL"]
             base_path = "../jpg/Kolor_RAL/"
             sanitized_name = name.strip()
@@ -309,14 +309,6 @@ custom_export_to_obj_without_mtl()
 
 
 
-# Ścieżka do zapisu pliku
-blend_file_path = bpy.data.filepath  # Obecna ścieżka do pliku .blend
-output_directory = os.path.dirname(blend_file_path)
-new_blend_file_path = os.path.join(output_directory, "roletowa7.blend")
 
-# Zapisz zmiany do nowego pliku .blend (z nową nazwą)
-bpy.context.preferences.filepaths.save_version = 0
-bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath, check_existing=True, compress=True, relative_remap=True)
-print(f"Plik .blend zapisany jako: {new_blend_file_path}")
 
 
