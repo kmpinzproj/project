@@ -91,3 +91,5 @@ docker-compose.override.yml
 /generator/render_camera1.png
 /generator/sketch_final.png
 /generator/image_with_arrows.png
+/generator/sketch_iso_no_diagonals.png
+/generator/sketch_orthogonal.png

@@ -5,8 +5,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 from button import StyledButton
-from generator.generator_gateV2 import BlenderScriptRunner
-from generator.szkic.szkic_prosty import draw_non_diagonal_edges
+from generator.szkic.szkic_prosty import (draw_orthogonal_edges, draw_filtered_edges_isometric)
 from generator.szkic.szkic_opencv import detect_and_draw_arrows
 import os
 import json
@@ -138,11 +137,15 @@ class ContactForm(QMainWindow):
     def sketch(self):
         selected_options = self.load_selected_options("../resources/selected_options.json")
         input_obj_file = "../generator/model.obj"
-        output_image_file = "../generator/sketch_final.png"
+        output_isometric_file = "../generator/sketch_iso_no_diagonals.png"
+        output_orthogonal_file = "../generator/sketch_orthogonal.png"
         final_output_path = '../generator/image_with_arrows.png'
         dimensions = selected_options["Wymiary"]
         width = dimensions["Szerokość"]
         height = dimensions["Wysokość"]
-        # Rysowanie szkicu
-        draw_non_diagonal_edges(input_obj_file, output_image_file)
-        detect_and_draw_arrows(output_image_file, final_output_path, width, height)
+        # Generowanie rzutu izometrycznego
+        draw_filtered_edges_isometric(input_obj_file, output_isometric_file)
+        # Generowanie zwykłego rzutu
+        draw_orthogonal_edges(input_obj_file, output_orthogonal_file)
+
+        detect_and_draw_arrows(output_orthogonal_file, final_output_path, width, height)
