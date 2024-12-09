@@ -87,3 +87,5 @@ docker-compose.override.yml
 *.egg
 *.egg-info
 /generator/model.mtl
+/generator/render_camera2.png
+/generator/render_camera1.png
