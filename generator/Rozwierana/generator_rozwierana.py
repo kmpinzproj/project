@@ -508,12 +508,12 @@ def read_json(json_path):
             uklad_wypelnienia = existing_data["Układ wypełnienia"]
         else:
             uklad_wypelnienia = "START"
-        if "Kolor standardowy" in existing_data and existing_data["Kolora Standardowy"] is not None:
+        if "Kolor standardowy" in existing_data and existing_data["Kolor Standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
-        elif "Kolor RAL" in existing_data and existing_data["Kolora RAL"] is not None:
+        elif "Kolor RAL" in existing_data and existing_data["Kolor RAL"] is not None:
             name = existing_data["Kolor RAL"]
             base_path = "../jpg/Kolor_RAL/"
             sanitized_name = name.strip()
