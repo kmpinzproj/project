@@ -222,6 +222,22 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
             joined_gate.location = (0,0, joined_gate.dimensions[2]/2)
             add_and_align_rails(joined_gate)
 
+            gate = bpy.data.objects.get("brama-koniec")
+            bpy.context.view_layer.objects.active = gate
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+            if gate:
+                gate_data = {
+                    "location": [gate.location.x, gate.location.y, gate.location.z],
+                    "dimensions": [gate.dimensions.x, gate.dimensions.y, gate.dimensions.z]
+                }
+                # Zapisz dane bramy do pliku JSON
+                with open("gate_data.json", "w") as json_file:
+                    json.dump(gate_data, json_file)
+                print("Dane bramy zostały zapisane do pliku gate_data.json.")
+            else:
+                print("Nie znaleziono obiektu bramy.")
+
     except ValueError:
         print("Podano nieprawidłowe dane. Spróbuj ponownie.")
     except Exception as e:
