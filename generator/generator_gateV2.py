@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+import json
 
 class BlenderScriptRunner:
     """
@@ -27,6 +27,8 @@ class BlenderScriptRunner:
         elif gate_type == "Brama Rozwierana":
             blend_file = "Rozwierana/rozwierana3.blend"
             script_file = "Rozwierana/generator_rozwierana.py"
+        dodatki_script = "dodatki/generowanie_dodatków.py"
+        dodatki_blend = "dodatki/uchylna11.blend"
 
         # Ścieżka do Blendera
         self.blender_path = self._get_default_blender_path()
@@ -35,6 +37,8 @@ class BlenderScriptRunner:
         self.project_root = os.path.abspath(os.path.dirname(__file__))  # Główny folder projektu
         self.blend_file = os.path.join(self.project_root, blend_file)
         self.script_file = os.path.join(self.project_root, script_file)
+        self.blend_file_d = os.path.join(self.project_root, dodatki_blend)
+        self.script_file_d = os.path.join(self.project_root, dodatki_script)
 
     def _get_default_blender_path(self):
         """
@@ -62,7 +66,7 @@ class BlenderScriptRunner:
         """
         # Sprawdzanie ścieżek
         self.validate_paths()
-
+        opcje = self.read_json("../resources/selected_options.json")
         try:
             # Uruchom pierwszy skrypt Blenderowy
             print(f"Uruchamianie pierwszego skryptu: {self.script_file}")
@@ -74,8 +78,46 @@ class BlenderScriptRunner:
             ], check=True)
             print(f"Pierwszy skrypt zakończony pomyślnie: {self.script_file}")
 
+            if opcje:
+                # Uruchom pierwszy skrypt Blenderowy
+                print(f"Uruchamianie drugiego skryptu: {self.script_file_d}")
+                subprocess.run([
+                    self.blender_path,
+                    "--background",  # Tryb bez interfejsu graficznego
+                    self.blend_file_d,  # Plik .blend do otwarcia
+                    "--python", self.script_file_d  # Skrypt do wykonania
+                ], check=True)
+                print(f"Pierwszy skrypt zakończony pomyślnie: {self.script_file_d}")
+            else:
+                # Jeśli opcje są puste, nadpisujemy plik combined_addons.obj pustym plikiem
+                with open("../generator/dodatki/combined_addons.obj", 'w') as f:
+                    f.write("# Pusty plik OBJ, ponieważ nie wybrano żadnych dodatków\n")
+
 
         except subprocess.CalledProcessError as e:
             print(f"Błąd podczas działania Blendera: {e}")
         except FileNotFoundError:
             print(f"Nie znaleziono Blendera w lokalizacji: {self.blender_path}")
+    @staticmethod
+    def read_json(json_path):
+        okno = None
+        klamka = None
+        kratka = None
+        drzwi = False  # Domyślna wartość False
+
+        with open(json_path, 'r', encoding='utf-8') as file:
+            existing_data = json.load(file)
+
+            if "Przeszklenia" in existing_data and existing_data["Przeszklenia"] is not None:
+                okno = existing_data["Przeszklenia"]
+            if "Klamka do bramy" in existing_data and existing_data["Klamka do bramy"] is not None:
+                klamka = existing_data["Klamka do bramy"]
+            if "Kratka wentylacyjna" in existing_data and existing_data["Kratka wentylacyjna"] is not None:
+                kratka = existing_data["Kratka wentylacyjna"]
+            if "Opcje dodatkowe" in existing_data and existing_data["Opcje dodatkowe"] is not None:
+                dodatki = existing_data["Opcje dodatkowe"]
+                if "Drzwi w bramie" in dodatki:
+                    drzwi = True
+
+        # Zwracaj tylko elementy, które nie są None lub False
+        return [element for element in [okno, klamka, kratka, drzwi] if element]
