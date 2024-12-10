@@ -131,15 +131,18 @@ class Kreator(QMainWindow):
 
     def change_model(self):
         """Zmienia model na nowy i przeładowuje widok 3D."""
-        # Ścieżka do pliku .obj
         gate_file = "../generator/model.obj"
         rail_file = "../generator/szyny.obj"
+        addons_file = "../generator/dodatki/combined_addons.obj"
 
-        if os.path.exists(gate_file):
-            self.opengl_widget.load_model(gate_file)  # Przeładuj model w widżecie OpenGL
+        if os.path.exists(gate_file) and os.path.exists(rail_file):
+            self.opengl_widget.load_model(gate_file)
             self.opengl_widget.load_rails(rail_file)
+            if os.path.exists(addons_file):
+                print("TEST")
+                self.opengl_widget.load_addons(addons_file)
         else:
-            print(f"Nie znaleziono pliku modelu: {gate_file}")
+            print(f"Nie znaleziono jednego z plików: {gate_file} lub {rail_file}")
 
     def render_and_change(self):
         self.gate_render()

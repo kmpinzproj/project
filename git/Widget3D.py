@@ -31,6 +31,8 @@ class OpenGLWidget(QOpenGLWidget):
         super().__init__(parent)
         self.obj_file = obj_file
         self.rails_obj_file = rails_obj_file
+        self.addons_file = "../generator/dodatki/combined_addons.obj"  # Ścieżka do pliku dodatków
+
         self.scene = None
         self.rails_scene = None
         self.gate_vertices = None
@@ -50,6 +52,8 @@ class OpenGLWidget(QOpenGLWidget):
         self.zoom = -4.0
         self.pan_x = 0.0
         self.pan_y = 0.0
+        self.addons = []  # Lista dodatków (każdy jako dict z vertices i faces)
+
 
     def initializeGL(self):
         glEnable(GL_DEPTH_TEST)
@@ -79,6 +83,8 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.load_model(self.obj_file)
         self.load_rails(self.rails_obj_file)  # Szyny
+        self.load_addons(self.addons_file)  # Wczytaj dodatki
+
 
     def load_texture(self, texture_file, rotation_angle=90):
         if not os.path.exists(texture_file):
@@ -252,13 +258,83 @@ class OpenGLWidget(QOpenGLWidget):
         glEnd()
         glPopMatrix()
 
+    def clear_addons(self):
+        """Czyści wszystkie dodatki i odświeża widok."""
+        print(f"Czyszczenie dodatków...")
+        self.addons.clear()  # Usunięcie wszystkich danych o dodatkach
+        self.update()  # Odśwież widok
+
+    def load_addons(self, obj_file):
+        """Ładowanie dodatków z pliku .obj."""
+        self.clear_addons()  # Wyczyść poprzednie dodatki
+
+        if not os.path.exists(obj_file):
+            print(f"Plik {obj_file} nie istnieje.")
+            return
+
+        global_vertex_offset = 0  # Przesunięcie indeksów wierzchołków
+        vertices_global = []  # Globalna lista wszystkich wierzchołków
+        current_object = {'name': None, 'vertices': [], 'faces': []}
+
+        with open(obj_file, 'r') as file:
+            for line in file:
+                if line.startswith('o '):  # Nowy obiekt w pliku
+                    if current_object['name'] is not None:
+                        print(
+                            f"Załadowano obiekt: {current_object['name']}, Wierzchołki: {len(current_object['vertices'])}, Twarze: {len(current_object['faces'])}")
+                        self.addons.append(current_object)
+                        # Aktualizacja przesunięcia wierzchołków
+                        global_vertex_offset += len(current_object['vertices'])
+                        vertices_global.extend(current_object['vertices'])
+
+                    current_object = {'name': line.split()[1], 'vertices': [], 'faces': []}
+
+                elif line.startswith('v '):  # Wczytaj wierzchołki
+                    vertex = [float(x) for x in line.split()[1:]]
+                    current_object['vertices'].append(vertex)
+
+                elif line.startswith('f '):  # Wczytaj twarze
+                    face = [int(idx.split('/')[0]) - 1 for idx in line.split()[1:]]
+                    shifted_face = [idx - global_vertex_offset for idx in
+                                    face]  # Skorygowane odniesienie do wierzchołków
+                    current_object['faces'].append(shifted_face)
+
+        if current_object['name'] is not None:
+            self.addons.append(current_object)
+            vertices_global.extend(current_object['vertices'])
+
+        self.update()
+
+    def draw_addons(self):
+        """Renderowanie dodatków."""
+        for addon in self.addons:
+            vertices = np.array(addon['vertices'], dtype=np.float32)
+            glDisable(GL_TEXTURE_2D)
+            glColor3f(0.8, 0.3, 0.3)  # Kolor dla dodatków
+
+            glBegin(GL_TRIANGLES)
+            for face in addon['faces']:
+                if len(face) < 3:
+                    continue
+                try:
+                    for i in range(1, len(face) - 1):
+                        v1 = vertices[face[0]]
+                        v2 = vertices[face[i]]
+                        v3 = vertices[face[i + 1]]
+                        normal = np.cross(v2 - v1, v3 - v1)
+                        normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal
+                        glNormal3fv(normal)
+                        glVertex3fv(v1)
+                        glVertex3fv(v2)
+                        glVertex3fv(v3)
+                except IndexError as e:
+                    print(f"Błąd indeksu w twarzy dodatku {addon['name']}: {e}")
+            glEnd()
+
     def paintGL(self):
-        """
-        Metoda malowania sceny OpenGL.
-        """
+        """Metoda rysowania OpenGL."""
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        # Dodanie `self.pan_y` dostosowanego dynamicznie do wysokości obiektu
         glTranslatef(self.pan_x, self.pan_y, self.zoom)
         glRotatef(self.rotation_x, 1.0, 0.0, 0.0)
         glRotatef(self.rotation_y, 0.0, 1.0, 0.0)
@@ -268,8 +344,8 @@ class OpenGLWidget(QOpenGLWidget):
 
         if self.rails_vertices is not None and self.rails_faces is not None:
             self.draw_rails()
-        else:
-            print("No rails to render.")
+
+        self.draw_addons()  #
 
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()
