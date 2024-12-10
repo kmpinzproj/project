@@ -34,4 +34,4 @@ Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 701
 Sposób otwierania drzwi: Ręczne, Automatyczne
 Przeszklenia: Okna poziome, Okna pionowe
 Kratka wentylacyjna, Lewa, Prawa, Obustronna
-Opcje dodatkowe: Rygiel trzypunktowy, Dodatkowy rygiel, Drzwi przejściowe
+Opcje dodatkowe: Rygiel trzypunktowy, Dodatkowy rygiel, Drzwi w bramie
