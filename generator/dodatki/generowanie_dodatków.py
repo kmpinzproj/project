@@ -23,11 +23,127 @@ for object_name in object_names:
 handle = bpy.data.objects.get("klamka-1")
 door = bpy.data.objects.get("drzwi")
 vent = bpy.data.objects.get("wentylv2")
+window = bpy.data.objects.get("okno1")
+glass = bpy.data.objects.get("szyba")
 bpy.context.view_layer.objects.active = door
 bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 
+
+def add_window(window, glass, option):
+    """
+    Dodaje okna oraz szyby do bramy w oparciu o dane z pliku JSON.
+
+    Argumenty:
+    window -- obiekt ramki okna (bpy.types.Object)
+    glass -- obiekt szyby (bpy.types.Object)
+    option -- opcja ustawienia okna (1 = poziome, 2 = pionowe obrócone o 90 stopni)
+
+    Zwraca:
+    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, Lista szyb
+    """
+    try:
+        if not window or not glass:
+            print("Nie znaleziono obiektu ramki okna lub szyby.")
+            return None, None
+
+        # Wczytaj dane bramy z pliku JSON
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        # Pobranie danych bramy
+        gate_location = gate_data["location"]
+        gate_dimensions = gate_data["dimensions"]
+
+        # Obliczenia pozycji
+        gate_left_edge_x = gate_location[0] - (gate_dimensions[0] / 2)
+        gate_right_edge_x = gate_location[0] + (gate_dimensions[0] / 2)
+        gate_bottom_z = gate_location[2] - (gate_dimensions[2] / 2)
+
+        # Pozycja Z okna względem dolnej krawędzi bramy
+        if gate_dimensions[2] < 2.6:
+            window_z = gate_bottom_z + 1.7  # Wysokość 1.7m od dołu
+        else:
+            window_z = gate_bottom_z + (gate_dimensions[2] / 2)  # Środek bramy
+
+        frame_objects = []  # Lista ramek
+        glass_objects = []  # Lista szyb
+
+        # --- LEWA STRONA ---
+        window_copy_left = window.copy()
+        window_copy_left.data = window.data.copy()
+        bpy.context.collection.objects.link(window_copy_left)
+
+        glass_copy_left = glass.copy()
+        glass_copy_left.data = glass.data.copy()
+        bpy.context.collection.objects.link(glass_copy_left)
+
+        # Pozycja lewego okna
+        window_left_x = -gate_dimensions[0] / 2 + 0.1 + 0.93/2
+        window_left_y = gate_location[1]  # Głębokość (Y)
+        window_left_z = window_z - 0.1  # Wysokość (Z)
+
+        window_copy_left.location = (window_left_x, window_left_y, window_left_z)
+        glass_copy_left.location = (window_left_x, window_left_y, window_left_z)
+
+        if option == "Okna pionowe":  # Obrócenie o 90 stopni
+            window_copy_left.rotation_euler[1] = math.radians(90)
+            glass_copy_left.rotation_euler[1] = math.radians(90)
+
+        frame_objects.append(window_copy_left)
+        glass_objects.append(glass_copy_left)
+
+        # --- PRAWA STRONA ---
+        window_copy_right = window.copy()
+        window_copy_right.data = window.data.copy()
+        bpy.context.collection.objects.link(window_copy_right)
+
+        glass_copy_right = glass.copy()
+        glass_copy_right.data = glass.data.copy()
+        bpy.context.collection.objects.link(glass_copy_right)
+
+        # Pozycja prawego okna
+        window_right_x = gate_right_edge_x - 0.2 - (window_copy_right.dimensions[0] / 2)
+        window_right_y = gate_location[1]  # Głębokość (Y)
+        window_right_z = window_z - 0.1  # Wysokość (Z)
+
+        window_copy_right.location = (window_right_x, window_right_y, window_right_z)
+        glass_copy_right.location = (window_right_x, window_right_y, window_right_z)
+
+        if option == "Okna pionowe":  # Obrócenie o 90 stopni
+            window_copy_right.rotation_euler[1] = math.radians(90)
+            glass_copy_right.rotation_euler[1] = math.radians(90)
+
+        frame_objects.append(window_copy_right)
+        glass_objects.append(glass_copy_right)
+
+        # Zastosowanie transformacji do ramek
+        for frame in frame_objects:
+            bpy.context.view_layer.objects.active = frame
+            frame.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        # Zastosowanie transformacji do szyb
+        for glass in glass_objects:
+            bpy.context.view_layer.objects.active = glass
+            glass.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        print(f"Ramki i szyby zostały dodane. Liczba ramek: {len(frame_objects)}, Liczba szyb: {len(glass_objects)}")
+        return frame_objects, glass_objects
+
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return None, None
+
+
+ # 1 pionowe, 2 poziome działa na 2 obiektach szyby w glass i ramki na okno w window, pozycjonuje to względem szerokości ide spac
+
+
+# ale ten to by pasowało na brame uchylna gdzie drzwi sa blisko szczytu na wyzszy szyt mozna dac okno wyzej jak sie miesci
 
 def position_door_from_file(door):
     """
@@ -329,10 +445,12 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
     if "Drzwi w bramie" in dodatki:
         door_copy = position_door_from_file(door)
         if door_copy:
+            door_copy.name = "drzwi_w_bramie"
             objects_to_export.append(door_copy)
             print("Dodano drzwi do eksportu.")
             handle_door_copy = add_handle(handle, door=door_copy)
             if handle_door_copy:
+                handle_door_copy.name = "klamka_do_drzwi"
                 objects_to_export.append(handle_door_copy)
                 print("Dodano klamkę od drzwi do eksportu.")
 
@@ -340,14 +458,30 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
     if 'kratka' in dodatki:
         vent_copy = position_vent_from_file(vent, dodatki["kratka"])
         if vent_copy:
+            vent_copy.name = "kratka_wentylacyjna"
             objects_to_export.append(vent_copy)
             print("Dodano kratkę wentylacyjną do eksportu.")
 
     if 'klamka' in dodatki:
         handle_copy = add_handle(handle, dodatki["klamka"])
         if handle_copy:
+            handle_copy.name = "klamka_do_bramy"
             objects_to_export.append(handle_copy)
             print("Dodano klamkę do eksportu.")
+
+    if 'okno' in dodatki:
+        print("TEST OKNA")
+        window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
+        if window_copies:
+            for idx, frame in enumerate(window_copies, start=1):
+                frame.name = f"ramka_okna_{idx}"
+                objects_to_export.append(frame)
+            print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
+        if glass_copies:
+            for idx, glass2 in enumerate(glass_copies, start=1):
+                glass2.name = f"szyba_okna_{idx}"
+                objects_to_export.append(glass2)
+            print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
 
     # Eksportuj tylko jeśli mamy jakieś obiekty do eksportu
     if objects_to_export:
