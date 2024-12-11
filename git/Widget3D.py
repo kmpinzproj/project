@@ -316,9 +316,13 @@ class OpenGLWidget(QOpenGLWidget):
         # Słownik z kolorami dla dodatków
         addon_colors = {
             "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
-            "drzwi.001": (51, 56, 52),  # Zielony
-            "klamka-1.001": (0, 0, 0),  # Niebieski
-            "szyba": (0.5, 0.5, 0.5)  # Szary
+            "drzwi_w_bramie": (51, 56, 52),  # Zielony
+            "klamka_do_drzwi": (0, 0, 0),  # Niebieski
+            "szyba_okna_1": (16, 157, 232),  # Szary
+            "szyba_okna_2": (16, 157, 232),  # Szary
+            "ramka_okna_1": (51, 56, 52),  # Szary
+            "ramka_okna_2": (51, 56, 52),  # Szary
+
         }
 
         # Ustaw kolory dla wszystkich dodatków
