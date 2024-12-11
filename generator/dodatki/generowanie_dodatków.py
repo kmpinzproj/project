@@ -21,15 +21,11 @@ for object_name in object_names:
         print(f"Obiekt '{object_name}' nie istnieje.")
 
 handle = bpy.data.objects.get("klamka-1")
-gate = bpy.data.objects.get("brama-uchylna-z-szynami")
 door = bpy.data.objects.get("drzwi")
+vent = bpy.data.objects.get("wentylv2")
 bpy.context.view_layer.objects.active = door
 bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-print(door)
-print(gate)
-print(gate.dimensions[0])
-print(gate.dimensions[2])
 
 
 
@@ -89,7 +85,7 @@ def position_door_from_file(door):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def add_handle(width, handle):
+def add_handle(handle,typ = "Klamka 1",  door=None):
     """
     Dodaje kopię klamki zarówno do drzwi, jak i do bramy.
 
@@ -97,60 +93,81 @@ def add_handle(width, handle):
     Jeśli istnieje brama, klamka jest dodawana na środku bramy.
 
     Argumenty:
-    gate -- obiekt bramy (bpy.types.Object)
-    door -- obiekt drzwi (bpy.types.Object) (może być None)
     handle -- obiekt klamki (bpy.types.Object)
+    door -- obiekt drzwi (bpy.types.Object) (opcjonalny)
     """
     try:
         if not handle:
             print("Nie znaleziono obiektu klamki.")
-            return
+            return None
+
+        # Wczytaj dane bramy z pliku JSON
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        # Pobranie danych bramy
+        gate_location = gate_data["location"]
+        gate_dimensions = gate_data["dimensions"]
 
         # Ustawienie origin na środku obiektu klamki
         bpy.context.view_layer.objects.active = handle
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
-        if door:  # tu możesz dać warunek jeśli drzwi istnieją w bramie
-            # Ustawienie origin drzwi
-
+        if door:  # Pozycjonowanie klamki na drzwiach
             # Tworzenie kopii klamki dla drzwi
             door_handle_copy = handle.copy()
             door_handle_copy.data = handle.data.copy()
             bpy.context.collection.objects.link(door_handle_copy)
 
+            # Ustawienie origin na środku geometrii drzwi
+            bpy.context.view_layer.objects.active = door
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
             # Obliczenie pozycji klamki dla drzwi
-            door_left_edge_x = -(width / 2) + 0.10  # Lewa krawędź drzwi
+            door_left_edge_x = door.location[0]   # Lewa krawędź drzwi
             handle_x = door_left_edge_x + 0.1 + (door_handle_copy.dimensions[0] / 2)  # 10 cm od lewej krawędzi drzwi
-            handle_y = - 0.03  # Ta sama pozycja w osi Y co drzwi
-            handle_z = 0.9  # 90 cm od dołu drzwi
+            handle_y = door.location[1] - 0.03  # Taka sama pozycja w osi Y co drzwi
+            handle_z = door.location[2] - (door.dimensions[2] / 2) + 0.9  # 90 cm od dolnej krawędzi drzwi
 
             # Ustawienie pozycji klamki dla drzwi
             door_handle_copy.location = (handle_x, handle_y, handle_z)
-            print(f"Klamka została dodana do drzwi 10 cm od lewej krawędzi na wysokości 90 cm.")
+            print(f"Klamka została dodana do drzwi na pozycji: {door_handle_copy.location}")
+            bpy.context.view_layer.objects.active = door_handle_copy
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            return door_handle_copy
 
-        if gate:  # dodaje na brame
-            # Ustawienie origin bramy
+        else:  # Pozycjonowanie klamki na bramie
+            if typ == "Klamka 2":
+                handle = bpy.data.objects.get("klamka-2")
+            elif typ == "Klamka 3":
+                handle = bpy.data.objects.get("klamka-3")
+            elif typ == "Klamka 4":
+                handle = bpy.data.objects.get("klamka-4")
 
-            # Tworzenie kopii klamki dla bramy
-            gate_handle_copy = handle.copy()
-            gate_handle_copy.data = handle.data.copy()
-            bpy.context.collection.objects.link(gate_handle_copy)
+            # Tworzenie kopii klamki
+            handle_copy = handle.copy()
+            handle_copy.data = handle.data.copy()
+            bpy.context.collection.objects.link(handle_copy)
 
-            # Obliczenie pozycji klamki dla bramy
-            handle_x = 0  # Środek bramy
-            handle_y = -0.03  # Ta sama pozycja w osi Y co brama
-            handle_z = 0.7  # Środek bramy w osi Z
+            # Obliczenie pozycji klamki względem bramy
+            handle_x = gate_location[0]  # Środek bramy
+            handle_y = gate_location[1] - 0.03  # Ta sama głębokość (Y) co brama, cofnięcie o 0.03
+            gate_bottom_z = gate_location[2] - (gate_dimensions[2] / 2)  # Dolna krawędź bramy
+            handle_z = gate_bottom_z + 0.7  # Klamka umieszczona 70 cm nad dolną krawędzią bramy
 
-            # Ustawienie pozycji klamki dla bramy
-            gate_handle_copy.location = (handle_x, handle_y, handle_z)
-            print(f"Klamka została dodana na środku bramy.")
+            # Ustawienie lokalizacji klamki
+            handle_copy.location = (handle_x, handle_y, handle_z)
+
+            # Zastosowanie transformacji dla obiektu
+            bpy.context.view_layer.objects.active = handle_copy
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+            print(f"Klamka została dodana na bramie na pozycji {handle_copy.location}")
+            return handle_copy
 
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
-
-
-vent = bpy.data.objects.get("wentylv2")
-
+        return None
 
 def position_vent_from_file(vent, option):
     """
@@ -295,7 +312,7 @@ def export_multiple_objects_to_obj_custom(objects, output_path):
     except Exception as e:
         print(f"Wystąpił błąd podczas eksportu: {e}")
 
-def export_selected_objects(dodatki, szerokosc, door, vent, output_path="../generator/dodatki/combined_addons.obj"):
+def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_addons.obj"):
     """
     Eksportuje wybrane obiekty (drzwi, kratka wentylacyjna) do jednego pliku .obj.
 
@@ -314,6 +331,10 @@ def export_selected_objects(dodatki, szerokosc, door, vent, output_path="../gene
         if door_copy:
             objects_to_export.append(door_copy)
             print("Dodano drzwi do eksportu.")
+            handle_door_copy = add_handle(handle, door=door_copy)
+            if handle_door_copy:
+                objects_to_export.append(handle_door_copy)
+                print("Dodano klamkę od drzwi do eksportu.")
 
     # Kratka wentylacyjna
     if 'kratka' in dodatki:
@@ -321,6 +342,12 @@ def export_selected_objects(dodatki, szerokosc, door, vent, output_path="../gene
         if vent_copy:
             objects_to_export.append(vent_copy)
             print("Dodano kratkę wentylacyjną do eksportu.")
+
+    if 'klamka' in dodatki:
+        handle_copy = add_handle(handle, dodatki["klamka"])
+        if handle_copy:
+            objects_to_export.append(handle_copy)
+            print("Dodano klamkę do eksportu.")
 
     # Eksportuj tylko jeśli mamy jakieś obiekty do eksportu
     if objects_to_export:
@@ -361,4 +388,4 @@ dodatki = read_json("../resources/selected_options.json")
 szerokość = dodatki["wymiary"]["Szerokość"]
 print(dodatki)
 
-export_selected_objects(dodatki, szerokość, door, vent)
+export_selected_objects(dodatki)
