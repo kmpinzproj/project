@@ -53,7 +53,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.pan_x = 0.0
         self.pan_y = 0.0
         self.addons = []  # Lista dodatków (każdy jako dict z vertices i faces)
-
+        self.addon_colors = {}  # Słownik z kolorami dla dodatków (nazwa dodatku -> (R, G, B))
 
     def initializeGL(self):
         glEnable(GL_DEPTH_TEST)
@@ -63,6 +63,9 @@ class OpenGLWidget(QOpenGLWidget):
         glShadeModel(GL_FLAT)
         glEnable(GL_MULTISAMPLE)
         glClearColor(0.1, 0.2, 0.3, 1.0)
+
+        glEnable(GL_COLOR_MATERIAL)  # Dodane - umożliwia kolory dla materiałów
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
 
         ambient_light = [0.3, 0.3, 0.3, 1.0]
         glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light)
@@ -158,7 +161,9 @@ class OpenGLWidget(QOpenGLWidget):
             return {}
 
     def draw_model(self):
+        glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
         scale_uv = 8.0  # Skalowanie UV (liczba powtórzeń tekstury na osi X i Y)
+        glDisable(GL_COLOR_MATERIAL)  # Wyłącz koloryzację materiałów dla bramy
         for mesh in self.scene.meshes.values():
             texture_id = None
             if mesh.materials:
@@ -168,7 +173,6 @@ class OpenGLWidget(QOpenGLWidget):
             if texture_id:
                 glEnable(GL_TEXTURE_2D)
                 glBindTexture(GL_TEXTURE_2D, texture_id)
-                # Ustaw tryb powielania tekstury w OpenGL
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
             else:
@@ -178,7 +182,6 @@ class OpenGLWidget(QOpenGLWidget):
             for face in mesh.faces:
                 for vertex_idx in face:
                     if texture_id and self.uv_coordinates is not None and vertex_idx < len(self.uv_coordinates):
-                        # Skalowanie UV
                         uv = self.uv_coordinates[vertex_idx]
                         glTexCoord2f(uv[0] * scale_uv, uv[1] * scale_uv)
                     glNormal3fv(self.normals[vertex_idx])
@@ -188,6 +191,7 @@ class OpenGLWidget(QOpenGLWidget):
             if texture_id:
                 glBindTexture(GL_TEXTURE_2D, 0)
                 glDisable(GL_TEXTURE_2D)
+        glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
     def compute_adjusted_center(self, vertices):
         min_y = np.min(vertices[:, 1])
@@ -232,31 +236,39 @@ class OpenGLWidget(QOpenGLWidget):
             print("Error loading rails data.")
 
     def draw_rails(self):
-        """Renderowanie szyn z ustalonym kolorem."""
+        glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
         if not hasattr(self, 'rails_vertices') or not hasattr(self, 'rails_faces'):
             print("No rails data to render.")
+            glPopAttrib()
             return
 
-        glDisable(GL_TEXTURE_2D)
-        glColor3f(0.5, 0.5, 0.5)  # Kolor szary dla szyn
+        color = (51 / 255, 56 / 255, 52 / 255)  # Domyślny kolor szary (RGB w skali 0-1)
+
+        glDisable(GL_TEXTURE_2D)  # Wyłącz tekstury dla szyn
+        glEnable(GL_COLOR_MATERIAL)  # Włącz kolorowanie
+        glColor3f(*color)  # Ustaw kolor szyn
+
         glPushMatrix()
-        glTranslatef(0.0, 0.0, 0.0)  # Tymczasowe przesunięcie szyn w stronę kamery
         glBegin(GL_TRIANGLES)
         for face in self.rails_faces:
-            # Sprawdź, czy twarz ma więcej niż trzy wierzchołki
             for i in range(1, len(face) - 1):
                 v1 = self.rails_vertices[face[0]]
                 v2 = self.rails_vertices[face[i]]
                 v3 = self.rails_vertices[face[i + 1]]
-                # Oblicz normalne dla trójkąta
+
                 normal = np.cross(v2 - v1, v3 - v1)
                 normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal
+
                 glNormal3fv(normal)
+                glColor3f(*color)  # Kolor dla każdego wierzchołka (aby mieć pewność)
+
                 glVertex3fv(v1)
                 glVertex3fv(v2)
                 glVertex3fv(v3)
         glEnd()
         glPopMatrix()
+
+        glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
     def clear_addons(self):
         """Czyści wszystkie dodatki i odświeża widok."""
@@ -283,7 +295,6 @@ class OpenGLWidget(QOpenGLWidget):
                         print(
                             f"Załadowano obiekt: {current_object['name']}, Wierzchołki: {len(current_object['vertices'])}, Twarze: {len(current_object['faces'])}")
                         self.addons.append(current_object)
-                        # Aktualizacja przesunięcia wierzchołków
                         global_vertex_offset += len(current_object['vertices'])
                         vertices_global.extend(current_object['vertices'])
 
@@ -295,23 +306,37 @@ class OpenGLWidget(QOpenGLWidget):
 
                 elif line.startswith('f '):  # Wczytaj twarze
                     face = [int(idx.split('/')[0]) - 1 for idx in line.split()[1:]]
-                    shifted_face = [idx - global_vertex_offset for idx in
-                                    face]  # Skorygowane odniesienie do wierzchołków
+                    shifted_face = [idx - global_vertex_offset for idx in face]
                     current_object['faces'].append(shifted_face)
 
         if current_object['name'] is not None:
             self.addons.append(current_object)
             vertices_global.extend(current_object['vertices'])
 
-        self.update()
+        # Słownik z kolorami dla dodatków
+        addon_colors = {
+            "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
+            "drzwi.001": (51, 56, 52),  # Zielony
+            "klamka-1.001": (0, 0, 0),  # Niebieski
+            "szyba": (0.5, 0.5, 0.5)  # Szary
+        }
+
+        # Ustaw kolory dla wszystkich dodatków
+        for addon_name, color in addon_colors.items():
+            self.set_addon_color(addon_name, color)
+
+        self.update()  # Odśwież widok po wprowadzeniu zmian
 
     def draw_addons(self):
-        """Renderowanie dodatków."""
         for addon in self.addons:
+            glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
             vertices = np.array(addon['vertices'], dtype=np.float32)
-            glDisable(GL_TEXTURE_2D)
-            glColor3f(0.8, 0.3, 0.3)  # Kolor dla dodatków
+            color = addon.get('color', (1.0, 1.0, 1.0))  # Domyślny kolor biały
+            glDisable(GL_TEXTURE_2D)  # Wyłącz teksturę dla dodatków
+            glEnable(GL_COLOR_MATERIAL)  # Włącz kolorowanie dla dodatków
+            glColor3f(*color)  # Ustaw kolor dodatku
 
+            glPushMatrix()
             glBegin(GL_TRIANGLES)
             for face in addon['faces']:
                 if len(face) < 3:
@@ -330,9 +355,19 @@ class OpenGLWidget(QOpenGLWidget):
                 except IndexError as e:
                     print(f"Błąd indeksu w twarzy dodatku {addon['name']}: {e}")
             glEnd()
+            glPopMatrix()
+            glPopAttrib()  # Przywróć poprzedni stan OpenGL
+
+    def set_addon_color(self, addon_name, color):
+        """Ustaw kolor dla danego dodatku."""
+        for addon in self.addons:
+            if addon.get('name') == addon_name:  # Sprawdzenie klucza 'name'
+                addon['color'] = tuple([c / 255.0 for c in color])  # Konwersja 0-255 do 0.0-1.0
+                print(f"Kolor dla dodatku '{addon_name}' został ustawiony na {addon['color']}.")
+                return  # Zatrzymaj, bo znaleziono dodatek
+        print(f"Nie znaleziono dodatku o nazwie '{addon_name}' w liście dodatków.")
 
     def paintGL(self):
-        """Metoda rysowania OpenGL."""
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         glTranslatef(self.pan_x, self.pan_y, self.zoom)
@@ -345,7 +380,7 @@ class OpenGLWidget(QOpenGLWidget):
         if self.rails_vertices is not None and self.rails_faces is not None:
             self.draw_rails()
 
-        self.draw_addons()  #
+        self.draw_addons() #
 
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()
