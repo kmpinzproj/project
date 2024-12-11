@@ -232,7 +232,7 @@ def tilt_gate(width, height, wypelnienie = "Poziome"):
                     "dimensions": [gate.dimensions.x, gate.dimensions.y, gate.dimensions.z]
                 }
                 # Zapisz dane bramy do pliku JSON
-                with open("gate_data.json", "w") as json_file:
+                with open("../generator/dodatki/gate_data.json", "w") as json_file:
                     json.dump(gate_data, json_file)
                 print("Dane bramy zostały zapisane do pliku gate_data.json.")
             else:
