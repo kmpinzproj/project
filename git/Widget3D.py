@@ -318,10 +318,14 @@ class OpenGLWidget(QOpenGLWidget):
             "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
             "drzwi_w_bramie": (51, 56, 52),  # Zielony
             "klamka_do_drzwi": (0, 0, 0),  # Niebieski
-            "szyba_okna_1": (16, 157, 232),  # Szary
-            "szyba_okna_2": (16, 157, 232),  # Szary
+            "szyba_okna_1": (75, 127, 156),  # Szary
+            "szyba_okna_2": (75, 127, 156),  # Szary
             "ramka_okna_1": (51, 56, 52),  # Szary
             "ramka_okna_2": (51, 56, 52),  # Szary
+            "klamka-1.001": (51, 56, 52),  # Szary
+            "klamka-2.001": (122, 101, 64),  # Szary
+            "klamka-3.001": (134, 149, 156),  # Szary
+            "klamka-4.001": (77, 59, 57),  # Szary
 
         }
 

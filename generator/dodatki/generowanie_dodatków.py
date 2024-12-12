@@ -324,7 +324,7 @@ def position_vent_from_file(vent, option):
             bpy.context.collection.objects.link(vent_copy)
 
             # Obliczenie lewej pozycji kratki
-            vent_x = gate_location[0] - (gate_dimensions[0] / 2) + 0.1 + (vent_copy.dimensions[0] / 2)  # Lewa krawędź
+            vent_x = -gate_dimensions[0] / 2 + 0.1 + 0.93/2
             vent_y = gate_location[1] - 0.03# Ta sama pozycja w osi Y co brama
             vent_z = gate_location[2] - (gate_dimensions[2] / 2) + 0.2  # Wysokość nad dolną krawędzią bramy
 
@@ -338,7 +338,7 @@ def position_vent_from_file(vent, option):
             bpy.context.collection.objects.link(vent_copy)
 
             # Obliczenie prawej pozycji kratki
-            vent_x = gate_location[0] + (gate_dimensions[0] / 2) - 0.1 - (vent_copy.dimensions[0] / 2)  # Prawa krawędź
+            vent_x = gate_dimensions[0] / 2 - 0.1 - 0.93/2
             vent_y = gate_location[1] - 0.05# Ta sama pozycja w osi Y co brama
             vent_z = gate_location[2] - (gate_dimensions[2] / 2) + 0.2  # Wysokość nad dolną krawędzią bramy
 
@@ -465,7 +465,6 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
     if 'klamka' in dodatki:
         handle_copy = add_handle(handle, dodatki["klamka"])
         if handle_copy:
-            handle_copy.name = "klamka_do_bramy"
             objects_to_export.append(handle_copy)
             print("Dodano klamkę do eksportu.")
 
