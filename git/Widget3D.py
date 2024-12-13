@@ -7,7 +7,22 @@ import pywavefront
 import numpy as np
 from PIL import Image
 import os
+import cv2
 
+addon_colors = {
+            "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
+            "drzwi_w_bramie": (51, 56, 52),  # Zielony
+            "klamka_do_drzwi": (0, 0, 0),  # Niebieski
+            "szyba_okna_1": (75, 127, 156),  # Szary
+            "szyba_okna_2": (75, 127, 156),  # Szary
+            "ramka_okna_1": (51, 56, 52),  # Szary
+            "ramka_okna_2": (51, 56, 52),  # Szary
+            "klamka-1.001": (51, 56, 52),  # Szary
+            "klamka-2.001": (122, 101, 64),  # Szary
+            "klamka-3.001": (134, 149, 156),  # Szary
+            "klamka-4.001": (77, 59, 57),  # Szary
+            "szyny": (0,0,0)
+        }
 
 def compute_normals(vertices, faces):
     normals = np.zeros(vertices.shape, dtype=np.float32)
@@ -53,7 +68,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.pan_x = 0.0
         self.pan_y = 0.0
         self.addons = []  # Lista dodatków (każdy jako dict z vertices i faces)
-        self.addon_colors = {}  # Słownik z kolorami dla dodatków (nazwa dodatku -> (R, G, B))
+        self.addon_colors = addon_colors  # Słownik z kolorami dla dodatków (nazwa dodatku -> (R, G, B))
 
     def initializeGL(self):
         glEnable(GL_DEPTH_TEST)
@@ -95,6 +110,7 @@ class OpenGLWidget(QOpenGLWidget):
             return None
 
         image = Image.open(texture_file)
+        self.read_color(image)
 
         # Obrót tekstury
         if rotation_angle != 0:
@@ -242,7 +258,7 @@ class OpenGLWidget(QOpenGLWidget):
             glPopAttrib()
             return
 
-        color = (51 / 255, 56 / 255, 52 / 255)  # Domyślny kolor szary (RGB w skali 0-1)
+        color = tuple(value / 255 for value in self.addon_colors["szyny"])  # Domyślny kolor szary (RGB w skali 0-1)
 
         glDisable(GL_TEXTURE_2D)  # Wyłącz tekstury dla szyn
         glEnable(GL_COLOR_MATERIAL)  # Włącz kolorowanie
@@ -286,52 +302,52 @@ class OpenGLWidget(QOpenGLWidget):
 
         global_vertex_offset = 0  # Przesunięcie indeksów wierzchołków
         vertices_global = []  # Globalna lista wszystkich wierzchołków
-        current_object = {'name': None, 'vertices': [], 'faces': []}
+        current_object = None  # Obecnie przetwarzany obiekt
 
         with open(obj_file, 'r') as file:
             for line in file:
                 if line.startswith('o '):  # Nowy obiekt w pliku
-                    if current_object['name'] is not None:
-                        print(
-                            f"Załadowano obiekt: {current_object['name']}, Wierzchołki: {len(current_object['vertices'])}, Twarze: {len(current_object['faces'])}")
+                    if current_object:  # Dodaj poprzedni obiekt, jeśli istnieje
                         self.addons.append(current_object)
+
+                        # Ustaw kolor dla ostatnio dodanego obiektu
+                        addon_name = current_object['name']
+                        if addon_name in self.addon_colors:
+                            self.addons[-1]['color'] = tuple(c / 255.0 for c in self.addon_colors[addon_name])
+                            print(f"Kolor dla dodatku '{addon_name}' ustawiono na {self.addons[-1]['color']}.")
+                        else:
+                            print(f"Brak koloru dla dodatku '{addon_name}'. Ustawiono kolor domyślny.")
+                            self.addons[-1]['color'] = (0.5, 0.5, 0.5)  # Domyślny szary kolor
+
                         global_vertex_offset += len(current_object['vertices'])
                         vertices_global.extend(current_object['vertices'])
 
-                    current_object = {'name': line.split()[1], 'vertices': [], 'faces': []}
+                    # Rozpocznij nowy obiekt
+                    current_object = {'name': line.split()[1], 'vertices': [], 'faces': [], 'color': None}
 
                 elif line.startswith('v '):  # Wczytaj wierzchołki
-                    vertex = [float(x) for x in line.split()[1:]]
-                    current_object['vertices'].append(vertex)
+                    if current_object:
+                        vertex = [float(x) for x in line.split()[1:]]
+                        current_object['vertices'].append(vertex)
 
                 elif line.startswith('f '):  # Wczytaj twarze
-                    face = [int(idx.split('/')[0]) - 1 for idx in line.split()[1:]]
-                    shifted_face = [idx - global_vertex_offset for idx in face]
-                    current_object['faces'].append(shifted_face)
+                    if current_object:
+                        face = [int(idx.split('/')[0]) - 1 for idx in line.split()[1:]]
+                        shifted_face = [idx - global_vertex_offset for idx in face]
+                        current_object['faces'].append(shifted_face)
 
-        if current_object['name'] is not None:
+        # Obsłuż ostatni obiekt po zakończeniu pętli
+        if current_object:
             self.addons.append(current_object)
-            vertices_global.extend(current_object['vertices'])
 
-        # Słownik z kolorami dla dodatków
-        addon_colors = {
-            "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
-            "drzwi_w_bramie": (51, 56, 52),  # Zielony
-            "klamka_do_drzwi": (0, 0, 0),  # Niebieski
-            "szyba_okna_1": (75, 127, 156),  # Szary
-            "szyba_okna_2": (75, 127, 156),  # Szary
-            "ramka_okna_1": (51, 56, 52),  # Szary
-            "ramka_okna_2": (51, 56, 52),  # Szary
-            "klamka-1.001": (51, 56, 52),  # Szary
-            "klamka-2.001": (122, 101, 64),  # Szary
-            "klamka-3.001": (134, 149, 156),  # Szary
-            "klamka-4.001": (77, 59, 57),  # Szary
-
-        }
-
-        # Ustaw kolory dla wszystkich dodatków
-        for addon_name, color in addon_colors.items():
-            self.set_addon_color(addon_name, color)
+            # Ustaw kolor dla ostatnio dodanego obiektu
+            addon_name = current_object['name']
+            if addon_name in self.addon_colors:
+                self.addons[-1]['color'] = tuple(c / 255.0 for c in self.addon_colors[addon_name])
+                print(f"Kolor dla dodatku '{addon_name}' ustawiono na {self.addons[-1]['color']}.")
+            else:
+                print(f"Brak koloru dla dodatku '{addon_name}'. Ustawiono kolor domyślny.")
+                self.addons[-1]['color'] = (0.5, 0.5, 0.5)  # Domyślny szary kolor
 
         self.update()  # Odśwież widok po wprowadzeniu zmian
 
@@ -366,15 +382,6 @@ class OpenGLWidget(QOpenGLWidget):
             glPopMatrix()
             glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
-    def set_addon_color(self, addon_name, color):
-        """Ustaw kolor dla danego dodatku."""
-        for addon in self.addons:
-            if addon.get('name') == addon_name:  # Sprawdzenie klucza 'name'
-                addon['color'] = tuple([c / 255.0 for c in color])  # Konwersja 0-255 do 0.0-1.0
-                print(f"Kolor dla dodatku '{addon_name}' został ustawiony na {addon['color']}.")
-                return  # Zatrzymaj, bo znaleziono dodatek
-        print(f"Nie znaleziono dodatku o nazwie '{addon_name}' w liście dodatków.")
-
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
@@ -389,6 +396,26 @@ class OpenGLWidget(QOpenGLWidget):
             self.draw_rails()
 
         self.draw_addons() #
+
+    def read_color(self, image):
+        addons = ["drzwi_w_bramie", "ramka_okna_1", "ramka_okna_2", "szyny"]
+        x, y = 50, 50  # Przykładowe współrzędne
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+        # Pobierz kolor z obrazu
+        rgb_color = image.getpixel((x, y))
+        factor = 0.5
+
+        # Przyciemnianie każdego kanału RGB
+        r = int(rgb_color[0] * factor)
+        g = int(rgb_color[1] * factor)
+        b = int(rgb_color[2] * factor)
+
+        # Przyciemniony kolor
+        darkened_color = (r, g, b)
+        for addon in addons:
+            self.addon_colors[addon] = darkened_color
 
     def mousePressEvent(self, event):
         self.last_mouse_position = event.position()

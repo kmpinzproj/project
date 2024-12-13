@@ -241,7 +241,7 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
 
             # Obliczenie pozycji klamki dla drzwi
             door_left_edge_x = door.location[0]   # Lewa krawędź drzwi
-            handle_x = door_left_edge_x + 0.1 + (door_handle_copy.dimensions[0] / 2)  # 10 cm od lewej krawędzi drzwi
+            handle_x = door_left_edge_x - 0.40 + (door_handle_copy.dimensions[0] / 2)  # 10 cm od lewej krawędzi drzwi
             handle_y = door.location[1] - 0.03  # Taka sama pozycja w osi Y co drzwi
             handle_z = door.location[2] - (door.dimensions[2] / 2) + 0.9  # 90 cm od dolnej krawędzi drzwi
 
