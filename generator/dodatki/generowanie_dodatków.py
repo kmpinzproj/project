@@ -30,6 +30,261 @@ bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 
+def add_window_rolling(window, glass, segment):
+    """
+    Dodaje okna do bramy roletowej, rozmieszczając je na środku każdego segmentu, z wyjątkiem ostatniego segmentu.
+    Dane szerokości, wysokości bramy i wysokości segmentu są pobierane z pliku JSON.
+
+    Argumenty:
+    window -- obiekt ramki okna (bpy.types.Object)
+    glass -- obiekt szyby (bpy.types.Object)
+    segment_height -- wysokość pojedynczego segmentu (float)
+
+    Zwraca:
+    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, lista szyb.
+    """
+    try:
+        # --- 1. Wczytaj dane bramy z pliku JSON ---
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        # Pobranie szerokości i wysokości bramy z JSON
+        width = gate_data["dimensions"][0]
+        height = gate_data["dimensions"][2]
+        segment_height = 0
+        if segment == "100 mm":
+            segment_height = 0.1
+        else:
+            segment_height = 0.077
+
+        if not window or not glass:
+            print("Nie znaleziono obiektu ramki okna lub szyby.")
+            return [], []
+
+            # Ustawienie origin na środku obiektu okna i szyby
+        bpy.context.view_layer.objects.active = window
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        bpy.context.view_layer.objects.active = glass
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        frame_objects = []  # Lista ramek
+        glass_objects = []  # Lista szyb
+
+        # --- 2. Obliczenia dla segmentów ---
+        segment_count = max(1, int(height // segment_height))
+
+        # Dolna krawędź bramy
+        bottom_z = (height / 2)
+
+        print(f"Liczba segmentów: {segment_count}, Wysokość segmentu: {segment_height}, Dolna krawędź Z: {bottom_z}")
+
+        # --- 3. Dodanie okien do każdego segmentu (poza ostatnim) ---
+        current_z = (segment_count - 6) * segment_height - segment_height / 2
+        for i in range(3):
+            # --- Tworzenie kopii ramki ---
+            window_copy = window.copy()
+            window_copy.data = window.data.copy()
+            bpy.context.collection.objects.link(window_copy)
+
+            # Ustawienie origin i zastosowanie transformacji
+            bpy.context.view_layer.objects.active = window_copy
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
+            # --- Skalowanie ramki ---
+            original_width = window_copy.dimensions[0]
+            original_height = window_copy.dimensions[2]
+
+            scale_x = (width * 0.9) / original_width  # Skalowanie szerokości
+            scale_z = (segment_height * 0.9) / original_height  # Skalowanie wysokości
+            window_copy.scale[0] *= scale_x  # Ustaw skalę X
+            window_copy.scale[2] *= scale_z  # Ustaw skalę Z
+
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
+
+            # Pozycjonowanie ramki
+            window_copy.location.x = 0  # Środek bramy w osi X
+            window_copy.location.y = -0.01  # Nieznaczne odsunięcie w osi Y
+            window_copy.location.z = current_z  # Pozycja Z (środek segmentu)
+
+            frame_objects.append(window_copy)  # Dodaj ramkę do listy
+
+            # --- Tworzenie kopii szyby ---
+            glass_copy = glass.copy()
+            glass_copy.data = glass.data.copy()
+            bpy.context.collection.objects.link(glass_copy)
+
+            # Ustawienie origin i zastosowanie transformacji
+            bpy.context.view_layer.objects.active = glass_copy
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+
+            # --- Skalowanie szyby ---
+            frame_width = window_copy.dimensions[0]
+            frame_height = window_copy.dimensions[2]
+
+            original_glass_width = glass_copy.dimensions[0]
+            original_glass_height = glass_copy.dimensions[2]
+
+            scale_x = (frame_width * 0.99) / original_glass_width  # Szyba o 95% szerokości ramki
+            scale_z = (frame_height * 0.95) / original_glass_height  # Szyba o 95% wysokości ramki
+            glass_copy.scale[0] *= scale_x  # Ustaw skalę X
+            glass_copy.scale[2] *= scale_z  # Ustaw skalę Z
+
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
+
+            # Pozycjonowanie szyby
+            glass_copy.location.x = 0  # Środek bramy w osi X
+            glass_copy.location.y = 0  # Odsunięcie względem okna w osi Y
+            glass_copy.location.z = current_z  # Pozycja Z (środek segmentu)
+
+            glass_objects.append(glass_copy)  # Dodaj szybę do listy
+
+            # Przejście do kolejnego segmentu
+            current_z += segment_height
+        # --- 4. Zastosowanie transformacji do ramek ---
+        for frame in frame_objects:
+            bpy.context.view_layer.objects.active = frame
+            frame.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        # --- 5. Zastosowanie transformacji do szyb ---
+        for glass in glass_objects:
+            bpy.context.view_layer.objects.active = glass
+            glass.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        print(f"Ramki i szyby zostały dodane. Liczba ramek: {len(frame_objects)}, Liczba szyb: {len(glass_objects)}")
+        return frame_objects, glass_objects
+
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return [], []
+
+def add_window_segment(glass, pattern):
+    """
+    Dodaje segmenty okien do bramy na podstawie wzoru (pattern) i danych z JSON.
+
+    Argumenty:
+    pattern -- wzór układu okien (np. 1, 2, 3)
+    glass -- obiekt szyby (bpy.types.Object)
+
+    Zwraca:
+    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, lista szyb.
+    """
+    try:
+        # --- 1. Wczytaj dane bramy z pliku JSON ---
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        # Pobranie szerokości i wysokości bramy z JSON
+        width = gate_data["dimensions"][0]
+        height = gate_data["dimensions"][2]
+
+        # --- 2. Wybór wzoru okien na podstawie patternu ---
+        if pattern == "Wzór 1":
+            windows = ["okno1", "okno1", "okno1"]
+        elif pattern == "Wzór 2":
+            windows = ["okno4", "okno4", "okno4"]
+        elif pattern == "Wzór 3":
+            windows = ["okno3", "okno4", "okno2"]
+        else:
+            print(f"Nieprawidłowy pattern: {pattern}")
+            return [], []
+
+        frame_objects = []  # Lista ramek
+        glass_objects = []  # Lista szyb
+
+        # --- 3. Obliczenia dla pozycji okien ---
+        segment_height = 0.4001  # Wysokość pojedynczego segmentu
+        segment_count_z = max(1, int(height // segment_height))
+        segment_height_per_unit = height / segment_count_z
+
+        if height >= 2.89:
+            window_position = segment_count_z - 1  # Okno na przedostatnim segmencie
+        else:
+            window_position = 4  # Domyślna pozycja, gdy wysokość < 2.89m
+
+        glass_z = segment_height_per_unit * window_position - segment_height_per_unit / 2
+        glass_y = 0  # Głębokość (stała)
+
+        # --- 4. Dodanie okien na lewą stronę ---
+        window_left = bpy.data.objects.get(windows[0])
+        if window_left:
+            window_copy_left = window_left.copy()
+            window_copy_left.data = window_left.data.copy()
+            bpy.context.collection.objects.link(window_copy_left)
+
+            glass_copy_left = glass.copy()
+            glass_copy_left.data = glass.data.copy()
+            bpy.context.collection.objects.link(glass_copy_left)
+
+            glass_x = -(width / 2) + 0.10 + 0.93 / 2  # Lewa strona
+            window_copy_left.location = (glass_x, glass_y, glass_z)
+            glass_copy_left.location = (glass_x, glass_y, glass_z)
+
+            frame_objects.append(window_copy_left)
+            glass_objects.append(glass_copy_left)
+
+        # --- 5. Dodanie okien na prawą stronę ---
+        window_right = bpy.data.objects.get(windows[2])
+        if window_right:
+            window_copy_right = window_right.copy()
+            window_copy_right.data = window_right.data.copy()
+            bpy.context.collection.objects.link(window_copy_right)
+
+            glass_copy_right = glass.copy()
+            glass_copy_right.data = glass.data.copy()
+            bpy.context.collection.objects.link(glass_copy_right)
+
+            glass_x = (width / 2) - 0.10 - 0.93 / 2  # Prawa strona
+            window_copy_right.location = (glass_x, glass_y, glass_z)
+            glass_copy_right.location = (glass_x, glass_y, glass_z)
+
+            frame_objects.append(window_copy_right)
+            glass_objects.append(glass_copy_right)
+
+        # --- 6. Dodanie środkowego okna (jeśli szerokość na to pozwala) ---
+        if width >= 2.46:
+            window_center = bpy.data.objects.get(windows[1])
+            if window_center:
+                window_copy_center = window_center.copy()
+                window_copy_center.data = window_center.data.copy()
+                bpy.context.collection.objects.link(window_copy_center)
+
+                glass_copy_center = glass.copy()
+                glass_copy_center.data = glass.data.copy()
+                bpy.context.collection.objects.link(glass_copy_center)
+
+                window_copy_center.location = (0, glass_y, glass_z)  # Środek
+                glass_copy_center.location = (0, glass_y, glass_z)  # Środek
+
+                frame_objects.append(window_copy_center)
+                glass_objects.append(glass_copy_center)
+
+        # --- 7. Zastosowanie transformacji do ramek ---
+        for frame in frame_objects:
+            bpy.context.view_layer.objects.active = frame
+            frame.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        # --- 8. Zastosowanie transformacji do szyb ---
+        for glass in glass_objects:
+            bpy.context.view_layer.objects.active = glass
+            glass.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        print(f"Ramki i szyby zostały dodane. Liczba ramek: {len(frame_objects)}, Liczba szyb: {len(glass_objects)}")
+        return frame_objects, glass_objects
+
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return [], []
 
 def add_window(window, glass, option):
     """
@@ -138,12 +393,6 @@ def add_window(window, glass, option):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
         return None, None
-
-
- # 1 pionowe, 2 poziome działa na 2 obiektach szyby w glass i ramki na okno w window, pozycjonuje to względem szerokości ide spac
-
-
-# ale ten to by pasowało na brame uchylna gdzie drzwi sa blisko szczytu na wyzszy szyt mozna dac okno wyzej jak sie miesci
 
 def position_door_from_file(door):
     """
@@ -468,19 +717,51 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
             objects_to_export.append(handle_copy)
             print("Dodano klamkę do eksportu.")
 
-    if 'okno' in dodatki:
-        print("TEST OKNA")
-        window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
-        if window_copies:
-            for idx, frame in enumerate(window_copies, start=1):
-                frame.name = f"ramka_okna_{idx}"
-                objects_to_export.append(frame)
-            print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
-        if glass_copies:
-            for idx, glass2 in enumerate(glass_copies, start=1):
-                glass2.name = f"szyba_okna_{idx}"
-                objects_to_export.append(glass2)
-            print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
+    if dodatki["typ"]== "Brama Segmentowa":
+        print("TEST SEGMENTOWA")
+        if 'okno' in dodatki:
+            print("TEST OKNA")
+            window_copies, glass_copies = add_window_segment(glass, dodatki["okno"])
+            if window_copies:
+                for idx, frame in enumerate(window_copies, start=1):
+                    frame.name = f"ramka_okna_{idx}"
+                    objects_to_export.append(frame)
+                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
+            if glass_copies:
+                for idx, glass2 in enumerate(glass_copies, start=1):
+                    glass2.name = f"szyba_okna_{idx}"
+                    objects_to_export.append(glass2)
+                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
+    elif dodatki["typ"] == "Brama Roletowa":
+        print("TEST Roletowa")
+        if 'okno' in dodatki:
+            print("TEST OKNA")
+            window2 = bpy.data.objects.get("okno-roletowev2")
+            window_copies, glass_copies = add_window_rolling(window2, glass, dodatki["segment"])
+            if window_copies:
+                for idx, frame in enumerate(window_copies, start=1):
+                    frame.name = f"ramka_okna_{idx}"
+                    objects_to_export.append(frame)
+                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
+            if glass_copies:
+                for idx, glass2 in enumerate(glass_copies, start=1):
+                    glass2.name = f"szyba_okna_{idx}"
+                    objects_to_export.append(glass2)
+                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
+    else:
+        if 'okno' in dodatki:
+            print("TEST OKNA")
+            window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
+            if window_copies:
+                for idx, frame in enumerate(window_copies, start=1):
+                    frame.name = f"ramka_okna_{idx}"
+                    objects_to_export.append(frame)
+                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
+            if glass_copies:
+                for idx, glass2 in enumerate(glass_copies, start=1):
+                    glass2.name = f"szyba_okna_{idx}"
+                    objects_to_export.append(glass2)
+                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
 
     # Eksportuj tylko jeśli mamy jakieś obiekty do eksportu
     if objects_to_export:
@@ -496,6 +777,14 @@ def read_json(json_path):
 
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
+
+        if "Typ bramy" in existing_data:
+            result['typ'] = existing_data["Typ bramy"]
+            if result["typ"] == "Brama Roletowa":
+                if "Wysokość profili" in existing_data:
+                    result["segment"] = existing_data["Wysokość profili"]
+                else:
+                    result["segment"] = None
 
         if "Wymiary" in existing_data:
             result['wymiary'] = existing_data["Wymiary"]

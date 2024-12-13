@@ -91,7 +91,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie):
         print(f"Wystąpił błąd podczas tworzenia bramy: {e}")
         return None
 
-
 def add_and_align_rails(gate):
     rail_name = "szyny-na-brame"
 
