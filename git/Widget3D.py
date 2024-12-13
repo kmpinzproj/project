@@ -15,8 +15,10 @@ addon_colors = {
             "klamka_do_drzwi": (0, 0, 0),  # Niebieski
             "szyba_okna_1": (75, 127, 156),  # Szary
             "szyba_okna_2": (75, 127, 156),  # Szary
+            "szyba_okna_3": (75, 127, 156),  # Szary
             "ramka_okna_1": (51, 56, 52),  # Szary
             "ramka_okna_2": (51, 56, 52),  # Szary
+            "ramka_okna_3": (51, 56, 52),  # Szary
             "klamka-1.001": (51, 56, 52),  # Szary
             "klamka-2.001": (122, 101, 64),  # Szary
             "klamka-3.001": (134, 149, 156),  # Szary
@@ -73,31 +75,27 @@ class OpenGLWidget(QOpenGLWidget):
     def initializeGL(self):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
-        glEnable(GL_LIGHT0)
         glEnable(GL_NORMALIZE)
-        glShadeModel(GL_FLAT)
+        glShadeModel(GL_SMOOTH)
         glEnable(GL_MULTISAMPLE)
         glClearColor(0.1, 0.2, 0.3, 1.0)
 
-        glEnable(GL_COLOR_MATERIAL)  # Dodane - umożliwia kolory dla materiałów
+        glEnable(GL_COLOR_MATERIAL)
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
 
-        ambient_light = [0.3, 0.3, 0.3, 1.0]
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light)
-
-        light_position = [5.0, 5.0, 10.0, 1.0]  # Ustaw światło nad i przed bramą        ambient_light = [0.5, 0.5, 0.5, 1.0]  # Więcej światła otoczenia
-        diffuse_light = [0.7, 0.7, 0.7, 1.0]  # Zmniejsz intensywność światła rozproszonego
-        specular_light = [0.2, 0.2, 0.2, 1.0]  # Zmniejsz odbicia
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse_light)
-        glLightfv(GL_LIGHT0, GL_SPECULAR, specular_light)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient_light)
+        glEnable(GL_LIGHT0)
+        light0_position = [10.0, 10.0, 10.0, 1.0]  # Główne światło z przodu, prawego górnego rogu
+        glLightfv(GL_LIGHT0, GL_POSITION, light0_position)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.9, 0.9, 0.9, 1.0])  # Jasne światło rozproszone
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [1.5, 1.5, 1.5, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.05, 0.05, 0.05, 1.0])  # Bardzo minimalne światło otoczenia
 
         glEnable(GL_LIGHT1)
-        light1_position = [-5.0, 10.0, 10.0, 1.0]
+        light1_position = [-10.0, 10.0, 10.0, 1.0]  # Światło wspierające z lewego górnego rogu
         glLightfv(GL_LIGHT1, GL_POSITION, light1_position)
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, [0.5, 0.5, 0.5, 1.0])
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, [0.4, 0.4, 0.4, 1.0])  # Delikatniejsze światło
         glLightfv(GL_LIGHT1, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
+        glLightfv(GL_LIGHT1, GL_AMBIENT, [0.02, 0.02, 0.02, 1.0])
 
         self.load_model(self.obj_file)
         self.load_rails(self.rails_obj_file)  # Szyny
@@ -275,7 +273,6 @@ class OpenGLWidget(QOpenGLWidget):
                 normal = np.cross(v2 - v1, v3 - v1)
                 normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal
 
-                glNormal3fv(normal)
                 glColor3f(*color)  # Kolor dla każdego wierzchołka (aby mieć pewność)
 
                 glVertex3fv(v1)
@@ -366,13 +363,14 @@ class OpenGLWidget(QOpenGLWidget):
                 if len(face) < 3:
                     continue
                 try:
+                    # Zakładamy, że normalne zostały już obliczone w pliku .obj
+                    # Jeśli normalne są zapisane w pliku .obj, można je wykorzystać tutaj
                     for i in range(1, len(face) - 1):
                         v1 = vertices[face[0]]
                         v2 = vertices[face[i]]
                         v3 = vertices[face[i + 1]]
-                        normal = np.cross(v2 - v1, v3 - v1)
-                        normal = normal / np.linalg.norm(normal) if np.linalg.norm(normal) != 0 else normal
-                        glNormal3fv(normal)
+
+                        # Nie obliczamy normalnych w czasie rzeczywistym
                         glVertex3fv(v1)
                         glVertex3fv(v2)
                         glVertex3fv(v3)
@@ -398,7 +396,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.draw_addons() #
 
     def read_color(self, image):
-        addons = ["drzwi_w_bramie", "ramka_okna_1", "ramka_okna_2", "szyny"]
+        addons = ["drzwi_w_bramie", "ramka_okna_1","ramka_okna_2", "ramka_okna_3", "szyny"]
         x, y = 50, 50  # Przykładowe współrzędne
 
         if image.mode != "RGB":
