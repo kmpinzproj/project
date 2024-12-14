@@ -91,7 +91,6 @@ def add_window_rolling(window, glass, segment):
 
             # Ustawienie origin i zastosowanie transformacji
             bpy.context.view_layer.objects.active = window_copy
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
             # --- Skalowanie ramki ---
             original_width = window_copy.dimensions[0]
@@ -102,15 +101,16 @@ def add_window_rolling(window, glass, segment):
             window_copy.scale[0] *= scale_x  # Ustaw skalę X
             window_copy.scale[2] *= scale_z  # Ustaw skalę Z
 
-            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
 
             # Pozycjonowanie ramki
-            window_copy.location.x = 0  # Środek bramy w osi X
+            window_copy.location.x = gate_data["location"][0]  # Środek bramy w osi X
             window_copy.location.y = -0.01  # Nieznaczne odsunięcie w osi Y
             window_copy.location.z = current_z  # Pozycja Z (środek segmentu)
 
             frame_objects.append(window_copy)  # Dodaj ramkę do listy
 
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
             # --- Tworzenie kopii szyby ---
             glass_copy = glass.copy()
             glass_copy.data = glass.data.copy()
@@ -118,7 +118,7 @@ def add_window_rolling(window, glass, segment):
 
             # Ustawienie origin i zastosowanie transformacji
             bpy.context.view_layer.objects.active = glass_copy
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            # bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
 
             # --- Skalowanie szyby ---
             frame_width = window_copy.dimensions[0]
@@ -132,10 +132,10 @@ def add_window_rolling(window, glass, segment):
             glass_copy.scale[0] *= scale_x  # Ustaw skalę X
             glass_copy.scale[2] *= scale_z  # Ustaw skalę Z
 
-            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
+            # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)  # Zastosowanie skalowania
 
             # Pozycjonowanie szyby
-            glass_copy.location.x = 0  # Środek bramy w osi X
+            glass_copy.location.x = gate_data["location"][0]  # Środek bramy w osi X
             glass_copy.location.y = 0  # Odsunięcie względem okna w osi Y
             glass_copy.location.z = current_z  # Pozycja Z (środek segmentu)
 
