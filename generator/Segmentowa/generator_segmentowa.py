@@ -2,6 +2,7 @@ import bpy
 import math
 import json
 import mathutils
+import bmesh
 import os
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
@@ -19,12 +20,18 @@ for object_name in object_names:
 
 def scale_stack_and_align_rails(width, height, przetloczenie):
     segment_name = "Cube.002"
-    available_segments = {"Bez przetłoczenia": "Cube", "Niskie": "Cube.001", "Średnie": "Cube.002", "Kasetony": "Cube.003", "START": "Cube.004"}
+    available_segments = {
+        "Bez przetłoczenia": "Cube",
+        "Niskie": "Cube.001",
+        "Średnie": "Cube.002",
+        "Kasetony": "Cube.003",
+        "START": "Cube.004"
+    }
 
     try:
         segment_name = available_segments[przetloczenie]
-    except ValueError:
-        print("Podano nieprawidłowy numer. Spróbuj ponownie.")
+    except KeyError:
+        print("Podano nieprawidłowy przetłoczenie. Spróbuj ponownie.")
         return
 
     segment = bpy.data.objects.get(segment_name)
@@ -38,48 +45,96 @@ def scale_stack_and_align_rails(width, height, przetloczenie):
         segment_width_m = 0.4  # Stała szerokość segmentu (40 cm w metrach)
         segment_height_m = 0.4  # Wysokość jednego segmentu w metrach
 
-        segment_count_x = max(1, int(x_length_m // segment_width_m))
-        segment_count_z = max(1, int(z_height_m // segment_height_m))
+        if przetloczenie != "Kasetony":
+            # Rozciągamy pierwszy segment na szerokość
+            first_segment = segment.copy()
+            first_segment.data = segment.data.copy()
+            bpy.context.collection.objects.link(first_segment)
+            first_segment.dimensions[0] = x_length_m  # Rozciągamy szerokość segmentu
 
-        segment_width_per_unit = round(x_length_m / segment_count_x, 3)
-        segment_height_per_unit = round(z_height_m / segment_count_z, 3)
+            current_z = 0
+            segment_copies_z = []
 
-        segment_copies = []
-
-        for row in range(segment_count_z):
-            for col in range(segment_count_x):
-                new_segment = segment.copy()
-                new_segment.data = segment.data.copy()
-                new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]
-                new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]
-                new_segment.location.x = col * segment_width_per_unit
-                new_segment.location.z = row * segment_height_per_unit
+            while round(current_z + segment_height_m, 6) <= z_height_m:
+                new_segment = first_segment.copy()
+                new_segment.data = first_segment.data.copy()
+                new_segment.location.z = current_z
                 bpy.context.collection.objects.link(new_segment)
-                segment_copies.append(new_segment)
+                segment_copies_z.append(new_segment)
+                current_z += segment_height_m
 
-        for segment in segment_copies:
-            segment.select_set(True)
-        bpy.context.view_layer.objects.active = segment_copies[0]
-        bpy.ops.object.join()
+            remaining_height = round(z_height_m - current_z, 6)
+            if remaining_height > 0.0001:
+                last_segment_z = first_segment.copy()
+                last_segment_z.data = first_segment.data.copy()
+                last_segment_z.location.z = current_z
+                bpy.context.collection.objects.link(last_segment_z)
 
-        joined_gate = bpy.context.view_layer.objects.active
-        joined_gate.name = "brama-koniec"
+                bpy.context.view_layer.objects.active = last_segment_z
+                bm = bmesh.new()
+                bm.from_mesh(last_segment_z.data)
+                result = bmesh.ops.bisect_plane(
+                    bm,
+                    geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                    plane_co=(0, 0, -(segment_height_m / 2) + remaining_height),
+                    plane_no=(0, 0, 1),
+                    clear_outer=True
+                )
+                bmesh.ops.contextual_create(bm, geom=result['geom'])
+                bm.to_mesh(last_segment_z.data)
+                bm.free()
+
+                segment_copies_z.append(last_segment_z)
+
+            for segment in segment_copies_z:
+                segment.select_set(True)
+            bpy.context.view_layer.objects.active = segment_copies_z[0]
+            bpy.ops.object.join()
+            joined_gate = bpy.context.view_layer.objects.active
+            joined_gate.name = "brama-koniec"
+
+        else:
+            segment_count_x = max(1, int(x_length_m // segment_width_m))
+            segment_count_z = max(1, int(z_height_m // segment_height_m))
+
+            segment_width_per_unit = round(x_length_m / segment_count_x, 3)
+            segment_height_per_unit = round(z_height_m / segment_count_z, 3)
+
+            segment_copies = []
+
+            for row in range(segment_count_z):
+                for col in range(segment_count_x):
+                    new_segment = segment.copy()
+                    new_segment.data = segment.data.copy()
+                    new_segment.scale[0] = segment_width_per_unit / segment.dimensions[0]
+                    new_segment.scale[2] = segment_height_per_unit / segment.dimensions[2]
+                    new_segment.location.x = col * segment_width_per_unit
+                    new_segment.location.z = row * segment_height_per_unit
+                    bpy.context.collection.objects.link(new_segment)
+                    segment_copies.append(new_segment)
+
+            for segment in segment_copies:
+                segment.select_set(True)
+            bpy.context.view_layer.objects.active = segment_copies[0]
+            bpy.ops.object.join()
+
+            joined_gate = bpy.context.view_layer.objects.active
+            joined_gate.name = "brama-koniec"
+
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-
-        joined_gate.location = (0,0,joined_gate.dimensions[2]/2)
-
+        joined_gate.location = (0, 0, joined_gate.dimensions[2] / 2)
         add_and_align_rails(joined_gate)
 
         gate = bpy.data.objects.get("brama-koniec")
         bpy.context.view_layer.objects.active = gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
         if gate:
             gate_data = {
                 "location": [gate.location.x, gate.location.y, gate.location.z],
                 "dimensions": [gate.dimensions.x, gate.dimensions.y, gate.dimensions.z]
             }
-            # Zapisz dane bramy do pliku JSON
             with open("../generator/dodatki/gate_data.json", "w") as json_file:
                 json.dump(gate_data, json_file)
             print("Dane bramy zostały zapisane do pliku gate_data.json.")
