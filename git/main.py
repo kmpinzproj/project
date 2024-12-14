@@ -188,7 +188,9 @@ if __name__ == "__main__":
     format.setSamples(128)  # Ustaw 8 próbek dla multisamplingu 256
     QSurfaceFormat.setDefaultFormat(format)
 
-    app = QApplication(sys.argv)
+    app = QApplication.instance()  # Sprawdź, czy aplikacja już istnieje
+    if not app:  # Jeśli nie istnieje, utwórz nową instancję
+        app = QApplication(sys.argv)
     load_stylesheet(app, "styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
