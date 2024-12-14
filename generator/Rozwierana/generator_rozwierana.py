@@ -51,8 +51,6 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
         print(f"Obiekt o nazwie '{segment_name}' nie został znaleziony.")
         return
 
-
-
     try:
         x_length_m = width / 1000
         z_height_m = height / 1000
@@ -69,7 +67,11 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
             new_gate.dimensions = (x_length_m, new_gate.dimensions[1], z_height_m)
             new_gate.location = (0, 0, z_height_m / 2)
             new_gate.name = "brama-koniec"
+            # Ustawienie originu
+            bpy.context.view_layer.objects.active = new_gate
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            joined_gate = new_gate
 
         elif wypelnienie == "Poziome" or wypelnienie == "START":
             # Rozciągamy pierwszy segment na szerokość
@@ -169,8 +171,22 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
 
         bpy.context.view_layer.objects.active = joined_gate
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-        joined_gate.location = (0, 0, joined_gate.dimensions[2] / 2)
-        add_and_align_rails(joined_gate)
+
+        # --- POZYCJA BRAMY ---
+        joined_gate.location.x = 0  # Środek w osi X
+        joined_gate.location.y = 0  # Środek w osi Y
+        joined_gate.location.z = joined_gate.dimensions[2] / 2
+
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        gate_data = {
+            "location": [joined_gate.location.x, joined_gate.location.y, joined_gate.location.z],
+            "dimensions": [joined_gate.dimensions.x, joined_gate.dimensions.y, joined_gate.dimensions.z]
+        }
+
+        with open("../generator/dodatki/gate_data.json", "w") as json_file:
+            json.dump(gate_data, json_file)
+
 
         if segment_choice == 3:  # ----------------------------------------------------- tu masz na podwójną warunek
             # Pobierz wymiary obiektu i jego połowę w osi X
@@ -253,38 +269,41 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
             right_door.rotation_euler[2] += radians(10)
             # Ukrycie oryginalnego obiektu
             joined_gate.hide_set(True)
-        else:
-            # Przesuwam pivot
-
+        elif segment_choice in [1,2]:
             # Pobierz bounding box obiektu w przestrzeni lokalnej
             bounding_box = [joined_gate.matrix_world @ Vector(corner) for corner in joined_gate.bound_box]
 
-            # Znajdź prawą, pionową krawędź z tyłu
-            # Maksymalna wartość X (prawo) i maksymalna wartość Y (tył)
-            if segment_choice == 1:  # --------------------------------------------------------jeśli lewo stronnna
-                right_back_x = min(v.x for v in bounding_box)  # Maksymalny X
-            elif segment_choice == 2:  # --------------------------------------------------------jeśli prawo stronnna
-                right_back_x = max(v.x for v in bounding_box)  # Maksymalny X
-            right_back_y = max(v.y for v in bounding_box)  # Maksymalny Y
-            right_back_z = joined_gate.dimensions[2] / 2  # Połowa wysokości Z
+            if segment_choice == 2:  # Lewa stronna
+                right_back_x = bounding_box[0].x  # lewa dolna krawędź
+            elif segment_choice == 1:  # Prawa stronna
+                right_back_x = bounding_box[4].x  # prawa dolna krawędź
 
-            # Utwórz współrzędne punktu
+            right_back_y = max(v.y for v in bounding_box)  # Tylna część bramy (maksymalna Y)
+            right_back_z = joined_gate.dimensions[2] / 2  # Środek wysokości Z
+
             right_back_corner = Vector((right_back_x, right_back_y, right_back_z))
 
-            # Przenieś 3D Cursor na obliczoną pozycję
             bpy.context.scene.cursor.location = right_back_corner
+            bpy.context.view_layer.update()
 
-            # Zaznacz obiekt i ustaw origin
-            bpy.ops.object.select_all(action='DESELECT')  # Odznacz wszystkie obiekty
-            joined_gate.select_set(True)  # Zaznacz tylko obiekt joined_gate
-            bpy.context.view_layer.objects.active = joined_gate  # Ustaw go jako aktywny
-            bpy.ops.object.origin_set(type='ORIGIN_CURSOR')  # Ustaw origin na kursorze
-            if segment_choice == 1:  # --------------------------------------------------------jeśli lewo stronnna
+            bpy.ops.object.select_all(action='DESELECT')
+            joined_gate.select_set(True)
+            bpy.context.view_layer.objects.active = joined_gate
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+
+            if segment_choice == 2:  # Lewa stronna
+                bpy.context.view_layer.objects.active = joined_gate
                 joined_gate.rotation_euler[2] -= radians(10)
                 joined_gate.name = "Left_Door"
-            elif segment_choice == 2:  # --------------------------------------------------------jeśli prawo stronnna
+            elif segment_choice == 1:  # Prawa stronna
+                bpy.context.view_layer.objects.active = joined_gate
                 joined_gate.rotation_euler[2] += radians(10)
                 joined_gate.name = "Right_Door"
+
+            bpy.context.view_layer.objects.active = joined_gate
+            bpy.context.view_layer.update()
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+
 
 
 
