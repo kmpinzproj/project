@@ -41,9 +41,9 @@ def cut_object(obj, plane_co, plane_no, clear_outer):
     bm.free()
 
 
-def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia=None):
+def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
     # Nazwa segmentu bazowego
-    available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "START": "Cube.004"}
+    available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "Jodełka w górę": "Cube.005", "START": "Cube.004"}
     segment_name = available_cube[uklad_wypelnienia]
     available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2, "Dwuskrzydłowe": 3}
     segment_choice = available_segments[ilosc_skrzydel]
@@ -54,129 +54,125 @@ def tilt_gate(width, height, ilosc_skrzydel, uklad_wypelnienia=None):
         print(f"Obiekt o nazwie '{segment_name}' nie został znaleziony.")
         return
 
-    try:
-        # Pobranie wymiarów bramy od użytkownika
-        x_length_m = width / 1000  # Konwersja cm na metry
-        z_height_m = height / 1000  # Konwersja cm na metry
 
-        # Wymiary segmentu
+
+    try:
+        x_length_m = width / 1000
+        z_height_m = height / 1000
+
         segment_width = segment.dimensions[0]
         segment_height = segment.dimensions[2]
 
-        # Tworzenie segmentów w osi X lub jodła
-        current_x = 0
-        segment_copies_x = []
+        if wypelnienie == "Jodełka w górę":
+            # Jodełka w górę - Rozciąganie całego segmentu
+            new_gate = segment.copy()
+            new_gate.data = segment.data.copy()
+            bpy.context.collection.objects.link(new_gate)
 
-        while round(current_x + segment_width, 6) <= x_length_m:
-            new_segment = segment.copy()
-            new_segment.data = segment.data.copy()
-            new_segment.location.x = current_x
-            bpy.context.collection.objects.link(new_segment)
-            segment_copies_x.append(new_segment)
-            current_x += segment_width
-
-        # Przycięcie ostatniego segmentu w osi X
-        remaining_width = round(x_length_m - current_x, 6)
-        if remaining_width > 0.0001:
-            last_segment_x = segment.copy()
-            last_segment_x.data = segment.data.copy()
-            last_segment_x.location.x = current_x
-            bpy.context.collection.objects.link(last_segment_x)
-
-            # Cięcie segmentu w osi X
-            bpy.context.view_layer.objects.active = last_segment_x
-            bm = bmesh.new()
-            bm.from_mesh(last_segment_x.data)
-            result = bmesh.ops.bisect_plane(
-                bm,
-                geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
-                plane_co=(-(segment_width / 2) + remaining_width, 0, 0),
-                plane_no=(1, 0, 0),
-                clear_outer=True
-            )
-            bmesh.ops.contextual_create(bm, geom=result['geom'])
-            bm.to_mesh(last_segment_x.data)
-            bm.free()
-
-            segment_copies_x.append(last_segment_x)
-
-        # Łączenie wszystkich x w jeden obiekt
-        for segment in segment_copies_x:
-            segment.select_set(True)  # Zaznacz wszystkie kopie
-        # Przykład: Zaznaczanie i łączenie obiektów
-        objects_to_join = bpy.context.selected_objects  # Pobierz zaznaczone obiekty
-
-        if objects_to_join:  # Sprawdź, czy są obiekty do złączenia
-            bpy.context.view_layer.objects.active = objects_to_join[0]  # Ustaw aktywny obiekt
-            bpy.ops.object.join()  # Połącz obiekty
-        else:
-            print("Brak zaznaczonych obiektów do połączenia.")
-
-        joined_gate_x = bpy.context.view_layer.objects.active
-        joined_gate_x.name = "brama-uchylna-x"  # Zmień nazwę obiektu
-
-        bpy.context.view_layer.objects.active = joined_gate_x
-        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-        # Pobierz początkowe Z obiektu joined_gate_x
-        base_z = joined_gate_x.location.z + (joined_gate_x.dimensions[2] / 2)
-
-        # Ustawienie segmentów w osi Z nad obiektem joined_gate_x
-        current_z = base_z
-        joined_segments = []
-        counter = 1
-        # Tworzenie segmentów w osi Z, bez przycinania ostatniego
-        while round(current_z + segment_height, 6) <= z_height_m + base_z - segment_height:
-            new_segment = joined_gate_x.copy()
-            new_segment.location.z = current_z + (segment_height / 2)
-            bpy.context.collection.objects.link(new_segment)
-            joined_segments.append(new_segment)
-            current_z += segment_height
-            counter += 1
-        remaining_height = round(z_height_m - (counter * segment_height), 6)
-        if remaining_height > 0.0001:
-            # Kopiowanie ostatniego segmentu
-            last_segment_z = joined_gate_x.copy()
-            last_segment_z.data = joined_gate_x.data.copy()
-            last_segment_z.location.z = current_z + (remaining_height / 2)
-            bpy.context.collection.objects.link(last_segment_z)
-
-            # Przycinanie segmentu w osi Z
-            bpy.context.view_layer.objects.active = last_segment_z
-            bm = bmesh.new()
-            bm.from_mesh(last_segment_z.data)
-            result = bmesh.ops.bisect_plane(
-                bm,
-                geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
-                plane_co=(0, 0, -(segment_height / 2) + remaining_height),  # Płaszczyzna cięcia w osi Z
-                plane_no=(0, 0, 1),  # Normalna osi Z (cięcie w pionie)
-                clear_outer=True  # Usuń górną część
-            )
-            bmesh.ops.contextual_create(bm, geom=result['geom'])
-            bm.to_mesh(last_segment_z.data)
-            bm.free()
-            bpy.context.view_layer.objects.active = last_segment_z
+            new_gate.dimensions = (x_length_m, new_gate.dimensions[1], z_height_m)
+            new_gate.location = (0, 0, z_height_m / 2)
+            new_gate.name = "brama-koniec"
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
-            if joined_segments:  # Jeśli istnieją inne segmenty
-                last_segment_z.location.z = joined_segments[-1].location.z + (joined_segments[-1].dimensions[2] / 2) + (
-                            remaining_height / 2)
-            else:  # Jeśli to pierwszy segment w osi Z
-                last_segment_z.location.z = current_z + (remaining_height / 2)
 
-            joined_segments.append(last_segment_z)  # Dodanie przyciętego segmentu do listy
-            for seg in joined_segments:
-                seg.select_set(True)
-            # Ustaw pierwszy obiekt jako aktywny
-            bpy.context.view_layer.objects.active = joined_segments[0]
+        elif wypelnienie == "Poziome" or wypelnienie == "START":
+            # Rozciągamy pierwszy segment na szerokość
+            first_segment = segment.copy()
+            first_segment.data = segment.data.copy()
+            bpy.context.collection.objects.link(first_segment)
+            first_segment.dimensions[0] = x_length_m
 
-            # Połącz wszystkie wybrane obiekty
+            current_z = 0
+            segment_copies_z = []
+
+            while round(current_z + segment_height, 6) <= z_height_m:
+                new_segment = first_segment.copy()
+                new_segment.data = first_segment.data.copy()
+                new_segment.location.z = current_z
+                bpy.context.collection.objects.link(new_segment)
+                segment_copies_z.append(new_segment)
+                current_z += segment_height
+
+            remaining_height = round(z_height_m - current_z, 6)
+            if remaining_height > 0.0001:
+                last_segment_z = first_segment.copy()
+                last_segment_z.data = first_segment.data.copy()
+                last_segment_z.location.z = current_z
+                bpy.context.collection.objects.link(last_segment_z)
+
+                bpy.context.view_layer.objects.active = last_segment_z
+                bm = bmesh.new()
+                bm.from_mesh(last_segment_z.data)
+                result = bmesh.ops.bisect_plane(
+                    bm,
+                    geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                    plane_co=(0, 0, -(segment_height / 2) + remaining_height),
+                    plane_no=(0, 0, 1),
+                    clear_outer=True
+                )
+                bmesh.ops.contextual_create(bm, geom=result['geom'])
+                bm.to_mesh(last_segment_z.data)
+                bm.free()
+
+                segment_copies_z.append(last_segment_z)
+
+            for segment in segment_copies_z:
+                segment.select_set(True)
+            bpy.context.view_layer.objects.active = segment_copies_z[0]
             bpy.ops.object.join()
             joined_gate = bpy.context.view_layer.objects.active
-            joined_gate.name = "brama-koniec"  # Zmień nazwę obiektu
-            bpy.context.view_layer.objects.active = joined_gate
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+            joined_gate.name = "brama-koniec"
 
-        joined_gate.location.x = 0
-        joined_gate.location.y = 0
+        elif wypelnienie == "Pionowe":
+            # Rozciągamy pierwszy segment na wysokość
+            first_segment = segment.copy()
+            first_segment.data = segment.data.copy()
+            bpy.context.collection.objects.link(first_segment)
+            first_segment.dimensions[2] = z_height_m
+
+            current_x = 0
+            segment_copies_x = []
+
+            while round(current_x + segment_width, 6) <= x_length_m:
+                new_segment = first_segment.copy()
+                new_segment.data = first_segment.data.copy()
+                new_segment.location.x = current_x
+                bpy.context.collection.objects.link(new_segment)
+                segment_copies_x.append(new_segment)
+                current_x += segment_width
+
+            remaining_width = round(x_length_m - current_x, 6)
+            if remaining_width > 0.0001:
+                last_segment_x = first_segment.copy()
+                last_segment_x.data = first_segment.data.copy()
+                last_segment_x.location.x = current_x
+                bpy.context.collection.objects.link(last_segment_x)
+
+                bpy.context.view_layer.objects.active = last_segment_x
+                bm = bmesh.new()
+                bm.from_mesh(last_segment_x.data)
+                result = bmesh.ops.bisect_plane(
+                    bm,
+                    geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                    plane_co=(-(segment_width / 2) + remaining_width, 0, 0),
+                    plane_no=(1, 0, 0),
+                    clear_outer=True
+                )
+                bmesh.ops.contextual_create(bm, geom=result['geom'])
+                bm.to_mesh(last_segment_x.data)
+                bm.free()
+
+                segment_copies_x.append(last_segment_x)
+
+            for segment in segment_copies_x:
+                segment.select_set(True)
+            bpy.context.view_layer.objects.active = segment_copies_x[0]
+            bpy.ops.object.join()
+            joined_gate = bpy.context.view_layer.objects.active
+            joined_gate.name = "brama-koniec"
+
+        bpy.context.view_layer.objects.active = joined_gate
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
+        joined_gate.location = (0, 0, joined_gate.dimensions[2] / 2)
         add_and_align_rails(joined_gate)
 
         if segment_choice == 3:  # ----------------------------------------------------- tu masz na podwójną warunek
@@ -342,7 +338,6 @@ def add_and_align_rails(gate):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
     obj = bpy.data.objects.get(object_name)
     if not obj:
@@ -493,7 +488,6 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
     # Usuń tymczasowe obiekty
     bpy.data.objects.remove(combined_doors)
 
-
 def read_json(json_path):
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
@@ -528,7 +522,7 @@ dimensions, wysokosc_profilu, kolor, uklad_wypelnienia = read_json("../resources
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 
-tilt_gate(width, height, wysokosc_profilu, uklad_wypelnienia)
+tilt_gate_rozwierana(width, height, wysokosc_profilu, uklad_wypelnienia)
 export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
 
