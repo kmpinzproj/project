@@ -164,7 +164,7 @@ def add_window_rolling(window, glass, segment):
         print(f"Wystąpił błąd: {e}")
         return [], []
 
-def add_window_segment(glass, pattern):
+def add_window_segment(glass, pattern, przetloczenie):
     """
     Dodaje segmenty okien do bramy na podstawie wzoru (pattern) i danych z JSON.
 
@@ -201,7 +201,11 @@ def add_window_segment(glass, pattern):
         # --- 3. Obliczenia dla pozycji okien ---
         segment_height = 0.4001  # Wysokość pojedynczego segmentu
         segment_count_z = max(1, int(height // segment_height))
-        segment_height_per_unit = height / segment_count_z
+        if przetloczenie == "Kasetony":
+            segment_height_per_unit = height / segment_count_z
+
+        else:
+            segment_height_per_unit = 0.4001
 
         if height >= 2.89:
             window_position = segment_count_z - 1  # Okno na przedostatnim segmencie
@@ -717,11 +721,11 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
             objects_to_export.append(handle_copy)
             print("Dodano klamkę do eksportu.")
 
-    if dodatki["typ"]== "Brama Segmentowa":
+    if dodatki["typ"] == "Brama Segmentowa":
         print("TEST SEGMENTOWA")
         if 'okno' in dodatki:
             print("TEST OKNA")
-            window_copies, glass_copies = add_window_segment(glass, dodatki["okno"])
+            window_copies, glass_copies = add_window_segment(glass, dodatki["okno"], dodatki["przetloczenie"])
             if window_copies:
                 for idx, frame in enumerate(window_copies, start=1):
                     frame.name = f"ramka_okna_{idx}"
@@ -785,6 +789,12 @@ def read_json(json_path):
                     result["segment"] = existing_data["Wysokość profili"]
                 else:
                     result["segment"] = None
+            elif result["typ"] == "Brama Segmentowa":
+                if "Rodzaj przetłoczenia" in existing_data:
+                    result["przetloczenie"] = existing_data['Rodzaj przetłoczenia']
+                else:
+                    result["przetloczenie"] = "Bez przetłoczeia"
+
 
         if "Wymiary" in existing_data:
             result['wymiary'] = existing_data["Wymiary"]
