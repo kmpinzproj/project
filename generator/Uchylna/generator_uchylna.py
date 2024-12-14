@@ -17,8 +17,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-    else:
-        print(f"Obiekt '{object_name}' nie istnieje.")
 
 
 def tilt_gate(width, height, wypelnienie="Poziome"):
@@ -171,7 +169,6 @@ def tilt_gate(width, height, wypelnienie="Poziome"):
             }
             with open("../generator/dodatki/gate_data.json", "w") as json_file:
                 json.dump(gate_data, json_file)
-            print("Dane bramy zostały zapisane do pliku gate_data.json.")
         else:
             print("Nie znaleziono obiektu bramy.")
     except Exception as e:
@@ -348,7 +345,6 @@ def read_json(json_path):
             wypelnienie = "START"
         if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
-            print(existing_data)
             base_path = "../jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"

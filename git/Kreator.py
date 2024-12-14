@@ -139,7 +139,6 @@ class Kreator(QMainWindow):
             self.opengl_widget.load_model(gate_file)
             self.opengl_widget.load_rails(rail_file)
             if os.path.exists(addons_file):
-                print("TEST")
                 self.opengl_widget.load_addons(addons_file)
         else:
             print(f"Nie znaleziono jednego z plików: {gate_file} lub {rail_file}")
@@ -180,7 +179,6 @@ class Kreator(QMainWindow):
             self.prompt_project_name()
             return True
         else:
-            print("Coś tu nie działa")
             return False
 
     def validate_fields(self):
@@ -359,7 +357,6 @@ class Kreator(QMainWindow):
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(base_data, file, ensure_ascii=False, indent=4)
-                # print(f"Dane zostały zapisane w pliku {file_path}.")
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisywania danych: {e}")
 

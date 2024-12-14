@@ -141,13 +141,9 @@ class OpenGLWidget(QOpenGLWidget):
             if material_name in material_textures:
                 texture_path = material_textures[material_name]
                 self.material_textures[material_name] = self.load_texture(texture_path)
-            else:
-                print(f"Brak tekstury dla materiału {material_name}")
 
         if hasattr(self.scene.parser, 'tex_coords'):
             self.uv_coordinates = np.array(self.scene.parser.tex_coords, dtype=np.float32)
-        else:
-            print("Brak UV współrzędnych w modelu.")
 
         self.normals = compute_normals(self.vertices, self.faces)
         adjusted_center = self.compute_adjusted_center(self.vertices)
@@ -285,7 +281,6 @@ class OpenGLWidget(QOpenGLWidget):
 
     def clear_addons(self):
         """Czyści wszystkie dodatki i odświeża widok."""
-        print(f"Czyszczenie dodatków...")
         self.addons.clear()  # Usunięcie wszystkich danych o dodatkach
         self.update()  # Odśwież widok
 
@@ -311,9 +306,7 @@ class OpenGLWidget(QOpenGLWidget):
                         addon_name = current_object['name']
                         if addon_name in self.addon_colors:
                             self.addons[-1]['color'] = tuple(c / 255.0 for c in self.addon_colors[addon_name])
-                            print(f"Kolor dla dodatku '{addon_name}' ustawiono na {self.addons[-1]['color']}.")
                         else:
-                            print(f"Brak koloru dla dodatku '{addon_name}'. Ustawiono kolor domyślny.")
                             self.addons[-1]['color'] = (0.5, 0.5, 0.5)  # Domyślny szary kolor
 
                         global_vertex_offset += len(current_object['vertices'])
@@ -341,9 +334,7 @@ class OpenGLWidget(QOpenGLWidget):
             addon_name = current_object['name']
             if addon_name in self.addon_colors:
                 self.addons[-1]['color'] = tuple(c / 255.0 for c in self.addon_colors[addon_name])
-                print(f"Kolor dla dodatku '{addon_name}' ustawiono na {self.addons[-1]['color']}.")
             else:
-                print(f"Brak koloru dla dodatku '{addon_name}'. Ustawiono kolor domyślny.")
                 self.addons[-1]['color'] = (0.5, 0.5, 0.5)  # Domyślny szary kolor
 
         self.update()  # Odśwież widok po wprowadzeniu zmian
@@ -462,7 +453,6 @@ class OpenGLWidget(QOpenGLWidget):
         max_coords = np.max(self.vertices, axis=0)  # Największe współrzędne (x, y, z)
         dimensions = max_coords - min_coords  # Rozmiar modelu (szerokość, wysokość, głębokość)
         diagonal = np.linalg.norm(dimensions)  # Długość przekątnej bryły (wymiary 3D)
-        print(f"Rozmiary modelu: {dimensions}, Przekątna: {diagonal}")
 
         # Obliczamy dolną krawędź Y (dla OpenGL to "góra-dół")
         min_y = min_coords[1]  # Dolna krawędź bramy
@@ -481,5 +471,4 @@ class OpenGLWidget(QOpenGLWidget):
 
         self.pan_x = 0.0  # Ustaw pozycję X na środek ekranu
 
-        print(f"Pan Y ustawione na {self.pan_y} dla minimalnego Y: {min_y}")
 

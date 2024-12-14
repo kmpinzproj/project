@@ -69,25 +69,21 @@ class BlenderScriptRunner:
         opcje = self.read_json("../resources/selected_options.json")
         try:
             # Uruchom pierwszy skrypt Blenderowy
-            print(f"Uruchamianie pierwszego skryptu: {self.script_file}")
             subprocess.run([
                 self.blender_path,
                 "--background",  # Tryb bez interfejsu graficznego
                 self.blend_file,  # Plik .blend do otwarcia
                 "--python", self.script_file  # Skrypt do wykonania
             ], check=True)
-            print(f"Pierwszy skrypt zakończony pomyślnie: {self.script_file}")
 
             if opcje:
                 # Uruchom pierwszy skrypt Blenderowy
-                print(f"Uruchamianie drugiego skryptu: {self.script_file_d}")
                 subprocess.run([
                     self.blender_path,
                     "--background",  # Tryb bez interfejsu graficznego
                     self.blend_file_d,  # Plik .blend do otwarcia
                     "--python", self.script_file_d  # Skrypt do wykonania
                 ], check=True)
-                print(f"Pierwszy skrypt zakończony pomyślnie: {self.script_file_d}")
             else:
                 # Jeśli opcje są puste, nadpisujemy plik combined_addons.obj pustym plikiem
                 with open("../generator/dodatki/combined_addons.obj", 'w') as f:

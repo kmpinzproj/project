@@ -155,7 +155,6 @@ class MainApplication(QMainWindow):
         if project_name_provided:  # Jeśli nazwa została poprawnie podana
             self.previous_index = self.stack.currentWidget()
             self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
-            print("Przejście do widoku formularza kontaktowego.")
         else:
             print("Przejście anulowane. Brak nazwy projektu.")
 

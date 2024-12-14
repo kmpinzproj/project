@@ -409,14 +409,12 @@ class ScrollableMenu(QWidget):
 
     def get_selected_options(self):
         """Returns the currently selected options."""
-        print(f"to przekazuje do testu{self.selected_options}")
         tmp = self.selected_options
         return tmp
 
     def validate_required_fields(self, required_fields):
         """Validates that all required fields from the given list have selected options."""
         all_valid = True
-        # print(f"Dane sprawdzane podczas walidacji {self.selected_options}")
         for category in required_fields:
             if category == "Kolor":
                 # Sprawdź, czy istnieje zaznaczony kolor w "Kolor standardowy" lub "Kolor RAL"

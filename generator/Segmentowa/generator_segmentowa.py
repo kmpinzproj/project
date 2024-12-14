@@ -14,8 +14,6 @@ for object_name in object_names:
         bpy.context.view_layer.objects.active = obj
         obj.select_set(True)
         bpy.ops.object.delete()
-    else:
-        test = 0
 
 
 def scale_stack_and_align_rails(width, height, przetloczenie):
@@ -137,7 +135,6 @@ def scale_stack_and_align_rails(width, height, przetloczenie):
             }
             with open("../generator/dodatki/gate_data.json", "w") as json_file:
                 json.dump(gate_data, json_file)
-            print("Dane bramy zostały zapisane do pliku gate_data.json.")
         else:
             print("Nie znaleziono obiektu bramy.")
 

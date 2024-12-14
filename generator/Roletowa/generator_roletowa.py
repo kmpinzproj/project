@@ -17,8 +17,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-    else:
-        print(f"Obiekt '{object_name}' nie istnieje.")
 
 
 def tilt_gate(width, height, wysokosc_profilu):
@@ -30,11 +28,7 @@ def tilt_gate(width, height, wysokosc_profilu):
     available_segments = {"77 mm": "seg1", "100 mm": "seg2", "START": "seg0"}
 
     # Wybór segmentu
-    try:
-        segment_name = available_segments[wysokosc_profilu]
-    except ValueError:
-        print("Podano nieprawidłowy numer. Spróbuj ponownie.")
-        return
+    segment_name = available_segments[wysokosc_profilu]
 
     # Pobierz segment bazowy
     segment = bpy.data.objects.get(segment_name)
@@ -54,9 +48,7 @@ def tilt_gate(width, height, wysokosc_profilu):
         joined_gate_x = segment.copy()
         joined_gate_x.data = segment.data.copy()
 
-
         joined_gate_x.location = (0, 0, segment_height / 2)  # Umieszczamy główny segment na dolnej krawędzi
-
 
         bpy.context.collection.objects.link(joined_gate_x)
         joined_gate_x.dimensions[0] = x_length_m
@@ -139,7 +131,6 @@ def tilt_gate(width, height, wysokosc_profilu):
             # Zapisz dane bramy do pliku JSON
             with open("../generator/dodatki/gate_data.json", "w") as json_file:
                 json.dump(gate_data, json_file)
-            print("Dane bramy zostały zapisane do pliku gate_data.json.")
         else:
             print("Nie znaleziono obiektu bramy.")
 

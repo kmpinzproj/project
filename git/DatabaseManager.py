@@ -442,6 +442,7 @@ if __name__ == "__main__":
     projekty = db_manager.list_projects()
     for projekt in projekty:
         print(projekt)
+        print("TEST")
 
     # Załadowanie JSON jako słownika Python
 

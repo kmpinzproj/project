@@ -20,9 +20,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-        print(f"Obiekt '{object_name}' został usunięty.")
-    else:
-        print(f"Obiekt '{object_name}' nie istnieje.")
 
 
 def cut_object(obj, plane_co, plane_no, clear_outer):

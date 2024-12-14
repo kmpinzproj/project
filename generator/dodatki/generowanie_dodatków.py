@@ -16,9 +16,6 @@ for object_name in object_names:
 
         # Usunięcie obiektu
         bpy.ops.object.delete()
-        print(f"Obiekt '{object_name}' został usunięty.")
-    else:
-        print(f"Obiekt '{object_name}' nie istnieje.")
 
 handle = bpy.data.objects.get("klamka-1")
 door = bpy.data.objects.get("drzwi")
@@ -283,7 +280,6 @@ def add_window_segment(glass, pattern, przetloczenie):
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-        print(f"Ramki i szyby zostały dodane. Liczba ramek: {len(frame_objects)}, Liczba szyb: {len(glass_objects)}")
         return frame_objects, glass_objects
 
     except Exception as e:
@@ -391,7 +387,6 @@ def add_window(window, glass, option):
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-        print(f"Ramki i szyby zostały dodane. Liczba ramek: {len(frame_objects)}, Liczba szyb: {len(glass_objects)}")
         return frame_objects, glass_objects
 
     except Exception as e:
@@ -447,8 +442,6 @@ def position_door_from_file(door):
         bpy.context.view_layer.objects.active = door_copy
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-        print(f"Drzwi zostały ustawione na pozycji: {door_copy.location}")
-
         return door_copy  # Zwrócenie kopii drzwi dla dalszego przetwarzania
 
     except Exception as e:
@@ -500,7 +493,6 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
 
             # Ustawienie pozycji klamki dla drzwi
             door_handle_copy.location = (handle_x, handle_y, handle_z)
-            print(f"Klamka została dodana do drzwi na pozycji: {door_handle_copy.location}")
             bpy.context.view_layer.objects.active = door_handle_copy
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             return door_handle_copy
@@ -531,7 +523,6 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
             bpy.context.view_layer.objects.active = handle_copy
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-            print(f"Klamka została dodana na bramie na pozycji {handle_copy.location}")
             return handle_copy
 
     except Exception as e:
@@ -612,7 +603,6 @@ def position_vent_from_file(vent, option):
         bpy.ops.object.join()  # Łączymy wszystkie zaznaczone obiekty w jeden
         merged_vent = bpy.context.view_layer.objects.active  # To jest nasz nowy obiekt kratki
 
-        print(f"Kratki wentylacyjne zostały połączone w jeden obiekt: {merged_vent.name}")
         return merged_vent
 
     except Exception as e:
@@ -676,8 +666,6 @@ def export_multiple_objects_to_obj_custom(objects, output_path):
                 # Zwiększ offset wierzchołków
                 vertex_offset += len(mesh.vertices)
 
-        print(f"Wyeksportowano obiekty do {output_path}")
-
     except Exception as e:
         print(f"Wystąpił błąd podczas eksportu: {e}")
 
@@ -700,12 +688,10 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
         if door_copy:
             door_copy.name = "drzwi_w_bramie"
             objects_to_export.append(door_copy)
-            print("Dodano drzwi do eksportu.")
             handle_door_copy = add_handle(handle, door=door_copy)
             if handle_door_copy:
                 handle_door_copy.name = "klamka_do_drzwi"
                 objects_to_export.append(handle_door_copy)
-                print("Dodano klamkę od drzwi do eksportu.")
 
     # Kratka wentylacyjna
     if 'kratka' in dodatki:
@@ -713,64 +699,50 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
         if vent_copy:
             vent_copy.name = "kratka_wentylacyjna"
             objects_to_export.append(vent_copy)
-            print("Dodano kratkę wentylacyjną do eksportu.")
 
     if 'klamka' in dodatki:
         handle_copy = add_handle(handle, dodatki["klamka"])
         if handle_copy:
             objects_to_export.append(handle_copy)
-            print("Dodano klamkę do eksportu.")
 
     if dodatki["typ"] == "Brama Segmentowa":
-        print("TEST SEGMENTOWA")
         if 'okno' in dodatki:
-            print("TEST OKNA")
             window_copies, glass_copies = add_window_segment(glass, dodatki["okno"], dodatki["przetloczenie"])
             if window_copies:
                 for idx, frame in enumerate(window_copies, start=1):
                     frame.name = f"ramka_okna_{idx}"
                     objects_to_export.append(frame)
-                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
             if glass_copies:
                 for idx, glass2 in enumerate(glass_copies, start=1):
                     glass2.name = f"szyba_okna_{idx}"
                     objects_to_export.append(glass2)
-                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
     elif dodatki["typ"] == "Brama Roletowa":
-        print("TEST Roletowa")
         if 'okno' in dodatki:
-            print("TEST OKNA")
             window2 = bpy.data.objects.get("okno-roletowev2")
             window_copies, glass_copies = add_window_rolling(window2, glass, dodatki["segment"])
             if window_copies:
                 for idx, frame in enumerate(window_copies, start=1):
                     frame.name = f"ramka_okna_{idx}"
                     objects_to_export.append(frame)
-                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
             if glass_copies:
                 for idx, glass2 in enumerate(glass_copies, start=1):
                     glass2.name = f"szyba_okna_{idx}"
                     objects_to_export.append(glass2)
-                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
     else:
         if 'okno' in dodatki:
-            print("TEST OKNA")
             window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
             if window_copies:
                 for idx, frame in enumerate(window_copies, start=1):
                     frame.name = f"ramka_okna_{idx}"
                     objects_to_export.append(frame)
-                print(f"Dodano ramki okienne do eksportu: {[obj.name for obj in window_copies]}")
             if glass_copies:
                 for idx, glass2 in enumerate(glass_copies, start=1):
                     glass2.name = f"szyba_okna_{idx}"
                     objects_to_export.append(glass2)
-                print(f"Dodano szyby okienne do eksportu: {[obj.name for obj in glass_copies]}")
 
     # Eksportuj tylko jeśli mamy jakieś obiekty do eksportu
     if objects_to_export:
         export_multiple_objects_to_obj_custom(objects_to_export, output_path)
-        print(f"Wyeksportowano {len(objects_to_export)} obiektów do pliku {output_path}.")
     else:
         print("Brak obiektów do eksportu.")
 
@@ -818,6 +790,5 @@ def read_json(json_path):
 
 dodatki = read_json("../resources/selected_options.json")
 szerokość = dodatki["wymiary"]["Szerokość"]
-print(dodatki)
 
 export_selected_objects(dodatki)
