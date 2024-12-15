@@ -40,9 +40,9 @@ def cut_object(obj, plane_co, plane_no, clear_outer):
 
 def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
     # Nazwa segmentu bazowego
-    available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "Jodełka w górę": "Cube.005", "START": "Cube.004"}
+    available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "Jodełka w górę": "Cube.005", "START": "Cube.004","Jodełka w dół": "Cube.006"}
     segment_name = available_cube[uklad_wypelnienia]
-    available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2, "Dwuskrzydłowe": 3}
+    available_segments = {"Jednoskrzydłowe prawe": 1, "Jednoskrzydłowe lewe": 2, "Dwuskrzydłowe": 3, "START": 0}
     segment_choice = available_segments[ilosc_skrzydel]
 
     # Pobierz segment bazowy
@@ -58,7 +58,7 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
         segment_width = segment.dimensions[0]
         segment_height = segment.dimensions[2]
 
-        if wypelnienie == "Jodełka w górę":
+        if wypelnienie == "Jodełka w górę" or wypelnienie == "Jodełka w dół":
             # Jodełka w górę - Rozciąganie całego segmentu
             new_gate = segment.copy()
             new_gate.data = segment.data.copy()
@@ -271,7 +271,7 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
             right_door.rotation_euler[2] += radians(10)
             # Ukrycie oryginalnego obiektu
             joined_gate.hide_set(True)
-        elif segment_choice in [1,2]:
+        elif segment_choice in [1,2,0]:
             # Pobierz bounding box obiektu w przestrzeni lokalnej
             bounding_box = [joined_gate.matrix_world @ Vector(corner) for corner in joined_gate.bound_box]
 
@@ -279,6 +279,9 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
                 right_back_x = bounding_box[0].x  # lewa dolna krawędź
             elif segment_choice == 1:  # Prawa stronna
                 right_back_x = bounding_box[4].x  # prawa dolna krawędź
+            elif segment_choice == 0:  # Prawa stronna
+                right_back_x = bounding_box[4].x  # prawa dolna krawędź
+
 
             right_back_y = max(v.y for v in bounding_box)  # Tylna część bramy (maksymalna Y)
             right_back_z = joined_gate.dimensions[2] / 2  # Środek wysokości Z
@@ -300,6 +303,8 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
             elif segment_choice == 1:  # Prawa stronna
                 bpy.context.view_layer.objects.active = joined_gate
                 joined_gate.rotation_euler[2] += radians(10)
+                joined_gate.name = "Right_Door"
+            elif segment_choice == 0:
                 joined_gate.name = "Right_Door"
 
             bpy.context.view_layer.objects.active = joined_gate
@@ -515,7 +520,7 @@ def read_json(json_path):
         if "Ilość skrzydeł" in existing_data and existing_data["Ilość skrzydeł"] is not None:
             przetloczenie = existing_data["Ilość skrzydeł"]
         else:
-            przetloczenie = "Jednoskrzydłowe lewe"
+            przetloczenie = "START"
         if "Układ wypełnienia" in existing_data and existing_data["Układ wypełnienia"] is not None:
             uklad_wypelnienia = existing_data["Układ wypełnienia"]
         else:
@@ -536,11 +541,11 @@ def read_json(json_path):
 
 
 # Uruchom funkcję
-dimensions, wysokosc_profilu, kolor, uklad_wypelnienia = read_json("../resources/selected_options.json")
+dimensions, ilosc_skrzydel, kolor, uklad_wypelnienia = read_json("../resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
-
-tilt_gate_rozwierana(width, height, wysokosc_profilu, uklad_wypelnienia)
+print(ilosc_skrzydel)
+tilt_gate_rozwierana(width, height, ilosc_skrzydel, uklad_wypelnienia)
 export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
 
