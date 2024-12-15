@@ -286,6 +286,111 @@ def add_window_segment(glass, pattern, przetloczenie):
         print(f"Wystąpił błąd: {e}")
         return [], []
 
+def add_window_rotation(window, glass, option, ilosc_skrzydel):
+    try:
+        if not window or not glass:
+            print("Nie znaleziono obiektu ramki okna lub szyby.")
+            return None, None
+
+        # Wczytaj dane bramy
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        gate_location = gate_data["location"]
+        gate_dimensions = gate_data["dimensions"]
+        gate_width = gate_dimensions[0]
+        gate_height = gate_dimensions[2]
+
+        frame_objects = []
+        glass_objects = []
+
+        # Obliczenia pozycji
+        gate_left_edge_x = gate_location[0] - (gate_width / 2)
+        gate_right_edge_x = gate_location[0] + (gate_width / 2)
+        gate_bottom_z = gate_location[2] - (gate_height / 2)
+        window_z = gate_bottom_z + 1.7 if gate_height < 2.6 else gate_bottom_z + (gate_height / 2)
+
+        window_positions = [
+            ("Left", gate_left_edge_x + 0.1 + 0.93 / 2),
+            ("Right", gate_right_edge_x - 0.1 - 0.93 / 2),
+        ]
+
+        # Tworzenie kopii ramek i szyb
+        for side, x_pos in window_positions:
+            window_copy = window.copy()
+            window_copy.data = window.data.copy()
+            bpy.context.collection.objects.link(window_copy)
+            window_copy.location = (x_pos, gate_location[1], window_z)
+            frame_objects.append(window_copy)
+
+            glass_copy = glass.copy()
+            glass_copy.data = glass.data.copy()
+            bpy.context.collection.objects.link(glass_copy)
+            glass_copy.location = (x_pos, gate_location[1], window_z)
+            glass_objects.append(glass_copy)
+
+        if ilosc_skrzydel == "Jednoskrzydłowe lewe":
+            pivot_x = gate_left_edge_x
+            rotation_angle = -math.radians(10)
+        elif ilosc_skrzydel == "Jednoskrzydłowe prawe":
+            pivot_x = gate_right_edge_x
+            rotation_angle = math.radians(10)
+        else:
+            pivot_x_left = gate_left_edge_x
+            pivot_x_right = gate_right_edge_x
+            rotation_angle_left = -math.radians(5)
+            rotation_angle_right = math.radians(10)
+
+        for i, (window_copy, glass_copy) in enumerate(zip(frame_objects, glass_objects)):
+            if ilosc_skrzydel == "Dwuskrzydłowe":
+                if i == 0:  # Left
+                    pivot_x = pivot_x_left
+                    rotation_angle = rotation_angle_left
+                else:  # Right
+                    pivot_x = pivot_x_right
+                    rotation_angle = rotation_angle_right
+
+            pivot = (pivot_x, gate_location[1], gate_location[2])
+
+            for obj in [window_copy, glass_copy]:
+                # Dodanie obrotu w osi Y dla opcji "Pionowe"
+                if option == "Okna pionowe":
+                    obj.rotation_euler[1] += math.radians(90)
+                bpy.context.scene.cursor.location = pivot
+                bpy.context.view_layer.objects.active = obj
+                obj.select_set(True)
+                bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+                bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
+                # Rotacja w osi Z
+                obj.rotation_euler[2] += rotation_angle
+
+                # Korekta pozycji Y - dynamiczna
+                distance = abs(obj.location[0] - pivot_x)
+                if ilosc_skrzydel == "Jednoskrzydłowe lewe":
+                    offset_y = distance * (1 - math.cos(rotation_angle)) + gate_width / 12.3
+                    obj.location[1] -= offset_y
+                elif ilosc_skrzydel == "Jednoskrzydłowe prawe":
+                    offset_y = distance * (1 - math.cos(rotation_angle)) - gate_width / 12.3
+                    obj.location[1] += offset_y
+                elif ilosc_skrzydel == "Dwuskrzydłowe":
+                    if i == 0:  # Left
+                        offset_y = distance * (1 - math.cos(rotation_angle_left)) + gate_width / 23.5
+                        obj.location[1] -= offset_y
+                    else:  # Right
+                        offset_y = distance * (1 - math.cos(rotation_angle_right)) + gate_width / 12.3
+                        obj.location[1] -= offset_y
+
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        return frame_objects, glass_objects
+
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return None, None
+
 def add_window(window, glass, option):
     """
     Dodaje okna oraz szyby do bramy w oparciu o dane z pliku JSON.
@@ -728,6 +833,17 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
                 for idx, glass2 in enumerate(glass_copies, start=1):
                     glass2.name = f"szyba_okna_{idx}"
                     objects_to_export.append(glass2)
+    elif dodatki["typ"] == "Brama Rozwierana":
+        if 'okno' in dodatki:
+            window_copies, glass_copies = add_window_rotation(window, glass, dodatki["okno"], dodatki["ilosc_skrzydel"])
+            if window_copies:
+                for idx, frame in enumerate(window_copies, start=1):
+                    frame.name = f"ramka_okna_{idx}"
+                    objects_to_export.append(frame)
+            if glass_copies:
+                for idx, glass2 in enumerate(glass_copies, start=1):
+                    glass2.name = f"szyba_okna_{idx}"
+                    objects_to_export.append(glass2)
     else:
         if 'okno' in dodatki:
             window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
@@ -766,6 +882,12 @@ def read_json(json_path):
                     result["przetloczenie"] = existing_data['Rodzaj przetłoczenia']
                 else:
                     result["przetloczenie"] = "Bez przetłoczeia"
+            elif result["typ"] == "Brama Rozwierana":
+                if "Ilość skrzydeł" in existing_data:
+                    result["ilosc_skrzydel"] = existing_data["Ilość skrzydeł"]
+                else:
+                    result["ilosc_skrzydel"] = "Jednoskrzydłowe lewe"
+
 
 
         if "Wymiary" in existing_data:

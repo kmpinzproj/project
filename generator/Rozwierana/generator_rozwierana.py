@@ -179,6 +179,8 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
 
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME', center='BOUNDS')
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        add_and_align_rails(joined_gate)
+
         gate_data = {
             "location": [joined_gate.location.x, joined_gate.location.y, joined_gate.location.z],
             "dimensions": [joined_gate.dimensions.x, joined_gate.dimensions.y, joined_gate.dimensions.z]
