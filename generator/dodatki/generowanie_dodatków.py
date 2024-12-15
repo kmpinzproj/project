@@ -888,8 +888,6 @@ def read_json(json_path):
                 else:
                     result["ilosc_skrzydel"] = "Jednoskrzydłowe lewe"
 
-
-
         if "Wymiary" in existing_data:
             result['wymiary'] = existing_data["Wymiary"]
 
