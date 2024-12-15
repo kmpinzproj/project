@@ -1,16 +1,16 @@
 import json
 import os
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Spacer, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Paragraph
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from tkinter import Tk, filedialog
+from PySide6.QtWidgets import QFileDialog, QApplication
+from PySide6.QtCore import Qt
 
 # Register a font that supports Polish characters
-pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
-
+# pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
 
 def create_pdf():
     # Load JSON data from file
@@ -31,10 +31,19 @@ def create_pdf():
         if width and height:
             dimensions = f"{width} x {height}"
 
+    # Initialize QApplication
+    app = QApplication.instance()
+    if not app:
+        app = QApplication([])
+
     # Prompt the user to choose the save location for the PDF
-    root = Tk()
-    root.withdraw()  # Hide the root window
-    output_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+    output_path, _ = QFileDialog.getSaveFileName(
+        None,
+        "Save PDF File",
+        os.path.expanduser("~/"),
+        "PDF files (*.pdf)"
+    )
+
     if not output_path:
         print("No file selected for saving the PDF.")
         return
@@ -82,7 +91,6 @@ def create_pdf():
         table = Table(formatted_table_data)
         table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSans'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 0), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),

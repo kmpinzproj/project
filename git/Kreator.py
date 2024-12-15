@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSizePolicy, QLabel, QCheckBox, QGridLayout, QInputDialog,
-    QMessageBox
+    QMessageBox, QSpacerItem
 )
 from PySide6.QtGui import QPixmap
 from Rozwijane_menu import ScrollableMenu
@@ -148,28 +148,43 @@ class Kreator(QMainWindow):
         self.change_model()
 
     def _create_navigation_buttons(self):
-        """Creates a widget with 'Back', 'Save', 'Render', and 'Contact' buttons."""
+        """Creates a widget with updated button layout and precise spacing."""
         buttons_widget = QWidget()
-        buttons_layout = QGridLayout(buttons_widget)  # Zamiast QHBoxLayout używamy QGridLayout
+        main_layout = QVBoxLayout(buttons_widget)
 
-        # Create Back, Save, Render, and Contact buttons
-        self.back_button = StyledButton("Cofnij")
-        self.contact_button = StyledButton("Kontakt")
+        # Tworzenie głównych wierszy
+        row1_layout = QHBoxLayout()
+        row2_layout = QHBoxLayout()
+        row3_layout = QHBoxLayout()
+
+        # Tworzenie przycisków
         self.render_button = StyledButton("Renderuj")
+        self.calculate_price_button = StyledButton("Kalkuluj cenę")
         self.save_button = StyledButton("Zapisz")
+        self.contact_button = StyledButton("Kontakt")
+        self.back_button = StyledButton("Cofnij")
 
-        self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
-        self.render_button.clicked.connect(self.render_and_change)
+        # Dodawanie przycisków do wierszy
+        row1_layout.addWidget(self.render_button)
+        row1_layout.addWidget(self.calculate_price_button)
+        row2_layout.addWidget(self.save_button)
+        row2_layout.addWidget(self.contact_button)
 
-        # Dodaj przyciski w układzie 2x2
-        buttons_layout.addWidget(self.render_button, 0, 0)  # Wiersz 0, kolumna 0
-        buttons_layout.addWidget(self.save_button, 0, 1)  # Wiersz 0, kolumna 1
-        buttons_layout.addWidget(self.back_button, 1, 0)  # Wiersz 1, kolumna 0
-        buttons_layout.addWidget(self.contact_button, 1, 1)  # Wiersz 1, kolumna 1
+        # Dodanie przycisku Cofnij w trzecim wierszu (wycentrowany)
+        row3_layout.addStretch()
+        row3_layout.addWidget(self.back_button)
+        row3_layout.addStretch()
 
-        # Usuń marginesy i odstępy dla przycisków
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(10)  # Odstęp między przyciskami
+        # Dodanie wierszy do głównego układu
+        main_layout.addLayout(row1_layout)
+        main_layout.addLayout(row2_layout)
+        main_layout.addSpacerItem(QSpacerItem(10, 5, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Minimalna przerwa
+        main_layout.addLayout(row3_layout)
+        main_layout.addSpacerItem(QSpacerItem(10, 5, QSizePolicy.Minimum, QSizePolicy.Fixed))  # Minimalna przerwa
+
+        # Dostosowanie marginesów
+        main_layout.setContentsMargins(10, 5, 10, 5)
+        main_layout.setSpacing(5)  # Minimalny odstęp między wierszami
 
         return buttons_widget
 
