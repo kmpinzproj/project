@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QRegularExpression
 from button import StyledButton
 from generator.szkic.szkic_prosty import (draw_orthogonal_edges, draw_filtered_edges_isometric)
 from generator.szkic.szkic_opencv import detect_and_draw_arrows
+from InvoiceGenerator import InvoiceGenerator
 import os
 import json
 
@@ -130,7 +131,7 @@ class ContactForm(QMainWindow):
         self.back_button = StyledButton("Cofnij")
 
         self.generate_pdf_button.clicked.connect(self.sketch)
-        self.invoice_button.clicked.connect(self.save_to_json)  # Podpięcie przycisku do zapisu JSON
+        self.invoice_button.clicked.connect(self.generate_invoice)  # Podpięcie przycisku do zapisu JSON
 
         layout.addWidget(self.generate_pdf_button)
         layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -160,14 +161,14 @@ class ContactForm(QMainWindow):
             print(f"Błąd podczas wczytywania pliku {file_path}: {e}")
             return {}
 
-    def save_to_json(self):
+    def generate_invoice(self):
         """Zapisuje dane z formularza do pliku JSON."""
         data = {
-            "name": self.name_input.text().strip(),
-            "email": self.email_input.text().strip(),
-            "phone": self.phone_input.text().strip(),
-            "nip": self.nip_input.text().strip(),
-            "comments": self.comments_input.toPlainText().strip()
+            "Imię i nazwisko": self.name_input.text().strip(),
+            "Adres e-mail": self.email_input.text().strip(),
+            "Nr telefonu": self.phone_input.text().strip(),
+            "NIP": self.nip_input.text().strip(),
+            "Uwagi:": self.comments_input.toPlainText().strip()
         }
 
         output_path = "../resources/invoice_data.json"
@@ -178,6 +179,13 @@ class ContactForm(QMainWindow):
             print(f"Dane zapisano do pliku {output_path}")
         except Exception as e:
             print(f"Wystąpił błąd podczas zapisu do pliku {output_path}: {e}")
+
+        try:
+            invoice_generator = InvoiceGenerator(output_path="faktura.pdf")
+            invoice_generator.generate_invoice()
+            print("Faktura PDF została wygenerowana pomyślnie.")
+        except Exception as e:
+            print(f"Wystąpił błąd podczas generowania faktury PDF: {e}")
 
     def validate_fields(self):
         """Walidacja pól formularza - aktywuje przycisk Kalkulator cen tylko, gdy pola są wypełnione."""
@@ -205,20 +213,3 @@ class ContactForm(QMainWindow):
 
         create_pdf()
 
-    def sketch(self):
-        selected_options = self.load_selected_options("../resources/selected_options.json")
-        input_obj_file = "../generator/model.obj"
-        output_isometric_file = "../generator/sketch_iso_no_diagonals.png"
-        output_orthogonal_file = "../generator/sketch_orthogonal.png"
-        final_output_path = '../generator/image_with_arrows.png'
-        dimensions = selected_options["Wymiary"]
-        width = dimensions["Szerokość"]
-        height = dimensions["Wysokość"]
-        # Generowanie rzutu izometrycznego
-        draw_filtered_edges_isometric(input_obj_file, output_isometric_file)
-        # Generowanie zwykłego rzutu
-        draw_orthogonal_edges(input_obj_file, output_orthogonal_file)
-
-        detect_and_draw_arrows(output_orthogonal_file, final_output_path, width, height)
-
-        create_pdf()
