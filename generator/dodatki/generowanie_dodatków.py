@@ -372,8 +372,8 @@ def add_window_rotation(window, glass, option, ilosc_skrzydel):
                     offset_y = distance * (1 - math.cos(rotation_angle)) + gate_width / 12.3
                     obj.location[1] -= offset_y
                 elif ilosc_skrzydel == "Jednoskrzydłowe prawe":
-                    offset_y = distance * (1 - math.cos(rotation_angle)) - gate_width / 12.3
-                    obj.location[1] += offset_y
+                    offset_y = distance * (1 - math.cos(rotation_angle)) + gate_width / 12.3
+                    obj.location[1] -= offset_y
                 elif ilosc_skrzydel == "Dwuskrzydłowe":
                     if i == 0:  # Left
                         offset_y = distance * (1 - math.cos(rotation_angle_left)) + gate_width / 23.5
