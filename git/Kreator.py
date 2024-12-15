@@ -11,6 +11,8 @@ import json
 from git.DatabaseManager import DatabaseManager
 from generator.generator_gateV2 import BlenderScriptRunner
 from Widget3D import OpenGLWidget
+from Kosztorys import PriceCalculator  # Import klasy z pliku Kosztorys.py
+
 
 if __name__ == "__main__":
     runner = BlenderScriptRunner()
@@ -166,6 +168,7 @@ class Kreator(QMainWindow):
 
         self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
         self.render_button.clicked.connect(self.render_and_change)
+        self.calculate_price_button.clicked.connect(self.open_cost_calculator)
 
         # Dodawanie przycisków do wierszy
         row1_layout.addWidget(self.render_button)
@@ -307,6 +310,13 @@ class Kreator(QMainWindow):
                                 img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
                                 # Zaktualizuj klucz "Kolor" w selected_options
                                 self.navigation_menu.selected_options["Kolor"] = kolor_value
+
+    def open_cost_calculator(self):
+        """Otwiera okno kalkulatora cen z pliku Kosztorys.py."""
+        self.selected_options = self.navigation_menu.get_selected_options()
+        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        self.cost_calculator_window = PriceCalculator()  # Tworzenie instancji okna
+        self.cost_calculator_window.show()  # Wyświetlenie okna
 
     @staticmethod
     def load_required_fields(file_path):
