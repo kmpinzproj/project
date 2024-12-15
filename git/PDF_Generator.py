@@ -1,7 +1,7 @@
 import json
 import os
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QFileDialog, QApplication
 from PySide6.QtCore import Qt
 
 # Register a font that supports Polish characters
-# pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
+pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
 
 def create_pdf():
     # Load JSON data from file
@@ -56,41 +56,44 @@ def create_pdf():
             print(f"Error: Unable to delete the existing PDF file. {e}")
             return
 
-    pdf = SimpleDocTemplate(output_path, pagesize=A4, topMargin=0, bottomMargin=0)
+    pdf = SimpleDocTemplate(output_path, pagesize=A4, leftMargin=20, rightMargin=20, topMargin=20, bottomMargin=20)
 
     # Create a list to hold PDF elements
     elements = []
 
+    page_width, page_height = A4
+    max_height = page_height - 20  # Subtract margins
+
     # Add images one below the other
     image_paths = ["../generator/image_with_arrows.png", "../generator/sketch_iso_no_diagonals.png"]
 
-    page_width, page_height = A4
-    image_width = page_width  # Full width
-    image_height = image_width * 0.5  # Maintain aspect ratio for images
-
     for image_path in image_paths:
         if os.path.exists(image_path):
-            image = Image(image_path, width=image_width, height=image_height)  # Resize image
+            image = Image(image_path, width=page_width * 0.9, height=page_height * 0.3)  # Resize image
             elements.append(image)
         else:
             print(f"Warning: Image '{image_path}' not found.")
 
     # Create the vertical table from JSON data
     if isinstance(data, dict) and data:
-        # Prepare the table data as key-value pairs
         formatted_table_data = []
+        styles = getSampleStyleSheet()
+        normal_style = styles['Normal']
+        normal_style.fontName = 'DejaVuSans'
+
         for key, value in data.items():
             if key == 'Wymiary' and dimensions:
-                formatted_table_data.append(["Wymiary", dimensions])
+                formatted_table_data.append([Paragraph("Wymiary", normal_style), Paragraph(dimensions, normal_style)])
             else:
                 if isinstance(value, list):
                     value = ", ".join(map(str, value))  # Convert list to comma-separated string
-                formatted_table_data.append([key, str(value)])
+                formatted_table_data.append([Paragraph(str(key), normal_style), Paragraph(str(value), normal_style)])
 
         # Create vertical table
         table = Table(formatted_table_data)
         table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSans'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 0), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
@@ -102,3 +105,6 @@ def create_pdf():
     # Build the PDF
     pdf.build(elements)
     print(f"PDF successfully created at '{os.path.abspath(output_path)}'")
+
+if __name__ == "__main__":
+    create_pdf()

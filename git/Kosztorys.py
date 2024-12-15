@@ -1,6 +1,6 @@
 import json
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
-from git.DatabaseManager import DatabaseManager
+from DatabaseManager import DatabaseManager
 
 def load_json_data(file_path):
     """Wczytaj dane z pliku JSON."""
