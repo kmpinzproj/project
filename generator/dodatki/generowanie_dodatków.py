@@ -835,7 +835,10 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
                     objects_to_export.append(glass2)
     elif dodatki["typ"] == "Brama Rozwierana":
         if 'okno' in dodatki:
-            window_copies, glass_copies = add_window_rotation(window, glass, dodatki["okno"], dodatki["ilosc_skrzydel"])
+            if dodatki["ilosc_skrzydel"]=="START":
+                window_copies, glass_copies = add_window(window, glass, dodatki["okno"])
+            else:
+                window_copies, glass_copies = add_window_rotation(window, glass, dodatki["okno"], dodatki["ilosc_skrzydel"])
             if window_copies:
                 for idx, frame in enumerate(window_copies, start=1):
                     frame.name = f"ramka_okna_{idx}"
@@ -886,7 +889,7 @@ def read_json(json_path):
                 if "Ilość skrzydeł" in existing_data:
                     result["ilosc_skrzydel"] = existing_data["Ilość skrzydeł"]
                 else:
-                    result["ilosc_skrzydel"] = "Jednoskrzydłowe lewe"
+                    result["ilosc_skrzydel"] = "START"
 
         if "Wymiary" in existing_data:
             result['wymiary'] = existing_data["Wymiary"]
@@ -910,5 +913,5 @@ def read_json(json_path):
 
 dodatki = read_json("../resources/selected_options.json")
 szerokość = dodatki["wymiary"]["Szerokość"]
-
+print()
 export_selected_objects(dodatki)
