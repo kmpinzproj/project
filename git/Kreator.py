@@ -164,6 +164,9 @@ class Kreator(QMainWindow):
         self.contact_button = StyledButton("Kontakt")
         self.back_button = StyledButton("Cofnij")
 
+        self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
+        self.render_button.clicked.connect(self.render_and_change)
+
         # Dodawanie przycisków do wierszy
         row1_layout.addWidget(self.render_button)
         row1_layout.addWidget(self.calculate_price_button)
