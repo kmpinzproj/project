@@ -426,6 +426,29 @@ class DatabaseManager:
             print(f"Błąd podczas sprawdzania istnienia projektu: {e}")
             return False
 
+    def get_price(self, gate_type, parameter, option):
+        """
+        Pobiera cenę z tabeli CENNIK na podstawie typu bramy, parametru i opcji.
+
+        :param gate_type: Typ bramy (np. "Brama Segmentowa")
+        :param parameter: Nazwa parametru (np. "Rodzaj przetłoczenia")
+        :param option: Opcja dla danego parametru (np. "Bez przetłoczenia")
+        :return: Cena jako liczba całkowita lub 0, jeśli cena nie została znaleziona.
+        """
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT doplata FROM CENNIK 
+                WHERE typ_bramy = ? AND parametr = ? AND opcja = ?
+            """, (gate_type, parameter, option))
+            result = cursor.fetchone()
+            conn.close()
+            return result[0] if result else 0
+        except sqlite3.Error as e:
+            print(f"Błąd podczas pobierania ceny: {e}")
+            return 0
+
 
 # TESTOWANIE BAZY DANYCH
 if __name__ == "__main__":

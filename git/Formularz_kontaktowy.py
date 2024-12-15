@@ -10,6 +10,7 @@ from generator.szkic.szkic_opencv import detect_and_draw_arrows
 import os
 import json
 
+from git.PDF_Generator import create_pdf
 
 
 class ContactForm(QMainWindow):
@@ -149,3 +150,5 @@ class ContactForm(QMainWindow):
         draw_orthogonal_edges(input_obj_file, output_orthogonal_file)
 
         detect_and_draw_arrows(output_orthogonal_file, final_output_path, width, height)
+
+        create_pdf()
