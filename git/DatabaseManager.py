@@ -145,6 +145,8 @@ class DatabaseManager:
                     "kolor_ral": gate_data.get("Kolor RAL", None),
                     "przeszklenia": gate_data.get("Przeszklenia", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                    "klamka_do_bramy": gate_data.get("Klamka do bramy", None),
+                    "kratka_wentylacyjna": gate_data.get("Kratka wentylacyjna", None)
                 }
 
             elif typ_bramy == "uchylna":
@@ -154,8 +156,9 @@ class DatabaseManager:
                     "kolor_ral": gate_data.get("Kolor RAL", None),
                     "sposob_otwierania_drzwi": gate_data.get("Sposób otwierania drzwi", None),
                     "przeszklenia": gate_data.get("Przeszklenia", None),
-                    "drzwi_przejsciowe": gate_data.get("Drzwi przejściowe", None),
                     "opcje_dodatkowe": ", ".join(gate_data.get("Opcje dodatkowe", [])),
+                    "klamka_do_bramy": gate_data.get("Klamka do bramy", None),
+                    "kratka_wentylacyjna": gate_data.get("Kratka wentylacyjna", None)
                 }
 
             else:
@@ -209,8 +212,8 @@ class DatabaseManager:
         elif typ_bramy == "rozwierana":
             cursor.execute("""
                 INSERT INTO BramaRozwierana 
-                (projekt_id, ilosc_skrzydel, ocieplenie, uklad_wypelnienia, kolor_standardowy, kolor_ral, przeszklenia, opcje_dodatkowe, szerokosc, wysokosc)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (projekt_id, ilosc_skrzydel, ocieplenie, uklad_wypelnienia, kolor_standardowy, kolor_ral, przeszklenia, opcje_dodatkowe, kratka_wentylacyjna, klamka_do_bramy, szerokosc, wysokosc)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 projekt_id,
                 gate_data.get("ilosc_skrzydel"),
@@ -220,15 +223,18 @@ class DatabaseManager:
                 gate_data.get("kolor_ral"),
                 gate_data.get("przeszklenia"),
                 gate_data.get("opcje_dodatkowe"),
+                gate_data.get("kratka_wentylacyjna"),
+                gate_data.get("klamka_do_bramy"),
                 width,
                 height
             ))
 
+
         elif typ_bramy == "uchylna":
             cursor.execute("""
                 INSERT INTO BramaUchylna 
-                (projekt_id, uklad_wypelnienia, kolor_standardowy, kolor_ral, sposob_otwierania_drzwi, przeszklenia, opcje_dodatkowe, szerokosc, wysokosc)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (projekt_id, uklad_wypelnienia, kolor_standardowy, kolor_ral, sposob_otwierania_drzwi, przeszklenia, opcje_dodatkowe, kratka_wentylacyjna, klamka_do_bramy, szerokosc, wysokosc)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 projekt_id,
                 gate_data.get("uklad_wypelnienia"),
@@ -237,6 +243,8 @@ class DatabaseManager:
                 gate_data.get("sposob_otwierania_drzwi"),
                 gate_data.get("przeszklenia"),
                 gate_data.get("opcje_dodatkowe"),
+                gate_data.get("kratka_wentylacyjna"),
+                gate_data.get("klamka_do_bramy"),
                 width,
                 height
             ))
@@ -317,8 +325,10 @@ class DatabaseManager:
                     "kolor_ral": brama[6],
                     "przeszklenia": brama[7],
                     "opcje_dodatkowe": brama[8],
-                    "szerokosc": brama[9],
-                    "wysokosc": brama[10]
+                    "kratka_wentylacyjna": brama[9],
+                    "klamka_do_bramy": brama[10],
+                    "szerokosc": brama[11],
+                    "wysokosc": brama[12]
                 }
 
         elif typ_bramy == "uchylna":
@@ -332,8 +342,10 @@ class DatabaseManager:
                     "sposob_otwierania_drzwi": brama[5],
                     "przeszklenia": brama[6],
                     "opcje_dodatkowe": brama[7],
-                    "szerokosc": brama[8],
-                    "wysokosc": brama[9]
+                    "kratka_wentylacyjna": brama[8],
+                    "klamka_do_bramy": brama[9],
+                    "szerokosc": brama[10],
+                    "wysokosc": brama[11]
                 }
 
         conn.close()

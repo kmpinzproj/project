@@ -45,6 +45,8 @@ CREATE TABLE BramaRozwierana (
     kolor_ral TEXT,
     przeszklenia TEXT,
     opcje_dodatkowe TEXT,
+    kratka_wentylacyjna TEXT,
+    klamka_do_bramy TEXT,
     szerokosc INTEGER,
     wysokosc INTEGER,
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
@@ -59,6 +61,8 @@ CREATE TABLE BramaUchylna (
     sposob_otwierania_drzwi TEXT,
     przeszklenia TEXT,
     opcje_dodatkowe TEXT,
+    kratka_wentylacyjna TEXT,
+    klamka_do_bramy TEXT,
     szerokosc INTEGER,
     wysokosc INTEGER,
     FOREIGN KEY (projekt_id) REFERENCES Projekt(id) ON DELETE CASCADE
@@ -156,6 +160,18 @@ INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
 ('Brama Rozwierana', 'Opcje dodatkowe', 'Rygiel trzypunktowy', 300),
 ('Brama Rozwierana', 'Opcje dodatkowe', 'Dodatkowe zamknięcie na kłódkę', 200);
 
+-- Klamka do bramy (Brama Rozwierana)
+INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
+('Brama Rozwierana', 'Klamka do bramy', 'Klamka 1', 50),
+('Brama Rozwierana', 'Klamka do bramy', 'Klamka 2', 70),
+('Brama Rozwierana', 'Klamka do bramy', 'Klamka 3', 100),
+('Brama Rozwierana', 'Klamka do bramy', 'Klamka 4', 150);
+
+-- Kratka wentylacyjna (Brama Rozwierana)
+INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
+('Brama Rozwierana', 'Kratka wentylacyjna', 'Lewa', 100),
+('Brama Rozwierana', 'Kratka wentylacyjna', 'Prawa', 100),
+('Brama Rozwierana', 'Kratka wentylacyjna', 'Obustronna', 200);
 
 -- Cena bazowa
 INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES ('Brama Uchylna', 'Bazowa', 'Cena', 1500);
@@ -183,3 +199,15 @@ INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
 ('Brama Uchylna', 'Opcje dodatkowe', 'Dodatkowy rygiel', 150),
 ('Brama Uchylna', 'Opcje dodatkowe', 'Drzwi przejściowe', 500);
 
+-- Klamka do bramy (Brama Uchylna)
+INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
+('Brama Uchylna', 'Klamka do bramy', 'Klamka 1', 50),
+('Brama Uchylna', 'Klamka do bramy', 'Klamka 2', 70),
+('Brama Uchylna', 'Klamka do bramy', 'Klamka 3', 100),
+('Brama Uchylna', 'Klamka do bramy', 'Klamka 4', 150);
+
+-- Kratka wentylacyjna (Brama Uchylna)
+INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
+('Brama Uchylna', 'Kratka wentylacyjna', 'Lewa', 100),
+('Brama Uchylna', 'Kratka wentylacyjna', 'Prawa', 100),
+('Brama Uchylna', 'Kratka wentylacyjna', 'Obustronna', 200);
