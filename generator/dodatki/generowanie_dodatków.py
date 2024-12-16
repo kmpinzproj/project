@@ -714,6 +714,110 @@ def position_vent_from_file(vent, option):
         print(f"Wystąpił błąd: {e}")
         return None
 
+def add_vent_rotation(vent, option, ilosc_skrzydel):
+    """
+    Tworzy kopię kratki wentylacyjnej i ustawia ją w odpowiednim miejscu na bramie rozwieranej,
+    z uwzględnieniem obrotu względem tylnej krawędzi bramy. Wszystkie kratki są łączone w jeden obiekt.
+
+    Argumenty:
+    vent -- obiekt kratki wentylacyjnej (bpy.types.Object)
+    option -- str, opcja "Lewa", "Prawa" lub "Obustronna"
+    ilosc_skrzydel -- str, liczba skrzydeł: "Jednoskrzydłowe lewe", "Jednoskrzydłowe prawe", "Dwuskrzydłowe"
+
+    Zwraca:
+    bpy.types.Object -- Połączony obiekt kratki wentylacyjnej
+    """
+    try:
+        if not vent:
+            print("Nie znaleziono obiektu kratki wentylacyjnej.")
+            return None
+
+        # Wczytaj dane bramy
+        with open("../generator/dodatki/gate_data.json", "r") as json_file:
+            gate_data = json.load(json_file)
+
+        gate_location = gate_data["location"]
+        gate_dimensions = gate_data["dimensions"]
+        gate_width = gate_dimensions[0]
+        gate_height = gate_dimensions[2]
+
+        vent_copies = []
+
+        # Pozycje X i Z dla lewej i prawej kratki
+        gate_left_edge_x = gate_location[0] - (gate_width / 2)
+        gate_right_edge_x = gate_location[0] + (gate_width / 2)
+        gate_bottom_z = gate_location[2] - (gate_height / 2)
+        vent_z = gate_bottom_z + 0.2  # Stała wysokość nad dolną krawędzią bramy
+
+        positions = []
+        if option in ["Lewa", "Obustronna"]:
+            positions.append(("Left", gate_left_edge_x + 0.1 + 0.93 / 2))
+        if option in ["Prawa", "Obustronna"]:
+            positions.append(("Right", gate_right_edge_x - 0.1 - 0.93 / 2))
+
+        # Wybór punktu obrotu
+        if ilosc_skrzydel == "Jednoskrzydłowe lewe":
+            pivot_x = gate_left_edge_x
+            rotation_angle = -math.radians(10)
+        elif ilosc_skrzydel == "Jednoskrzydłowe prawe":
+            pivot_x = gate_right_edge_x
+            rotation_angle = math.radians(10)
+        else:  # Dwuskrzydłowe
+            pivot_x_left = gate_left_edge_x
+            pivot_x_right = gate_right_edge_x
+            rotation_angle_left = -math.radians(5)
+            rotation_angle_right = math.radians(10)
+
+        # Tworzenie kopii kratek
+        for i, (side, x_pos) in enumerate(positions):
+            vent_copy = vent.copy()
+            vent_copy.data = vent.data.copy()
+            bpy.context.collection.objects.link(vent_copy)
+            vent_copy.location = (x_pos, gate_location[1], vent_z)
+
+            # Obrót kratki względem odpowiedniego punktu
+            if ilosc_skrzydel == "Dwuskrzydłowe":
+                pivot_x = pivot_x_left if side == "Left" else pivot_x_right
+                rotation_angle = rotation_angle_left if side == "Left" else rotation_angle_right
+            elif ilosc_skrzydel == "Jednoskrzydłowe lewe" or ilosc_skrzydel == "Jednoskrzydłowe prawe":
+                # Dla jednoskrzydłowych używamy tego samego pivot_x i kąta dla obu stron
+                rotation_angle = -math.radians(10) if ilosc_skrzydel == "Jednoskrzydłowe lewe" else math.radians(10)
+
+            pivot = (pivot_x, gate_location[1], gate_location[2])
+            bpy.context.scene.cursor.location = pivot
+            bpy.context.view_layer.objects.active = vent_copy
+            vent_copy.select_set(True)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+            vent_copy.rotation_euler[2] += rotation_angle
+
+            # Korekta pozycji Y
+            distance = abs(vent_copy.location[0] - pivot_x)
+            offset_y = distance * (1 - math.cos(rotation_angle))
+            vent_copy.location[1] -= offset_y
+
+            # Zastosowanie transformacji
+            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_VOLUME')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+            vent_copies.append(vent_copy)
+
+        # Łączenie wszystkich kratek w jeden obiekt
+        if vent_copies:
+            bpy.context.view_layer.objects.active = vent_copies[0]
+            for vent_copy in vent_copies:
+                vent_copy.select_set(True)
+            bpy.ops.object.join()
+            merged_vent = bpy.context.view_layer.objects.active
+            merged_vent.name = "vent_combined"
+            return merged_vent
+        else:
+            print("Nie utworzono żadnych kopii kratki wentylacyjnej.")
+            return None
+
+    except Exception as e:
+        print(f"Wystąpił błąd: {e}")
+        return None
+
 def export_multiple_objects_to_obj_custom(objects, output_path):
     """
     Eksportuje wiele obiektów do jednego pliku .obj bez użycia operatora Blendera, z obrotem o -90 stopni w osi X.
@@ -800,7 +904,10 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
 
     # Kratka wentylacyjna
     if 'kratka' in dodatki:
-        vent_copy = position_vent_from_file(vent, dodatki["kratka"])
+        if dodatki["typ"] == "Brama Rozwierana" and dodatki["ilosc_skrzydel"] != "START":
+            vent_copy = add_vent_rotation(vent,dodatki["kratka"], dodatki["ilosc_skrzydel"])
+        else:
+            vent_copy = position_vent_from_file(vent, dodatki["kratka"])
         if vent_copy:
             vent_copy.name = "kratka_wentylacyjna"
             objects_to_export.append(vent_copy)
