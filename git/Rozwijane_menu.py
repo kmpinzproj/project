@@ -186,6 +186,12 @@ class ScrollableMenu(QWidget):
                 if img_label:
                     img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
+            # **Specjalna obsługa dla "Kolor standardowy" i "Kolor RAL"**
+            if category == "Kolor standardowy":
+                self._clear_other_color_category("Kolor RAL")
+            elif category == "Kolor RAL":
+                self._clear_other_color_category("Kolor standardowy")
+
             # Zaznacz klikniętą opcję
             image_label.setStyleSheet("border: 5px solid green; padding: 0px; margin: 0px;")
 
@@ -196,6 +202,15 @@ class ScrollableMenu(QWidget):
 
             if selected_text:
                 self.selected_options[category] = selected_text
+
+    def _clear_other_color_category(self, other_category):
+        """Clears the selected options from the other color category (either 'Kolor standardowy' or 'Kolor RAL')."""
+        if other_category in self.option_items_by_category:
+            for option_widget in self.option_items_by_category[other_category]:
+                img_label = option_widget.findChild(QLabel, "image_label")
+                if img_label:
+                    img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
+            self.selected_options.pop(other_category, None)
 
     def set_default_options(self, default_options):
         """Sets default options based on loaded data."""
