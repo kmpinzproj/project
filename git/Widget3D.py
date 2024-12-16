@@ -19,7 +19,7 @@ addon_colors = {
             "ramka_okna_1": (51, 56, 52),  # Szary
             "ramka_okna_2": (51, 56, 52),  # Szary
             "ramka_okna_3": (51, 56, 52),  # Szary
-            "klamka-1.001": (51, 56, 52),  # Szary
+            "klamka-1.001": (0, 0, 0),  # Szary
             "klamka-2.001": (122, 101, 64),  # Szary
             "klamka-3.001": (134, 149, 156),  # Szary
             "klamka-4.001": (77, 59, 57),  # Szary
