@@ -269,6 +269,20 @@ class Kreator(QMainWindow):
     def set_default_options(self):
         """Sets default options based on loaded data."""
         for category, value in self.default_options.items():
+            # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
+            if category in self.navigation_menu.option_items_by_category:
+                for item in self.navigation_menu.option_items_by_category[category]:
+                    if isinstance(item, QCheckBox):
+                        if isinstance(value, list):
+                            # Jeśli wartość to lista, zaznacz checkboxy odpowiadające każdej wartości
+                            if item.text() in value:
+                                item.setChecked(True)
+                        else:
+                            # Jeśli wartość to pojedynczy tekst, zaznacz odpowiedni checkbox
+                            if item.text() == value:
+                                item.setChecked(True)
+
+            # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
             if category in self.navigation_menu.option_items_by_category:
                 for option_widget in self.navigation_menu.option_items_by_category[category]:
                     text_label = option_widget.findChild(QLabel, "text_label")
