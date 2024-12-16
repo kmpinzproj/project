@@ -269,47 +269,13 @@ class Kreator(QMainWindow):
     def set_default_options(self):
         """Sets default options based on loaded data."""
         for category, value in self.default_options.items():
-            # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
-            if category in self.navigation_menu.option_items_by_category:
-                for item in self.navigation_menu.option_items_by_category[category]:
-                    if isinstance(item, QCheckBox):
-                        if isinstance(value, list):
-                            # Jeśli wartość to lista, zaznacz checkboxy odpowiadające każdej wartości
-                            if item.text() in value:
-                                item.setChecked(True)
-                        else:
-                            # Jeśli wartość to pojedynczy tekst, zaznacz odpowiedni checkbox
-                            if item.text() == value:
-                                item.setChecked(True)
-
-            # Obsługa dla opcji z obrazkami (Kolory, Układ wypełnienia itp.)
             if category in self.navigation_menu.option_items_by_category:
                 for option_widget in self.navigation_menu.option_items_by_category[category]:
                     text_label = option_widget.findChild(QLabel, "text_label")
-                    if text_label and text_label.text() == value:
-                        img_label = option_widget.findChild(QLabel, "image_label")
-                        if img_label:
-                            # Zaznacz opcję poprzez obramowanie
-                            img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-                            # Aktualizuj zaznaczoną opcję w selected_options
-                            self.navigation_menu.selected_options[category] = value
+                    img_label = option_widget.findChild(QLabel, "image_label")
 
-        # Specjalna obsługa dla kategorii "Kolor"
-        if "Kolor" in self.default_options:
-            kolor_value = self.default_options["Kolor"]
-
-            # Szukaj w "Kolor Standardowy" i "Kolor RAL"
-            for color_category in ["Kolor Standardowy", "Kolor RAL"]:
-                if color_category in self.navigation_menu.option_items_by_category:
-                    for option_widget in self.navigation_menu.option_items_by_category[color_category]:
-                        text_label = option_widget.findChild(QLabel, "text_label")
-                        if text_label and text_label.text() == kolor_value:
-                            img_label = option_widget.findChild(QLabel, "image_label")
-                            if img_label:
-                                # Zaznacz opcję w odpowiedniej kategorii
-                                img_label.setStyleSheet("border: 2px solid red; padding: 0px; margin: 0px;")
-                                # Zaktualizuj klucz "Kolor" w selected_options
-                                self.navigation_menu.selected_options["Kolor"] = kolor_value
+                    if text_label and img_label and text_label.text() == value:
+                        self.navigation_menu._on_option_click(category, img_label)  # Kliknięcie na opcję
 
     def open_cost_calculator(self):
         """Otwiera okno kalkulatora cen z pliku Kosztorys.py."""

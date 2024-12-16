@@ -173,9 +173,6 @@ class ScrollableMenu(QWidget):
 
     def _on_option_click(self, category, image_label):
         """Handle click on an image option."""
-        # Zainicjuj zmienną, aby była dostępna w całej funkcji
-        selected_text = None
-
         # Sprawdź, czy kliknięty obrazek jest już zaznaczony
         if image_label.styleSheet() == "border: 5px solid green; padding: 0px; margin: 0px;":
             # Usuń zaznaczenie
@@ -189,24 +186,6 @@ class ScrollableMenu(QWidget):
                 if img_label:
                     img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
 
-            # Specjalne zachowanie dla pól "Kolor standardowy" i "Kolor RAL"
-            if category in ["Kolor standardowy", "Kolor RAL"]:
-                for color_category in ["Kolor standardowy", "Kolor RAL"]:
-                    if color_category in self.category_widgets:
-                        field_group = self.category_widgets[color_category]["field_group"]
-                        field_group.setStyleSheet("")  # Usuń czerwone obramowanie
-
-                    if color_category != category:
-                        for option_widget in self.option_items_by_category.get(color_category, []):
-                            img_label = option_widget.findChild(QLabel, "image_label")
-                            if img_label:
-                                img_label.setStyleSheet("border: none; padding: 0px; margin: 0px;")
-                        self.selected_options.pop(color_category, None)
-            else:
-                if category in self.category_widgets:
-                    field_group = self.category_widgets[category]["field_group"]
-                    field_group.setStyleSheet("")
-
             # Zaznacz klikniętą opcję
             image_label.setStyleSheet("border: 5px solid green; padding: 0px; margin: 0px;")
 
@@ -218,9 +197,16 @@ class ScrollableMenu(QWidget):
             if selected_text:
                 self.selected_options[category] = selected_text
 
-        # Zaktualizuj zaznaczoną opcję
-        if selected_text:
-            self.selected_options[category] = selected_text
+    def set_default_options(self, default_options):
+        """Sets default options based on loaded data."""
+        for category, value in default_options.items():
+            if category in self.option_items_by_category:
+                for option_widget in self.option_items_by_category[category]:
+                    text_label = option_widget.findChild(QLabel, "text_label")
+                    img_label = option_widget.findChild(QLabel, "image_label")
+
+                    if text_label and img_label and text_label.text() == value:
+                        self._on_option_click(category, img_label)  # Kliknij opcję, aby ją zaznaczyć
 
     def _create_checkbox_options_widget(self, options, category):
         """Create a widget with checkboxes for options with single selection per category."""
