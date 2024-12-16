@@ -537,7 +537,13 @@ def position_door_from_file(door):
         door_width = door_copy.dimensions[0]
 
         # Obliczenie nowej pozycji dla kopii drzwi
-        new_door_x = gate_left_edge_x + 0.1 + (door_width / 2)  # 10 cm od lewej krawędzi bramy
+        print(gate_dimensions[0])
+        if gate_dimensions[0] > 3.500:
+            new_door_x = gate_left_edge_x + 0.2 + (door_width / 2)  # 10 cm od lewej krawędzi bramy
+        elif gate_dimensions[0] > 7.000:
+            new_door_x = gate_left_edge_x + 0.3 + (door_width / 2)  # 20 cm od lewej krawędzi bramy
+        else:
+            new_door_x = gate_left_edge_x + 0.1 + (door_width / 2)  # 30 cm od lewej krawędzi bramy
         new_door_y = gate_location[1]  # Taka sama pozycja w osi Y co brama
         new_door_z = gate_location[2] - (gate_dimensions[2] / 2) + (door_copy.dimensions[2] / 2)  # Pozycja Z
 
