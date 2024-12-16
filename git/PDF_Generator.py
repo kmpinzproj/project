@@ -49,12 +49,12 @@ def create_pdf():
         return
 
     # Remove the existing file if it exists
-    if os.path.exists(output_path):
-        try:
-            os.remove(output_path)
-        except PermissionError as e:
-            print(f"Error: Unable to delete the existing PDF file. {e}")
-            return
+    # if os.path.exists(output_path):
+    #     try:
+    #         os.remove(output_path)
+    #     except PermissionError as e:
+    #         print(f"Error: Unable to delete the existing PDF file. {e}")
+    #         return
 
     pdf = SimpleDocTemplate(output_path, pagesize=A4, leftMargin=20, rightMargin=20, topMargin=20, bottomMargin=20)
 

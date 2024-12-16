@@ -80,9 +80,9 @@ def add_window_rolling(window, glass, segment):
 
         # --- 3. Dodanie okien do każdego segmentu (poza ostatnim) ---
         if segment == "100 mm":
-            current_z = 16 * segment_height - segment_height / 2
+            current_z = 14 * segment_height - segment_height / 2
         else:
-            current_z = 20 * segment_height - segment_height / 2
+            current_z = 18 * segment_height - segment_height / 2
         for i in range(3):
             # --- Tworzenie kopii ramki ---
             window_copy = window.copy()
