@@ -24,7 +24,8 @@ Układ wypełnienia: Poziome, Pionowe, Jodełka w górę, Jodełka w dół
 Kolor standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Przeszklenia: Okna poziome, Okna pionowe
-Kratka wentylacyjna, Lewa, Prawa, Obustronna
+Kratka wentylacyjna: Lewa, Prawa, Obustronna
+Klamka do bramy: Klamka 1, Klamka 2, Klamka 3, Klamka 4
 Opcje dodatkowe: Rygiel trzypunktowy, Dodatkowe zamknięcie na kłódkę
 
 [Brama Uchylna]
@@ -33,5 +34,6 @@ Kolor standardowy: Złoty dąb, Orzech, Biały, Antracyt, Siena rosso
 Kolor RAL: 1015, 1023, 3000, 3003, 5003, 5010, 5011, 5014, 6005, 6009, 6010, 7016, 7030, 7040, 8001, 8003, 8028, 9006
 Sposób otwierania drzwi: Ręczne, Automatyczne
 Przeszklenia: Okna poziome, Okna pionowe
-Kratka wentylacyjna, Lewa, Prawa, Obustronna
+Kratka wentylacyjna: Lewa, Prawa, Obustronna
+Klamka do bramy: Klamka 1, Klamka 2, Klamka 3, Klamka 4
 Opcje dodatkowe: Rygiel trzypunktowy, Dodatkowy rygiel, Drzwi w bramie

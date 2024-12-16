@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QLineEdit, QTextEdit, QMainWindow, QSizePolicy, QSpacerItem
+    QLineEdit, QTextEdit, QMainWindow, QSizePolicy, QSpacerItem, QApplication, QFileDialog
 )
 from PySide6.QtGui import QFont, QRegularExpressionValidator
 from PySide6.QtCore import Qt, QRegularExpression
@@ -181,7 +181,31 @@ class ContactForm(QMainWindow):
             print(f"Wystąpił błąd podczas zapisu do pliku {output_path}: {e}")
 
         try:
-            invoice_generator = InvoiceGenerator(output_path="faktura.pdf")
+            save_window = QApplication.instance()
+            if not save_window:
+                save_window = QApplication([])
+
+            # Prompt the user to choose the save location for the PDF
+            output_path, _ = QFileDialog.getSaveFileName(
+                None,
+                "Save PDF File",
+                os.path.expanduser("~/"),
+                "PDF files (*.pdf)"
+            )
+
+            if not output_path:
+                print("No file selected for saving the PDF.")
+                return
+
+            # Remove the existing file if it exists
+            if os.path.exists(output_path):
+                try:
+                    os.remove(output_path)
+                except PermissionError as e:
+                    print(f"Error: Unable to delete the existing PDF file. {e}")
+                    return
+
+            invoice_generator = InvoiceGenerator(output_path=output_path)
             invoice_generator.generate_invoice()
             print("Faktura PDF została wygenerowana pomyślnie.")
         except Exception as e:
