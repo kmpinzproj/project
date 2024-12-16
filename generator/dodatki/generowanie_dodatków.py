@@ -429,7 +429,7 @@ def add_window(window, glass, option):
         if gate_dimensions[2] < 2.6:
             window_z = gate_bottom_z + 1.7  # Wysokość 1.7m od dołu
         else:
-            window_z = gate_bottom_z + (gate_dimensions[2] / 2)  # Środek bramy
+            window_z = gate_bottom_z + 2.45  # Środek bramy
 
         frame_objects = []  # Lista ramek
         glass_objects = []  # Lista szyb
