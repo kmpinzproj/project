@@ -619,9 +619,11 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
             handle_x = gate_location[0]  # Środek bramy
             handle_y = gate_location[1] - 0.03  # Ta sama głębokość (Y) co brama, cofnięcie o 0.03
             gate_bottom_z = gate_location[2] - (gate_dimensions[2] / 2)  # Dolna krawędź bramy
-            handle_z = gate_bottom_z + 0.7  # Klamka umieszczona 70 cm nad dolną krawędzią bramy
-
-            # Ustawienie lokalizacji klamki
+            if typ == "Klamka 4" or typ  == "Klamka 3" or typ == "Klamka 2":
+                handle_z = gate_bottom_z + 0.65  # Klamka umieszczona 70 cm nad dolną krawędzią bramy
+            else:
+                handle_z = gate_bottom_z + 0.7  # Klamka umieszczona 70 cm nad dolną krawędzią bramy
+# Ustawienie lokalizacji klamki
             handle_copy.location = (handle_x, handle_y, handle_z)
 
             # Zastosowanie transformacji dla obiektu
@@ -1084,8 +1086,6 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
         export_multiple_objects_to_obj_custom(objects_to_export, output_path)
     else:
         print("Brak obiektów do eksportu.")
-
-import json
 
 def read_json(json_path):
     result = {}
