@@ -205,7 +205,7 @@ def add_window_segment(glass, pattern, przetloczenie):
             segment_height_per_unit = 0.4001
 
         if height >= 2.89:
-            window_position = segment_count_z - 1  # Okno na przedostatnim segmencie
+            window_position = 6  # Okno na przedostatnim segmencie
         else:
             window_position = 4  # Domyślna pozycja, gdy wysokość < 2.89m
 
@@ -421,6 +421,7 @@ def add_window(window, glass, option):
         gate_right_edge_x = gate_location[0] + (gate_dimensions[0] / 2)
         gate_bottom_z = gate_location[2] - (gate_dimensions[2] / 2)
 
+
         # Pozycja Z okna względem dolnej krawędzi bramy
         if gate_dimensions[2] < 2.6:
             window_z = gate_bottom_z + 1.7  # Wysokość 1.7m od dołu
@@ -635,7 +636,6 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
         return None
-
 
 def add_handle_swing_gate(handle, typ, ilosc_skrzydel):
     """
