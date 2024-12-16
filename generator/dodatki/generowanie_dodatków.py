@@ -311,7 +311,7 @@ def add_window_rotation(window, glass, option, ilosc_skrzydel):
         gate_left_edge_x = gate_location[0] - (gate_width / 2)
         gate_right_edge_x = gate_location[0] + (gate_width / 2)
         gate_bottom_z = gate_location[2] - (gate_height / 2)
-        window_z = gate_bottom_z + 1.7 if gate_height < 2.6 else gate_bottom_z + (gate_height / 2)
+        window_z = gate_bottom_z + 1.7 if gate_height < 2.6 else gate_bottom_z + 1.7
 
         window_positions = [
             ("Left", gate_left_edge_x + 0.1 + 0.93 / 2),
@@ -699,18 +699,18 @@ def add_handle_swing_gate(handle, typ, ilosc_skrzydel):
         handle_y = gate_location[1] - 0.03  # Cofnięcie w osi Y
 
         if ilosc_skrzydel == "Jednoskrzydłowe lewe":
-            handle_x = gate_right_edge_x - 0.1
+            handle_x = gate_right_edge_x - 0.25
             pivot_x = gate_right_edge_x
             rotation_angle = -math.radians(10)
             distance = gate_width
         elif ilosc_skrzydel == "Jednoskrzydłowe prawe":
-            handle_x = gate_left_edge_x + 0.1
+            handle_x = gate_left_edge_x + 0.25
             pivot_x = gate_left_edge_x
             rotation_angle = math.radians(10)
             distance = gate_width
         elif ilosc_skrzydel == "Dwuskrzydłowe":
             left_swing_width = gate_width / 2
-            handle_x = gate_left_edge_x + left_swing_width - 0.1  # Prawa krawędź lewego skrzydła
+            handle_x = gate_left_edge_x + left_swing_width - 0.15  # Prawa krawędź lewego skrzydła
             pivot_x = gate_left_edge_x  # Pivot na lewej tylnej krawędzi lewego skrzydła
             rotation_angle = -math.radians(5)
             distance = left_swing_width  # Odległość to cała szerokość lewego skrzydła
