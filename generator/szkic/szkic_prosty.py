@@ -96,15 +96,3 @@ def draw_orthogonal_edges(obj_file_path, output_image_path):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.savefig(output_image_path, dpi=300)
     plt.close()
-
-
-# Ścieżki do plików
-input_obj_file = "../generator/model.obj"
-output_isometric_file = "../generator/sketch_iso_no_diagonals.png"
-output_orthogonal_file = "../generator/sketch_orthogonal.png"
-
-# Generowanie rzutu izometrycznego
-draw_filtered_edges_isometric(input_obj_file, output_isometric_file)
-
-# Generowanie zwykłego rzutu
-draw_orthogonal_edges(input_obj_file, output_orthogonal_file)
