@@ -1,7 +1,20 @@
 from PySide6.QtWidgets import QPushButton
 
 class StyledButton(QPushButton):
+    """
+    Klasa reprezentująca niestandardowy przycisk z własnym stylem.
+
+    Przyciski posiadają zaokrąglone rogi, różne kolory dla stanów (normalny,
+    najechany, wciśnięty, wyłączony) oraz dopasowane odstępy i czcionkę.
+    """
     def __init__(self, text, parent=None):
+        """
+        Inicjalizuje przycisk z podanym tekstem oraz stosuje stylizację CSS.
+
+        Args:
+            text (str): Tekst wyświetlany na przycisku.
+            parent (QWidget, optional): Rodzic przycisku. Domyślnie None.
+        """
         super().__init__(text, parent)
 
         self.setStyleSheet("""

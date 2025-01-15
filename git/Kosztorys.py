@@ -3,12 +3,30 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 from DatabaseManager import DatabaseManager
 
 def load_json_data(file_path):
-    """Wczytaj dane z pliku JSON."""
+    """
+    Wczytuje dane z pliku JSON.
+
+    Args:
+        file_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        dict: Słownik z danymi wczytanymi z pliku JSON.
+    """
     with open(file_path, 'r', encoding='utf-8') as file:
         return json.load(file)
 
 
 def calculate_price(data, db_manager):
+    """
+    Oblicza całkowitą cenę bramy garażowej na podstawie danych wejściowych i cen z bazy danych.
+
+    Args:
+        data (dict): Dane z pliku JSON zawierające szczegóły dotyczące bramy.
+        db_manager (DatabaseManager): Obiekt zarządzający połączeniem z bazą danych.
+
+    Returns:
+        tuple: Całkowita cena (int) oraz szczegóły cenowe (list).
+    """
     gate_type = data.get("Typ bramy")
 
     try:
@@ -61,7 +79,15 @@ def calculate_price(data, db_manager):
 
 
 class PriceCalculator(QWidget):
+    """
+    Widżet kalkulatora cen dla bram garażowych.
+
+    Oblicza cenę bramy na podstawie danych z pliku JSON i wyświetla szczegóły w oknie.
+    """
     def __init__(self):
+        """
+        Inicjalizuje widżet kalkulatora cen, wczytuje dane i wyświetla szczegóły kalkulacji.
+        """
         super().__init__()
         self.setWindowTitle("Kalkulator Cen Bramy Garażowej")
         self.setGeometry(100, 100, 400, 500)

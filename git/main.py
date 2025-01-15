@@ -13,6 +13,9 @@ from PySide6.QtGui import QSurfaceFormat
 QApplication.setStyle("Fusion")
 
 class MainApplication(QMainWindow):
+    """
+    Główna klasa aplikacji zarządzająca widokami oraz inicjalizacją bazy danych.
+    """
     VIEW_INDICES = {
         "start": 0,
         "gate_selection": 1,
@@ -23,6 +26,12 @@ class MainApplication(QMainWindow):
     DB_FILE = "../resources/project_db.db"
 
     def __init__(self):
+        """
+        Inicjalizuje główną aplikację.
+
+        Ustawia tytuł okna, inicjalizuje bazę danych i przygotowuje widoki
+        oraz połączenia dla aplikacji.
+        """
         super().__init__()
         self.gate_creator_view = None
         self.selected_gate_type = None  # Stores the selected gate type
@@ -44,11 +53,18 @@ class MainApplication(QMainWindow):
         self._initialize_views()
 
     def resizeEvent(self, event):
-        """Adjust background image size upon window resizing."""
+        """
+        Obsługuje zdarzenie zmiany rozmiaru w celu dostosowania układu aplikacji.
+
+        Args:
+            event (QResizeEvent): Zdarzenie zmiany rozmiaru wywołane przez aplikację.
+        """
         super().resizeEvent(event)
 
     def _initialize_views(self):
-        """Creates and adds all views to the QStackedWidget."""
+        """
+        Inicjalizuje wszystkie widoki w aplikacji i ustawia ich połączenia.
+        """
         self.start_view = OknoStartowe()
         self.gate_selection_view = WyborBramy(self.navigate_to_dimension_view)
         self.dimension_view = None
@@ -66,7 +82,9 @@ class MainApplication(QMainWindow):
         self._setup_connections_contact_form()
 
     def _setup_connections_start_view(self):
-        """Sets up connections for start view buttons."""
+        """
+        Ustawia połączenia sygnał-slot dla widoku startowego.
+        """
         self.start_view.create_new_button.clicked.connect(
             lambda: self.navigate_to_gate_selection_view()
         )
@@ -75,31 +93,44 @@ class MainApplication(QMainWindow):
         )
 
     def _setup_connections_gate_selection(self):
-        """Sets up connections for gate selection view buttons."""
+        """
+        Ustawia połączenia sygnał-slot dla widoku wyboru bramy.
+        """
         self.gate_selection_view.back_button.clicked.connect(self.navigate_to_start_view)
 
     def _setup_connections_dimension_view(self):
-        """Sets up connections for dimension view buttons."""
+        """
+        Ustawia połączenia sygnał-slot dla widoku wymiarów.
+        """
         self.dimension_view.back_button.clicked.connect(self.navigate_back)
         self.dimension_view.accept_button.clicked.connect(self.navigate_to_gate_creator_view)
 
     def _setup_connections_contact_form(self):
-        """Sets up connections for contact form view buttons."""
+        """
+        Ustawia połączenia sygnał-slot dla widoku formularza kontaktowego.
+        """
         self.contact_form_view.back_button.clicked.connect(self.navigate_to_gate_creator_view)
         self.contact_form_view.submit_button.clicked.connect(self.navigate_to_start_view)
 
     def navigate_to_start_view(self):
-        """Przejście do widoku startowego i odświeżenie danych."""
+        """
+        Przechodzi do widoku startowego.
+        """
         self.start_view.refresh()
         self.previous_view = None
         self.stack.setCurrentIndex(self.VIEW_INDICES["start"])
 
     def navigate_to_gate_selection_view(self):
+        """
+        Przechodzi do widoku wyboru bramy.
+        """
         self.previous_view = "start"
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_selection"])
 
     def navigate_to_dimension_view(self, is_opened_project=False):
-        """Przejście do widoku wymiarów."""
+        """
+        Przechodzi do widoku wymiarów.
+        """
         if self.dimension_view:
             self.stack.removeWidget(self.dimension_view)
             self.dimension_view.deleteLater()
@@ -118,7 +149,9 @@ class MainApplication(QMainWindow):
         self._setup_connections_dimension_view()
 
     def navigate_back(self):
-        """Cofanie do poprzedniego widoku."""
+        """
+        Powraca do poprzedniego widoku.
+        """
         if self.previous_view == "start":
             self.navigate_to_start_view()
         elif self.previous_view == "gate_selection":
@@ -127,28 +160,32 @@ class MainApplication(QMainWindow):
             print("Nie można cofnąć - brak poprzedniego widoku.")
 
     def navigate_to_gate_creator_view(self):
-        """Creates a new instance of Kreator with the selected gate type and configures buttons."""
-        # if self.selected_gate_type:
-        #     # Usuń istniejący widok kreatora, jeśli już istnieje
+        """
+        Przechodzi do widoku kreatora bramy.
+        """
         if self.gate_creator_view:
             self.stack.removeWidget(self.gate_creator_view)
             self.gate_creator_view.deleteLater()
             self.gate_creator_view = None
 
         # Utwórz nową instancję Kreator
-        self.gate_creator_view = Kreator(self.selected_gate_type)
+        self.gate_creator_view = Kreator()
         self.stack.insertWidget(self.VIEW_INDICES["gate_creator"], self.gate_creator_view)
         self.previous_index = self.stack.currentWidget()
         self.stack.setCurrentIndex(self.VIEW_INDICES["gate_creator"])
         self._setup_connections_gate_creator()
 
     def _setup_connections_gate_creator(self):
-        """Sets up connections for the Kreator view buttons."""
+        """
+        Ustawia połączenia sygnał-slot dla widoku kreatora bramy.
+        """
         self.gate_creator_view.back_button.clicked.connect(self.navigate_to_dimension_view)
         self.gate_creator_view.contact_button.clicked.connect(self.navigate_to_contact_form_view)
 
     def navigate_to_contact_form_view(self):
-        """Navigates to the contact form view if a project name has been provided."""
+        """
+        Przechodzi do widoku formularza kontaktowego.
+        """
         # Sprawdzenie, czy użytkownik podał nazwę projektu
         project_name_provided = self.gate_creator_view.prompt_project_name()
 
@@ -159,7 +196,12 @@ class MainApplication(QMainWindow):
             print("Przejście anulowane. Brak nazwy projektu.")
 
     def initialize_database(self):
-        """Initializes the database if it does not already exist."""
+        """
+        Inicjalizuje połączenie z bazą danych.
+
+        Upewnia się, że plik bazy danych istnieje, i ustanawia niezbędne
+        połączenie dla funkcjonalności aplikacji.
+        """
         if not os.path.exists(self.DB_FILE):
             print("Baza danych nie istnieje. Tworzenie bazy...")
             try:
@@ -175,7 +217,12 @@ class MainApplication(QMainWindow):
             print("Baza danych już istnieje.")
 
 def load_stylesheet(app, file_path):
-    """Ładuje plik stylów CSS i stosuje go do aplikacji."""
+    """
+    Ładuje i stosuje arkusz stylów z podanej ścieżki.
+
+    Args:
+        path (str): Ścieżka do pliku z arkuszem stylów.
+    """
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as file:
             app.setStyleSheet(file.read())

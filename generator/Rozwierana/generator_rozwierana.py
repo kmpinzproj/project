@@ -39,6 +39,15 @@ def cut_object(obj, plane_co, plane_no, clear_outer):
 
 
 def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
+    """
+    Generuje model bramy rozwieranej z uwzględnieniem ilości skrzydeł i układu wypełnienia.
+
+    Args:
+        width (float): Szerokość bramy w milimetrach.
+        height (float): Wysokość bramy w milimetrach.
+        ilosc_skrzydel (str): Ilość skrzydeł bramy ("Jednoskrzydłowe prawe", "Jednoskrzydłowe lewe", "Dwuskrzydłowe").
+        wypelnienie (str): Układ wypełnienia ("Poziome", "Pionowe", "Jodełka w górę", "Jodełka w dół", "START").
+    """
     # Nazwa segmentu bazowego
     available_cube = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "Jodełka w górę": "Cube.005", "START": "Cube.004","Jodełka w dół": "Cube.006"}
     segment_name = available_cube[uklad_wypelnienia]
@@ -321,6 +330,12 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
 
 
 def add_and_align_rails(gate):
+    """
+    Dodaje szyny do bramy rozwieranej i dopasowuje je do wymiarów bramy.
+
+    Args:
+        gate (Object): Obiekt bramy rozwieranej, do którego dodawane są szyny.
+    """
     rail_name = "szyny-na-brame"
 
     # Pobierz obiekt szyn
@@ -362,6 +377,13 @@ def add_and_align_rails(gate):
         print(f"Wystąpił błąd: {e}")
 
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    """
+    Eksportuje obiekt do pliku .obj bez pliku .mtl.
+
+    Args:
+        object_name (str): Nazwa obiektu w Blenderze do eksportu.
+        output_obj_path (str): Ścieżka do pliku .obj.
+    """
     obj = bpy.data.objects.get(object_name)
     if not obj:
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
@@ -409,6 +431,16 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
 
 def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right_door_name="Right_Door",
                                  output_obj_path="model.obj", output_mtl_path="model.mtl"):
+    """
+    Eksportuje drzwi (lewe i prawe) do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
+
+    Args:
+        texture_path (str): Ścieżka do pliku tekstury.
+        left_door_name (str): Nazwa obiektu drzwi lewych w Blenderze.
+        right_door_name (str): Nazwa obiektu drzwi prawych w Blenderze.
+        output_obj_path (str): Ścieżka do pliku .obj.
+        output_mtl_path (str): Ścieżka do pliku .mtl.
+    """
     # Pobierz obiekty lewe i prawe drzwi
     left_door = bpy.data.objects.get(left_door_name)
     right_door = bpy.data.objects.get(right_door_name)
@@ -512,6 +544,15 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
     bpy.data.objects.remove(combined_doors)
 
 def read_json(json_path):
+    """
+    Wczytuje dane z pliku JSON i zwraca wymiary, ilość skrzydeł, układ wypełnienia oraz ścieżkę do tekstury.
+
+    Args:
+        json_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        tuple: Wymiary (dict), ilość skrzydeł (str), układ wypełnienia (str), ścieżka do tekstury (str).
+    """
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'

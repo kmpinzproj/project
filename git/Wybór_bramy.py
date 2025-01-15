@@ -11,11 +11,23 @@ import json
 
 
 class WyborBramy(QMainWindow):
+    """
+    Klasa reprezentująca widok wyboru typu bramy w aplikacji.
+
+    Pozwala użytkownikowi wybrać typ bramy, wyświetlając dostępne opcje w formie
+    ramek z opisem, zdjęciem oraz przyciskiem wyboru.
+    """
     # Constants for frame size
     FRAME_WIDTH = 390
     FRAME_HEIGHT = 220
 
     def __init__(self, dimension_view):
+        """
+        Inicjalizuje widok wyboru bramy.
+
+        Args:
+            dimension_view (function): Funkcja przechodząca do widoku wymiarów.
+        """
         super().__init__()
         self.back_button = None
         self.accept_button = None
@@ -56,12 +68,29 @@ class WyborBramy(QMainWindow):
         main_layout.setStretch(1, 0)
 
     def add_frame(self, title, description, row, column):
-        """Adds a frame with given title and description to the specified row and column in the grid layout."""
+        """
+        Dodaje ramkę z podanym tytułem i opisem do siatki w określonym wierszu i kolumnie.
+
+        Args:
+            title (str): Tytuł ramki (np. nazwa bramy).
+            description (str): Opis bramy.
+            row (int): Wiersz w układzie siatki.
+            column (int): Kolumna w układzie siatki.
+        """
         frame = self.create_inner_frame(title, description)
         self.grid_layout.addWidget(frame, row, column)
 
     def create_inner_frame(self, title, description):
-        """Creates an individual frame for each door type with a title, description, image, and selection button."""
+        """
+        Tworzy ramkę dla danego typu bramy, zawierającą tytuł, opis, obraz oraz przycisk wyboru.
+
+        Args:
+            title (str): Tytuł ramki (np. nazwa bramy).
+            description (str): Opis bramy.
+
+        Returns:
+            QFrame: Ramka z widżetami opisującymi typ bramy.
+        """
         frame = QFrame()
         frame.setObjectName("gateFrame")
         frame.setMinimumSize(QSize(self.FRAME_WIDTH, self.FRAME_HEIGHT))
@@ -110,6 +139,15 @@ class WyborBramy(QMainWindow):
         return frame
 
     def create_title_label(self, title):
+        """
+        Tworzy etykietę tytułu dla ramki.
+
+        Args:
+            title (str): Tytuł do wyświetlenia.
+
+        Returns:
+            QLabel: Etykieta z tytułem.
+        """
         label_title = QLabel(title)
         label_title.setObjectName("gateTitleLabel")  # Identyfikator
         font = QFont()
@@ -119,13 +157,27 @@ class WyborBramy(QMainWindow):
         return label_title
 
     def create_description_label(self, description):
+        """
+        Tworzy etykietę opisu dla ramki.
+
+        Args:
+            description (str): Opis do wyświetlenia.
+
+        Returns:
+            QLabel: Etykieta z opisem.
+        """
         label_description = QLabel(description)
         label_description.setObjectName("gateDescriptionLabel")  # Identyfikator
         label_description.setWordWrap(True)
         return label_description
 
     def setup_buttons(self, layout):
-        """Sets up the bottom navigation buttons."""
+        """
+        Konfiguruje przyciski nawigacyjne na dole widoku.
+
+        Args:
+            layout (QVBoxLayout): Główny układ widoku, do którego zostaną dodane przyciski.
+        """
         buttons_widget = QWidget()
         buttons_layout = QHBoxLayout(buttons_widget)
 
@@ -138,7 +190,12 @@ class WyborBramy(QMainWindow):
         buttons_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     def resizeEvent(self, event):
-        """Handle resizing of the main window to adjust image sizes."""
+        """
+        Obsługuje zdarzenie zmiany rozmiaru okna, dynamicznie dostosowując rozmiar obrazów w ramkach.
+
+        Args:
+            event (QResizeEvent): Zdarzenie zmiany rozmiaru.
+        """
         super().resizeEvent(event)
 
         # Oblicz szerokość ramki (w zależności od rozmiaru okna)
@@ -168,7 +225,10 @@ class WyborBramy(QMainWindow):
     @staticmethod
     def save_gate_type(gate_type):
         """
-        Saves the gate type to the JSON file. Creates the file if it doesn't exist.
+        Zapisuje wybrany typ bramy do pliku JSON.
+
+        Args:
+            gate_type (str): Wybrany typ bramy do zapisania.
         """
         file_path = "../resources/selected_options.json"
         try:

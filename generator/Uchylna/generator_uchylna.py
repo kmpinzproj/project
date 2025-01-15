@@ -20,7 +20,14 @@ for object_name in object_names:
 
 
 def tilt_gate(width, height, wypelnienie="Poziome"):
+    """
+    Generuje model bramy uchylnej na podstawie podanych wymiarów i wypełnienia.
 
+    Args:
+        width (float): Szerokość bramy w milimetrach.
+        height (float): Wysokość bramy w milimetrach.
+        wypelnienie (str): Typ wypełnienia bramy (np. "Poziome", "Pionowe", "Jodełka w górę", "START").
+    """
     segment_name = "Cube.002"
     available_segments = {"Poziome": "Cube.002", "Pionowe": "Cube.003", "Jodełka w górę": "Cube.005", "START": "Cube.004"}
     rail_name = "szyny-na-brame"
@@ -177,6 +184,12 @@ def tilt_gate(width, height, wypelnienie="Poziome"):
 
 
 def add_and_align_rails(gate):
+    """
+    Dodaje szyny do bramy i dopasowuje je do wymiarów bramy.
+
+    Args:
+        gate (Object): Obiekt bramy, do którego dodawane są szyny.
+    """
     rail_name = "szyny-na-brame"
 
     # Pobierz obiekt szyn
@@ -219,9 +232,13 @@ def add_and_align_rails(gate):
 
 def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", output_obj_path="model.obj", output_mtl_path="model.mtl"):
     """
-    Eksportuje obiekt do pliku .obj z rotacją 90 stopni w osi X,
-    ukrywając inne obiekty w scenie.
-    Tworzy również plik .mtl z odniesieniem do tekstury.
+    Eksportuje obiekt do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
+
+    Args:
+        texture_path (str): Ścieżka do pliku tekstury.
+        object_name (str): Nazwa obiektu w Blenderze do eksportu.
+        output_obj_path (str): Ścieżka do pliku .obj.
+        output_mtl_path (str): Ścieżka do pliku .mtl.
     """
     # Sprawdź, czy obiekt istnieje
     obj = bpy.data.objects.get(object_name)
@@ -288,6 +305,13 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", 
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    """
+    Eksportuje obiekt do pliku .obj bez pliku .mtl.
+
+    Args:
+        object_name (str): Nazwa obiektu w Blenderze do eksportu.
+        output_obj_path (str): Ścieżka do pliku .obj.
+    """
     obj = bpy.data.objects.get(object_name)
     if not obj:
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
@@ -334,6 +358,15 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
 def read_json(json_path):
+    """
+    Wczytuje dane z pliku JSON i zwraca wymiary, układ wypełnienia oraz ścieżkę do tekstury.
+
+    Args:
+        json_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        tuple: Wymiary (dict), układ wypełnienia (str), ścieżka do tekstury (str).
+    """
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
 

@@ -12,7 +12,15 @@ import os
 pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
 
 def load_json_data(file_path):
-    """Wczytaj dane z pliku JSON."""
+    """
+    Wczytuje dane z pliku JSON.
+
+    Args:
+        file_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        dict: Dane załadowane z pliku JSON lub pusty słownik w przypadku błędu.
+    """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
@@ -21,11 +29,28 @@ def load_json_data(file_path):
         return {}
 
 class PDFGenerator:
+    """
+    Klasa odpowiedzialna za generowanie pliku PDF z podsumowaniem projektu i szkicami.
+    """
     def __init__(self, output_path="output.pdf"):
+        """
+        Inicjalizuje generator plików PDF.
+
+        Args:
+            output_path (str): Ścieżka do zapisu wygenerowanego pliku PDF.
+        """
         self.output_path = output_path
 
     def create_pdf(self):
-        """Generuje PDF na podstawie wczytanych danych."""
+        """
+        Generuje plik PDF na podstawie danych projektu i dodaje szkice jako obrazy.
+
+        Dane projektu wczytywane są z pliku `../resources/selected_options.json`,
+        a obrazy są ładowane z predefiniowanych ścieżek.
+
+        Raises:
+            Exception: Jeśli wystąpi błąd podczas generowania PDF.
+        """
         product_data = load_json_data("../resources/selected_options.json")
 
         # Inicjalizacja dokumentu PDF

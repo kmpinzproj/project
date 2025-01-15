@@ -15,7 +15,16 @@ from PDF_Generator import PDFGenerator
 
 
 class ContactForm(QMainWindow):
+    """
+    Klasa reprezentująca formularz kontaktowy dla aplikacji Garage Door Designer.
+
+    Formularz umożliwia wprowadzenie danych kontaktowych, uwag oraz generowanie faktur
+    i plików PDF z podglądem bramy.
+    """
     def __init__(self):
+        """
+        Inicjalizuje widok formularza kontaktowego oraz jego interfejs użytkownika.
+        """
         super().__init__()
         self.setObjectName("ContactForm")  # Ustawiamy nazwę klasy CSS
         self.generate_pdf_button = None
@@ -36,7 +45,9 @@ class ContactForm(QMainWindow):
         self.setup_ui()
 
     def setup_ui(self):
-        """Initializes the main layout and divides it into navigation and view panels."""
+        """
+        Tworzy główny układ interfejsu, dzieląc go na panel nawigacyjny oraz panel przycisków.
+        """
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
@@ -53,7 +64,12 @@ class ContactForm(QMainWindow):
 
 
     def create_navigation_panel(self):
-        """Creates the left panel with contact form fields."""
+        """
+        Tworzy lewy panel zawierający pola formularza kontaktowego.
+
+        Returns:
+            QWidget: Panel z polami formularza kontaktowego.
+        """
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
@@ -107,7 +123,17 @@ class ContactForm(QMainWindow):
 
     @staticmethod
     def _create_form_field(label_text, widget, layout):
-        """Helper function to add a labeled form field to a layout."""
+        """
+        Tworzy pole formularza z podaną etykietą i widżetem.
+
+        Args:
+            label_text (str): Tekst etykiety.
+            widget (QWidget): Widżet do wprowadzania danych.
+            layout (QVBoxLayout): Układ, do którego zostanie dodane pole formularza.
+
+        Returns:
+            QWidget: Utworzony widżet formularza.
+        """
         field_layout = QVBoxLayout()
         label = QLabel(label_text)
         label.setFont(QFont("Arial", 14))
@@ -118,7 +144,12 @@ class ContactForm(QMainWindow):
         return widget
 
     def create_buttons_panel(self):
-        """Creates the right panel with action buttons spread over half the height."""
+        """
+        Tworzy prawy panel z przyciskami akcji.
+
+        Returns:
+            QWidget: Panel z przyciskami.
+        """
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
@@ -148,7 +179,15 @@ class ContactForm(QMainWindow):
 
     @staticmethod
     def load_selected_options(file_path):
-        """Loads selected options from a JSON file."""
+        """
+        Wczytuje zaznaczone opcje z pliku JSON.
+
+        Args:
+            file_path (str): Ścieżka do pliku JSON.
+
+        Returns:
+            dict: Wczytane dane w formie słownika.
+        """
         if not os.path.exists(file_path):
             print(f"Plik {file_path} nie istnieje. Zwracanie pustych opcji.")
             return {}
@@ -162,7 +201,9 @@ class ContactForm(QMainWindow):
             return {}
 
     def generate_invoice(self):
-        """Zapisuje dane z formularza do pliku JSON."""
+        """
+        Generuje fakturę na podstawie danych z formularza i zapisuje ją do pliku JSON.
+        """
         data = {
             "Imię i nazwisko": self.name_input.text().strip(),
             "Adres e-mail": self.email_input.text().strip(),
@@ -212,7 +253,9 @@ class ContactForm(QMainWindow):
             print(f"Wystąpił błąd podczas generowania faktury PDF: {e}")
 
     def validate_fields(self):
-        """Walidacja pól formularza - aktywuje przycisk Kalkulator cen tylko, gdy pola są wypełnione."""
+        """
+        Waliduje pola formularza i aktywuje przycisk faktury, jeśli dane są poprawne.
+        """
         name_filled = bool(self.name_input.text().strip())
         email_filled = self.email_input.hasAcceptableInput()  # Walidacja formatu e-mail
         phone_filled = bool(self.phone_input.text().strip())
@@ -220,6 +263,9 @@ class ContactForm(QMainWindow):
         self.invoice_button.setEnabled(name_filled and email_filled and phone_filled)
 
     def sketch(self):
+        """
+         Generuje podgląd i szkice na podstawie wybranych opcji oraz zapisuje je w formacie PDF.
+         """
         selected_options = self.load_selected_options("../resources/selected_options.json")
         input_obj_file = "../generator/model.obj"
         output_isometric_file = "../generator/sketch_iso_no_diagonals.png"

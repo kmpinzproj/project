@@ -17,6 +17,17 @@ for object_name in object_names:
 
 
 def scale_stack_and_align_rails(width, height, przetloczenie):
+    """
+    Generuje model bramy segmentowej z uwzględnieniem wybranego przetłoczenia.
+
+    Args:
+        width (float): Szerokość bramy w milimetrach.
+        height (float): Wysokość bramy w milimetrach.
+        przetloczenie (str): Rodzaj przetłoczenia ("Bez przetłoczenia", "Niskie", "Średnie", "Kasetony", "START").
+
+    Returns:
+        Object: Wygenerowany obiekt bramy segmentowej.
+    """
     segment_name = "Cube.002"
     available_segments = {
         "Bez przetłoczenia": "Cube",
@@ -144,6 +155,12 @@ def scale_stack_and_align_rails(width, height, przetloczenie):
         return None
 
 def add_and_align_rails(gate):
+    """
+    Dodaje szyny do bramy segmentowej i dopasowuje je do wymiarów bramy.
+
+    Args:
+        gate (Object): Obiekt bramy segmentowej, do którego dodawane są szyny.
+    """
     rail_name = "szyny-na-brame"
 
     # Pobierz obiekt szyn
@@ -189,6 +206,15 @@ def add_and_align_rails(gate):
 # Eksport z teksturą
 def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
                                       output_obj_path="model.obj", output_mtl_path="model.mtl"):
+    """
+    Eksportuje obiekt do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
+
+    Args:
+        texture_path (str): Ścieżka do pliku tekstury.
+        object_name (str): Nazwa obiektu w Blenderze do eksportu.
+        output_obj_path (str): Ścieżka do pliku .obj.
+        output_mtl_path (str): Ścieżka do pliku .mtl.
+    """
     obj = bpy.data.objects.get(object_name)
     if not obj:
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
@@ -241,6 +267,13 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
 def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny.obj"):
+    """
+    Eksportuje obiekt do pliku .obj bez pliku .mtl.
+
+    Args:
+        object_name (str): Nazwa obiektu w Blenderze do eksportu.
+        output_obj_path (str): Ścieżka do pliku .obj.
+    """
     obj = bpy.data.objects.get(object_name)
     if not obj:
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
@@ -287,6 +320,15 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
 def read_json(json_path):
+    """
+    Wczytuje dane z pliku JSON i zwraca wymiary, rodzaj przetłoczenia oraz ścieżkę do tekstury.
+
+    Args:
+        json_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        tuple: Wymiary (dict), rodzaj przetłoczenia (str), ścieżka do tekstury (str).
+    """
     with open(json_path, 'r', encoding='utf-8') as file:
         existing_data = json.load(file)
         # Zachowaj 'Typ bramy' i 'Wymiary'

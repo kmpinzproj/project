@@ -4,7 +4,21 @@ from PySide6.QtCore import Qt
 
 
 class CustomListWidgetItem(QWidget):
+    """
+    Klasa reprezentująca niestandardowy element listy w widżecie.
+
+    Element zawiera ikonę oraz nazwę pliku, które są wyświetlane w jednym QLabel.
+    Umożliwia dynamiczną zmianę tła w zależności od stanu zaznaczenia.
+    """
     def __init__(self, file_name, icon_path, parent=None):
+        """
+        Inicjalizuje element listy z podaną ikoną i nazwą pliku.
+
+        Args:
+            file_name (str): Nazwa pliku do wyświetlenia.
+            icon_path (str): Ścieżka do pliku ikony.
+            parent (QWidget, optional): Rodzic widżetu. Domyślnie None.
+        """
         super().__init__(parent)
 
         # Layout
@@ -26,7 +40,12 @@ class CustomListWidgetItem(QWidget):
         self.combined_label = combined_label
 
     def set_selected(self, selected):
-        """Zmień kolor tła na zielony w zależności od stanu zaznaczenia."""
+        """
+        Zmienia kolor tła w zależności od stanu zaznaczenia.
+
+        Args:
+            selected (bool): True, jeśli element jest zaznaczony, False w przeciwnym przypadku.
+        """
         if selected:
             self.combined_label.setStyleSheet("background-color: lightgreen;")  # Zielone tło
         else:

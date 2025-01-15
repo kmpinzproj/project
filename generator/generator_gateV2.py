@@ -4,16 +4,16 @@ import json
 
 class BlenderScriptRunner:
     """
-    Klasa obsługująca uruchamianie Blendera w tle z plikiem .blend i skryptami Python.
+    Klasa obsługująca uruchamianie Blendera w tle z plikami .blend i skryptami Python.
+    Pozwala na generowanie obiektów 3D w zależności od typu bramy oraz obsługę dodatków.
     """
 
     def __init__(self, gate_type="Segmentowa"):
         """
-        Inicjalizacja obiektu BlenderScriptRunner.
+        Inicjalizuje obiekt BlenderScriptRunner, konfigurując ścieżki do plików i ustawienia.
 
         Args:
-            gate_type (str): Typ bramy (np. "Segmentowa", "Uchylna", "Roletowa", "Rozwierana").
-            additional_script (str, optional): Ścieżka do dodatkowego skryptu Python do uruchomienia po głównym skrypcie.
+            gate_type (str): Typ bramy, np. "Segmentowa", "Uchylna", "Roletowa", "Rozwierana".
         """
         if gate_type == "Brama Segmentowa":
             blend_file = "Segmentowa/segmentowa_kopia3.blend"
@@ -43,6 +43,9 @@ class BlenderScriptRunner:
     def _get_default_blender_path(self):
         """
         Zwraca domyślną ścieżkę do Blendera na podstawie systemu operacyjnego.
+
+        Returns:
+            str: Ścieżka do pliku wykonywalnego Blendera.
         """
         if os.name == 'nt':  # Windows
             return "C:/Program Files/Blender Foundation/Blender 4.1/blender.exe"
@@ -54,6 +57,9 @@ class BlenderScriptRunner:
     def validate_paths(self):
         """
         Sprawdza, czy pliki .blend i skrypt istnieją.
+
+        Raises:
+            FileNotFoundError: Jeśli którykolwiek z plików nie istnieje.
         """
         if not os.path.exists(self.blend_file):
             raise FileNotFoundError(f"Błąd: Plik .blend nie istnieje: {self.blend_file}")
@@ -62,7 +68,8 @@ class BlenderScriptRunner:
 
     def run(self):
         """
-        Uruchamia Blendera w tle z podanymi plikami.
+        Uruchamia Blendera w tle z plikami .blend i skryptami.
+        W przypadku braku wybranych opcji dodatków generuje pusty plik dodatków.
         """
         # Sprawdzanie ścieżek
         self.validate_paths()
@@ -94,8 +101,18 @@ class BlenderScriptRunner:
             print(f"Błąd podczas działania Blendera: {e}")
         except FileNotFoundError:
             print(f"Nie znaleziono Blendera w lokalizacji: {self.blender_path}")
+
     @staticmethod
     def read_json(json_path):
+        """
+        Odczytuje wybrane opcje z pliku JSON.
+
+        Args:
+            json_path (str): Ścieżka do pliku JSON z opcjami.
+
+        Returns:
+            list: Lista elementów dodatków na podstawie wybranych opcji.
+        """
         okno = None
         klamka = None
         kratka = None

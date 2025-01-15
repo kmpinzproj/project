@@ -12,7 +12,15 @@ import os
 
 
 class OknoStartowe(QMainWindow):
+    """
+    Klasa reprezentująca ekran początkowy aplikacji.
+    """
     def __init__(self):
+        """
+        Inicjalizuje okno startowe aplikacji.
+
+        Tworzy i konfiguruje interfejs użytkownika oraz przygotowuje niezbędne elementy.
+        """
         super().__init__()
         self.setObjectName("OknoStartowe")  # Dodanie identyfikatora dla stylów
         self.setWindowTitle("Garage Door Designer")
@@ -25,6 +33,12 @@ class OknoStartowe(QMainWindow):
         self.refresh()  # Odśwież zawartość przy pierwszym uruchomieniu
 
     def _setup_ui(self):
+        """
+        Konfiguruje interfejs użytkownika.
+
+        Tworzy główny układ aplikacji z lewym i prawym panelem oraz dodaje
+        podstawowe widżety.
+        """
         central_widget = QWidget(self)
         central_widget.setObjectName("oknoStartoweWindow")
         self.setCentralWidget(central_widget)
@@ -40,7 +54,11 @@ class OknoStartowe(QMainWindow):
         main_layout.setStretch(1, 3)
 
     def _create_left_panel(self):
-        """Tworzy lewy panel z przyciskami do zarządzania projektami."""
+        """
+        Tworzy lewy panel w oknie startowym.
+
+        Panel zawiera przyciski do tworzenia nowych projektów lub otwierania zapisancyh.
+        """
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
@@ -62,6 +80,11 @@ class OknoStartowe(QMainWindow):
         return left_widget
 
     def open_selected_project(self):
+        """
+        Otwiera wybrany projekt z bazy danych.
+
+        Wczytuje dane projektu i zapisuje je do pliku JSON, który będzie używany w kolejnych widokach.
+        """
         self.clear_selected_options()
 
         selected_items = self.project_table.selectedItems()
@@ -77,6 +100,11 @@ class OknoStartowe(QMainWindow):
                 print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
     def _create_right_panel(self):
+        """
+        Tworzy prawy panel w oknie startowym.
+
+        Panel zawiera tabelę listę utworzonych projektów.
+        """
         right_widget = QWidget()
         right_widget.setObjectName("projectTablePanel")
         right_layout = QVBoxLayout(right_widget)
@@ -102,7 +130,11 @@ class OknoStartowe(QMainWindow):
         return right_widget
 
     def _handle_row_selection(self):
-        """Obsługuje zaznaczanie wiersza w tabeli."""
+        """
+        Obsługuje wybór wiersza w tabeli projektów.
+
+        Włącza przycisk "Otwórz zapisany", gdy wiersz w tabeli jest zaznaczony.
+        """
         selected_items = self.project_table.selectedItems()
         if selected_items:
             self.selected_row = self.project_table.row(selected_items[0]) + 1
@@ -112,10 +144,19 @@ class OknoStartowe(QMainWindow):
             self.open_saved_button.setEnabled(False)  # Wyłącz przycisk
 
     def refresh(self):
-        """Odświeża dane w tabeli z projektami."""
+        """
+        Odświeża dane w tabeli projektów.
+
+        Ładuje listę projektów z bazy danych i wyświetla je w tabeli.
+        """
         self._load_project_files()
 
     def _load_project_files(self):
+        """
+        Ładuje listę projektów z bazy danych i uzupełnia tabelę.
+
+        Pobiera dane projektów, takie jak nazwa i data, i wyświetla je w odpowiednich komórkach.
+        """
         self.project_table.clearContents()
 
         projects = self.db_manager.list_projects()
@@ -148,6 +189,11 @@ class OknoStartowe(QMainWindow):
 
     @staticmethod
     def clear_selected_options():
+        """
+        Czyści plik z zapisanymi opcjami projektu.
+
+        Zapisuje pusty słownik do pliku JSON, usuwając wszystkie poprzednie dane.
+        """
         file_path = "../resources/selected_options.json"
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -158,4 +204,10 @@ class OknoStartowe(QMainWindow):
 
     @staticmethod
     def _add_spacer(layout):
+        """
+        Dodaje pustą przestrzeń do układu.
+
+        Args:
+            layout (QLayout): Układ, do którego zostanie dodany odstęp.
+        """
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))

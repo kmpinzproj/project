@@ -14,19 +14,22 @@ from Widget3D import OpenGLWidget
 from Kosztorys import PriceCalculator  # Import klasy z pliku Kosztorys.py
 
 
-if __name__ == "__main__":
-    runner = BlenderScriptRunner()
-    runner.run()
-
-
 class Kreator(QMainWindow):
+    """
+    Klasa reprezentująca okno kreatora bram garażowych.
+
+    Zarządza interfejsem użytkownika, umożliwia wybór opcji, renderowanie modelu 3D,
+    kalkulację kosztów oraz zapis projektu.
+    """
     LEFT_PANEL_WIDTH = 400
     IMAGE_WIDGET_MIN_SIZE = 400  # Minimum size for image widget
 
-    def __init__(self, test, image_path="../generator/renders/Camera_4.png"):
+    def __init__(self):
+        """
+        Inicjalizuje okno kreatora.
+        """
         super().__init__()
         self.setObjectName("kreator_view")
-        self.image_path = os.path.abspath(image_path) if image_path else None
         self.setWindowTitle("Garage Door Designer")
         self.setGeometry(100, 100, 834, 559)
         self.setMinimumSize(834, 559)
@@ -45,7 +48,9 @@ class Kreator(QMainWindow):
         self.set_default_options()
 
     def _setup_ui(self):
-        """Sets up the main layout and divides it into left and right panels."""
+        """
+        Konfiguruje główny układ okna, dzieląc go na panel lewy i prawy.
+        """
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
@@ -63,7 +68,12 @@ class Kreator(QMainWindow):
         main_layout.setStretch(1, 1)  # Prawy panel, równomierna proporcja do lewego panelu
 
     def _create_left_panel(self):
-        """Creates the left panel with the scrollable menu based on gate type."""
+        """
+        Tworzy lewy panel z menu nawigacyjnym.
+
+        Returns:
+            QWidget: Widżet lewego panelu.
+        """
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
@@ -75,7 +85,12 @@ class Kreator(QMainWindow):
         return left_widget
 
     def _create_right_panel(self):
-        """Creates the right panel with QLabel for image display and navigation buttons."""
+        """
+        Tworzy prawy panel zawierający widżet obrazu oraz przyciski nawigacyjne.
+
+        Returns:
+            QWidget: Widżet prawego panelu.
+        """
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
@@ -90,7 +105,12 @@ class Kreator(QMainWindow):
         return right_widget
 
     def _create_image_widget(self):
-        """Creates and configures the OpenGLWidget for 3D display."""
+        """
+        Tworzy widżet OpenGL do wyświetlania modelu 3D.
+
+        Returns:
+            OpenGLWidget: Widżet OpenGL do renderowania bramy.
+        """
         self.gate_render_start()
 
         # Ścieżka do pliku .obj
@@ -103,7 +123,7 @@ class Kreator(QMainWindow):
 
     def gate_render(self):
         """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        Renderuje bramę na podstawie zaznaczonych opcji i aktualizuje widok.
         """
         self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
@@ -118,7 +138,7 @@ class Kreator(QMainWindow):
 
     def gate_render_start(self):
         """
-        Renderuje bramę za pomocą BlenderScriptRunner i aktualizuje obrazek w interfejsie.
+        Renderuje początkową wersję bramy przy uruchomieniu kreatora.
         """
         self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.default_options)
@@ -132,7 +152,9 @@ class Kreator(QMainWindow):
             print(f"Wystąpił błąd podczas renderowania: {e}")
 
     def change_model(self):
-        """Zmienia model na nowy i przeładowuje widok 3D."""
+        """
+        Przeładowuje model bramy i szyn w widoku 3D.
+        """
         gate_file = "../generator/model.obj"
         rail_file = "../generator/szyny.obj"
         addons_file = "../generator/dodatki/combined_addons.obj"
@@ -146,11 +168,19 @@ class Kreator(QMainWindow):
             print(f"Nie znaleziono jednego z plików: {gate_file} lub {rail_file}")
 
     def render_and_change(self):
+        """
+        Renderuje bramę i odświeża widok modelu 3D.
+        """
         self.gate_render()
         self.change_model()
 
     def _create_navigation_buttons(self):
-        """Creates a widget with updated button layout and precise spacing."""
+        """
+        Tworzy panel z przyciskami nawigacyjnymi.
+
+        Returns:
+            QWidget: Widżet z przyciskami.
+        """
         buttons_widget = QWidget()
         main_layout = QVBoxLayout(buttons_widget)
 
@@ -195,7 +225,12 @@ class Kreator(QMainWindow):
         return buttons_widget
 
     def validate_and_proceed(self):
-        """Validates required fields and triggers the transition if valid."""
+        """
+        Sprawdza wymagane pola i przechodzi do kolejnego widoku, jeśli wszystkie pola są poprawne.
+
+        Returns:
+            bool: True, jeśli walidacja zakończyła się sukcesem, False w przeciwnym przypadku.
+        """
         if self.validate_fields():
             self.prompt_project_name()
             return True
@@ -203,11 +238,24 @@ class Kreator(QMainWindow):
             return False
 
     def validate_fields(self):
-        """Validates required fields in the ScrollableMenu and returns True if all are valid."""
+        """
+        Sprawdza poprawność wymaganych pól w ScrollableMenu.
+
+        Returns:
+            bool: True, jeśli wszystkie wymagane pola są poprawne, False w przeciwnym przypadku.
+        """
         return self.navigation_menu.validate_required_fields(self.required_fields)
 
     def prompt_project_name(self, render=False):
-        """Prompt user for a project name before saving."""
+        """
+        Pyta użytkownika o nazwę projektu i zapisuje projekt.
+
+        Args:
+            render (bool): Flaga wskazująca, czy renderowanie powinno zostać wykonane przed zapisem.
+
+        Returns:
+            bool: True, jeśli projekt został zapisany, False w przeciwnym przypadku.
+        """
         if render:
             self.render_and_change()
 
@@ -238,8 +286,13 @@ class Kreator(QMainWindow):
 
     def check_project_existence_and_prompt(self, project_name):
         """
-        Sprawdza, czy projekt o podanej nazwie istnieje w bazie danych.
-        Jeśli tak, pyta użytkownika, czy chce nadpisać istniejący projekt.
+        Sprawdza, czy projekt o danej nazwie istnieje, i pyta użytkownika o nadpisanie.
+
+        Args:
+            project_name (str): Nazwa projektu do sprawdzenia.
+
+        Returns:
+            bool: True, jeśli projekt można zapisać, False w przeciwnym przypadku.
         """
         try:
             db_manager = DatabaseManager()
@@ -267,7 +320,9 @@ class Kreator(QMainWindow):
             return False
 
     def set_default_options(self):
-        """Sets default options based on loaded data."""
+        """
+        Ustawia domyślne opcje w kreatorze na podstawie załadowanych danych.
+        """
         for category, value in self.default_options.items():
             # Obsługa dla opcji checkbox (pojedyncze i wielokrotne)
             if category in self.navigation_menu.option_items_by_category:
@@ -292,7 +347,9 @@ class Kreator(QMainWindow):
                         self.navigation_menu._on_option_click(category, img_label)  # Kliknięcie na opcję
 
     def open_cost_calculator(self):
-        """Otwiera okno kalkulatora cen z pliku Kosztorys.py."""
+        """
+        Otwiera okno kalkulatora cen.
+        """
         self.selected_options = self.navigation_menu.get_selected_options()
         self.save_selected_options("../resources/selected_options.json", self.selected_options)
         self.cost_calculator_window = PriceCalculator()  # Tworzenie instancji okna
@@ -300,7 +357,15 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def load_required_fields(file_path):
-        """Loads required fields for each gate type from a text file."""
+        """
+        Wczytuje wymagane pola dla każdego typu bramy z pliku tekstowego.
+
+        Args:
+            file_path (str): Ścieżka do pliku tekstowego.
+
+        Returns:
+            dict: Słownik z wymaganymi polami dla każdego typu bramy.
+        """
         required_fields = {}
         current_gate_type = None
 
@@ -323,7 +388,15 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def load_selected_options(file_path):
-        """Loads selected options from a JSON file."""
+        """
+        Wczytuje zaznaczone opcje z pliku JSON.
+
+        Args:
+            file_path (str): Ścieżka do pliku JSON.
+
+        Returns:
+            dict: Dane opcji wczytane z pliku JSON.
+        """
         if not os.path.exists(file_path):
             print(f"Plik {file_path} nie istnieje. Zwracanie pustych opcji.")
             return {}
@@ -339,8 +412,11 @@ class Kreator(QMainWindow):
     @staticmethod
     def save_selected_options(file_path, selected_options):
         """
-        Saves selected options to a JSON file by preserving 'Typ bramy' and 'Wymiary',
-        and overwriting all other data with new selected options.
+        Zapisuje zaznaczone opcje do pliku JSON.
+
+        Args:
+            file_path (str): Ścieżka do pliku JSON.
+            selected_options (dict): Dane opcji do zapisania.
         """
         # Przygotuj bazową strukturę danych
         base_data = {}
@@ -370,6 +446,13 @@ class Kreator(QMainWindow):
 
     @staticmethod
     def save_json_to_db(file_path, selected_options):
+        """
+        Zapisuje dane z pliku JSON do bazy danych.
+
+        Args:
+            file_path (str): Ścieżka do pliku JSON.
+            selected_options (dict): Dane opcji do zapisania w bazie danych.
+        """
         # Przygotuj bazową strukturę danych
         base_data = {}
 

@@ -6,6 +6,15 @@ import matplotlib.pyplot as plt
 def is_parallel_to_axis(v0, v1, axis, tolerance=1e-2):
     """
     Sprawdza, czy krawędź jest równoległa do określonej osi (X, Y lub Z).
+
+    Args:
+        v0 (np.ndarray): Współrzędne pierwszego wierzchołka krawędzi.
+        v1 (np.ndarray): Współrzędne drugiego wierzchołka krawędzi.
+        axis (str): Oś do sprawdzenia ('x', 'y', 'z').
+        tolerance (float): Tolerancja dla porównania współrzędnych (domyślnie 1e-2).
+
+    Returns:
+        bool: True, jeśli krawędź jest równoległa do określonej osi, w przeciwnym razie False.
     """
     vec = v1 - v0
     if axis == 'x':  # Równoległa do osi X
@@ -21,6 +30,14 @@ def filter_edges(edges, vertices, tolerance=1e-2):
     """
     Filtruje krawędzie, pozostawiając tylko te, które są dokładnie pionowe lub poziome
     względem osi X, Y lub Z w przestrzeni 3D.
+
+    Args:
+        edges (np.ndarray): Lista krawędzi w formacie [(indeks_wierzchołka_0, indeks_wierzchołka_1), ...].
+        vertices (np.ndarray): Lista współrzędnych wierzchołków 3D.
+        tolerance (float): Tolerancja dla sprawdzania równoległości krawędzi (domyślnie 1e-2).
+
+    Returns:
+        list: Lista krawędzi, które są pionowe lub poziome względem osi X, Y lub Z.
     """
     filtered_edges = []
     for edge in edges:
@@ -35,6 +52,12 @@ def filter_edges(edges, vertices, tolerance=1e-2):
 def apply_isometric_projection(vertices):
     """
     Zastosowanie rzutu izometrycznego na wierzchołkach 3D.
+
+    Args:
+        vertices (np.ndarray): Lista współrzędnych wierzchołków 3D.
+
+    Returns:
+        np.ndarray: Lista współrzędnych wierzchołków po zastosowaniu rzutu izometrycznego.
     """
     # Macierz transformacji izometrycznej
     iso_matrix = np.array([
@@ -48,6 +71,13 @@ def apply_isometric_projection(vertices):
 def draw_filtered_edges_isometric(obj_file_path, output_image_path):
     """
     Generuje rzut izometryczny z filtrowaniem krawędzi pionowych i poziomych.
+
+    Args:
+        obj_file_path (str): Ścieżka do pliku .obj z modelem 3D.
+        output_image_path (str): Ścieżka do pliku wyjściowego obrazu.
+
+    Returns:
+        None
     """
     # Wczytaj plik OBJ
     mesh = trimesh.load(obj_file_path)
@@ -74,7 +104,14 @@ def draw_filtered_edges_isometric(obj_file_path, output_image_path):
 
 def draw_orthogonal_edges(obj_file_path, output_image_path):
     """
-    Generuje zwykły rzut z filtrowaniem krawędzi pionowych i poziomych.
+    Generuje zwykły rzut ortogonalny z filtrowaniem krawędzi pionowych i poziomych.
+
+    Args:
+        obj_file_path (str): Ścieżka do pliku .obj z modelem 3D.
+        output_image_path (str): Ścieżka do pliku wyjściowego obrazu.
+
+    Returns:
+        None
     """
     # Wczytaj plik OBJ
     mesh = trimesh.load(obj_file_path)

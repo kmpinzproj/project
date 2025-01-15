@@ -7,10 +7,22 @@ import os
 
 
 class ScrollableMenu(QWidget):
+    """
+    Klasa reprezentująca przewijane menu używane w kreatorze bram.
+
+    Menu wyświetla dostępne opcje, pozwala na ich wybór oraz obsługuje dynamiczne
+    układanie elementów w zależności od rozmiaru okna.
+    """
     FIELD_HEIGHT = 100  # Default height for collapsed fields
     OPTION_WIDGET_SIZE = (100, 140)  # Width and height of option widgets
 
     def __init__(self, gate_type):
+        """
+        Inicjalizuje przewijane menu.
+
+        Args:
+            gate_type (str): Typ bramy, dla którego generowane są opcje menu.
+        """
         super().__init__()
         self.setWindowTitle("Przewijane menu")
         self.setMinimumWidth(400)
@@ -27,6 +39,10 @@ class ScrollableMenu(QWidget):
         self._setup_ui()
 
     def _setup_ui(self):
+        """
+        Konfiguruje główny układ menu, tworzy obszar przewijania oraz ładuje opcje
+        dla określonego typu bramy.
+        """
         layout = QVBoxLayout(self)
 
         self.scroll_area = QScrollArea()
@@ -53,7 +69,16 @@ class ScrollableMenu(QWidget):
         self.installEventFilter(self)  # Monitor resize events for dynamic updates
 
     def _create_field_group(self, field_name, options):
-        """Create a field group for a category."""
+        """
+        Tworzy grupę opcji dla danej kategorii.
+
+        Args:
+            field_name (str): Nazwa kategorii.
+            options (list): Lista opcji dostępnych w tej kategorii.
+
+        Returns:
+            QGroupBox: Widżet grupy opcji.
+        """
         field_group = QGroupBox()
         field_layout = QVBoxLayout(field_group)
 
@@ -94,7 +119,16 @@ class ScrollableMenu(QWidget):
         return field_group
 
     def _create_image_options_widget(self, category, options):
-        """Create a widget with grid layout for image-based options."""
+        """
+        Tworzy widżet z opcjami w postaci obrazów.
+
+        Args:
+            category (str): Nazwa kategorii.
+            options (list): Lista opcji do wyświetlenia jako obrazy.
+
+        Returns:
+            QWidget: Widżet zawierający opcje w formie obrazów.
+        """
         options_widget = QWidget()
         options_layout = QGridLayout(options_widget)
 
@@ -122,7 +156,17 @@ class ScrollableMenu(QWidget):
         return options_widget
 
     def _create_image_option(self, option_name, image_path, category):
-        """Create a single image option widget with selectable functionality and centered text."""
+        """
+        Tworzy pojedynczy widżet opcji z obrazkiem i opisem.
+
+        Args:
+            option_name (str): Nazwa opcji.
+            image_path (str): Ścieżka do obrazu reprezentującego opcję.
+            category (str): Kategoria, do której należy opcja.
+
+        Returns:
+            QWidget: Widżet reprezentujący opcję.
+        """
         option_widget = QWidget()
         layout = QVBoxLayout(option_widget)
         layout.setAlignment(Qt.AlignCenter)
@@ -172,7 +216,13 @@ class ScrollableMenu(QWidget):
         return option_widget
 
     def _on_option_click(self, category, image_label):
-        """Handle click on an image option."""
+        """
+        Obsługuje kliknięcia na opcję obrazkową.
+
+        Args:
+            category (str): Kategoria opcji.
+            image_label (QLabel): Kliknięty obraz.
+        """
         # Sprawdź, czy kliknięty obrazek jest już zaznaczony
         if image_label.styleSheet() == "border: 5px solid green; padding: 0px; margin: 0px;":
             # Usuń zaznaczenie
@@ -204,7 +254,12 @@ class ScrollableMenu(QWidget):
                 self.selected_options[category] = selected_text
 
     def _clear_other_color_category(self, other_category):
-        """Clears the selected options from the other color category (either 'Kolor standardowy' or 'Kolor RAL')."""
+        """
+        Czyści zaznaczone opcje w drugiej kategorii kolorów (np. "Kolor RAL").
+
+        Args:
+            other_category (str): Nazwa kategorii do wyczyszczenia.
+        """
         if other_category in self.option_items_by_category:
             for option_widget in self.option_items_by_category[other_category]:
                 img_label = option_widget.findChild(QLabel, "image_label")
@@ -213,7 +268,12 @@ class ScrollableMenu(QWidget):
             self.selected_options.pop(other_category, None)
 
     def set_default_options(self, default_options):
-        """Sets default options based on loaded data."""
+        """
+        Ustawia domyślne opcje na podstawie załadowanych danych.
+
+        Args:
+            default_options (dict): Domyślne opcje do ustawienia.
+        """
         for category, value in default_options.items():
             if category in self.option_items_by_category:
                 for option_widget in self.option_items_by_category[category]:
@@ -224,7 +284,16 @@ class ScrollableMenu(QWidget):
                         self._on_option_click(category, img_label)  # Kliknij opcję, aby ją zaznaczyć
 
     def _create_checkbox_options_widget(self, options, category):
-        """Create a widget with checkboxes for options with single selection per category."""
+        """
+        Tworzy widżet z opcjami w formie checkboxów.
+
+        Args:
+            options (list): Lista opcji do wyświetlenia jako checkboxy.
+            category (str): Kategoria, do której należą opcje.
+
+        Returns:
+            QWidget: Widżet zawierający opcje w formie checkboxów.
+        """
         options_widget = QWidget()
         options_layout = QVBoxLayout(options_widget)
 
@@ -242,7 +311,13 @@ class ScrollableMenu(QWidget):
         return options_widget
 
     def _on_checkbox_click(self, category, clicked_checkbox):
-        """Handle checkbox clicks. Allow multiple selection for specific categories."""
+        """
+        Obsługuje kliknięcia na checkboxy.
+
+        Args:
+            category (str): Kategoria opcji.
+            clicked_checkbox (QCheckBox): Kliknięty checkbox.
+        """
         if category == "Opcje dodatkowe":
             # Dla "Opcje dodatkowe" zapisuj stan każdego checkboxa
             selected_options = [
@@ -273,14 +348,24 @@ class ScrollableMenu(QWidget):
                 self.selected_options.pop(category, None)
 
     def _create_toggle_button(self):
-        """Create a toggle button for collapsing/expanding options."""
+        """
+        Tworzy przycisk przełączający widoczność opcji.
+
+        Returns:
+            QPushButton: Przycisk przełączania.
+        """
         button = QPushButton("↓")
         button.setFixedSize(24, 24)
         button.setFlat(True)
         return button
 
     def toggle_options(self, category):
-        """Toggle visibility of options for a category."""
+        """
+        Przełącza widoczność opcji w danej kategorii.
+
+        Args:
+            category (str): Nazwa kategorii.
+        """
         data = self.category_widgets[category]
         field_group = data["field_group"]
         options_widget = data["options_widget"]
@@ -317,7 +402,14 @@ class ScrollableMenu(QWidget):
             toggle_button.setText("↑")
 
     def _populate_grid_layout(self, option_items, layout, columns):
-        """Populate a grid layout with option widgets."""
+        """
+        Wypełnia układ siatki widżetami opcji.
+
+        Args:
+            option_items (list): Lista widżetów opcji.
+            layout (QGridLayout): Układ siatki do wypełnienia.
+            columns (int): Liczba kolumn w siatce.
+        """
         for i in reversed(range(layout.count())):
             widget = layout.itemAt(i).widget()
             if widget:
@@ -329,13 +421,29 @@ class ScrollableMenu(QWidget):
             layout.addWidget(widget, row, column)
 
     def eventFilter(self, source, event):
-        """Handle resize events for dynamic updates."""
+        """
+        Obsługuje zdarzenia dla dynamicznych aktualizacji siatki opcji.
+
+        Args:
+            source (QObject): Źródło zdarzenia.
+            event (QEvent): Zdarzenie do obsłużenia.
+
+        Returns:
+            bool: True, jeśli zdarzenie zostało obsłużone, False w przeciwnym przypadku.
+        """
         if event.type() == QEvent.Resize:
             self._update_grid_columns()
         return super().eventFilter(source, event)
 
     def _update_grid_columns(self):
-        """Dynamically update grid columns based on available width."""
+        """
+        Dynamicznie aktualizuje liczbę kolumn w siatkach opcji na podstawie dostępnej szerokości.
+
+        Dostosowuje układ siatki opcji dla każdej kategorii, biorąc pod uwagę rozmiar widocznego
+        obszaru i odstępy między elementami. Specjalnie traktuje kategorię "Przeszklenia",
+        uwzględniając jej większe rozmiary.
+
+        """
         available_width = self.scroll_area.viewport().width()
         spacing = 10  # Margines między elementami
 
@@ -364,7 +472,14 @@ class ScrollableMenu(QWidget):
                 self._adjust_field_group_height(option_items, columns, data["field_group"])
 
     def _populate_grid_layout(self, option_items, layout, columns):
-        """Populate a grid layout with option widgets."""
+        """
+        Wypełnia układ siatki widżetami opcji.
+
+        Args:
+            option_items (list): Lista widżetów opcji.
+            layout (QGridLayout): Układ siatki do wypełnienia.
+            columns (int): Liczba kolumn w siatce.
+        """
         # Usuń wszystkie istniejące widgety z układu
         for i in reversed(range(layout.count())):
             widget = layout.itemAt(i).widget()
@@ -378,7 +493,14 @@ class ScrollableMenu(QWidget):
             layout.addWidget(widget, row, column)
 
     def _adjust_field_group_height(self, option_items, columns, field_group):
-        """Adjust the height of a field group based on the number of rows."""
+        """
+        Dostosowuje wysokość grupy pola na podstawie liczby wierszy.
+
+        Args:
+            option_items (list): Lista widżetów opcji.
+            columns (int): Liczba kolumn w siatce.
+            field_group (QGroupBox): Grupa pola do dostosowania.
+        """
         total_items = len(option_items)
         rows = (total_items + columns - 1) // columns  # Ceiling division
         option_height = self.OPTION_WIDGET_SIZE[1]
@@ -389,7 +511,15 @@ class ScrollableMenu(QWidget):
         field_group.updateGeometry()
 
     def load_options_data(self, filename):
-        """Load options data from a file."""
+        """
+        Wczytuje dane opcji z pliku.
+
+        Args:
+            filename (str): Ścieżka do pliku z danymi opcji.
+
+        Returns:
+            dict: Dane opcji w postaci słownika.
+        """
         options_data = {}
         current_gate = None
 
@@ -409,12 +539,25 @@ class ScrollableMenu(QWidget):
         return options_data
 
     def get_selected_options(self):
-        """Returns the currently selected options."""
+        """
+        Zwraca aktualnie wybrane opcje.
+
+        Returns:
+            dict: Wybrane opcje w formacie klucz-wartość.
+        """
         tmp = self.selected_options
         return tmp
 
     def validate_required_fields(self, required_fields):
-        """Validates that all required fields from the given list have selected options."""
+        """
+        Sprawdza, czy wszystkie wymagane pola zostały uzupełnione.
+
+        Args:
+            required_fields (list): Lista nazw wymaganych kategorii.
+
+        Returns:
+            bool: True, jeśli wszystkie wymagane pola są uzupełnione, False w przeciwnym przypadku.
+        """
         all_valid = True
         for category in required_fields:
             if category == "Kolor":

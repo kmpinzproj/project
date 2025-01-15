@@ -12,7 +12,15 @@ pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
 
 
 def load_json_data(file_path):
-    """Wczytaj dane z pliku JSON."""
+    """
+    Wczytuje dane z pliku JSON.
+
+    Args:
+        file_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        dict: Dane załadowane z pliku JSON lub pusty słownik w przypadku błędu.
+    """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return json.load(file)
@@ -22,7 +30,16 @@ def load_json_data(file_path):
 
 
 def calculate_price(data, db_manager):
-    """Oblicza cenę na podstawie danych i bazy danych."""
+    """
+    Oblicza cenę na podstawie danych o produkcie i bazy danych.
+
+    Args:
+        data (dict): Dane o produkcie.
+        db_manager (DatabaseManager): Instancja klasy DatabaseManager do pobierania cen.
+
+    Returns:
+        tuple: Całkowita cena i szczegóły cenowe jako lista.
+    """
     gate_type = data.get("Typ bramy")
 
     try:
@@ -74,12 +91,23 @@ def calculate_price(data, db_manager):
 
 
 class InvoiceGenerator:
+    """
+    Klasa do generowania faktur w formacie PDF.
+    """
     def __init__(self, output_path="invoice.pdf"):
+        """
+        Inicjalizuje generator faktur.
+
+        Args:
+            output_path (str): Ścieżka do zapisu wygenerowanej faktury.
+        """
         self.output_path = output_path
         self.db_manager = DatabaseManager()
 
     def generate_invoice(self):
-        """Generuje fakturę PDF."""
+        """
+        Generuje fakturę VAT w formacie PDF na podstawie danych o produkcie i nabywcy.
+        """
         product_parameters = load_json_data("../resources/selected_options.json")
         customer_data = load_json_data("../resources/invoice_data.json")  # Wczytanie danych nabywcy
         total_price, price_details = calculate_price(product_parameters, self.db_manager)

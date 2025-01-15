@@ -5,7 +5,19 @@ from PIL import Image, ImageDraw, ImageFont
 
 def detect_and_draw_arrows(image_path, output_path, width, height):
     """
-    Wykrywa kontury na obrazie i rysuje strzałki pokazujące szerokość i wysokość obiektu.
+    Wykrywa kontury na obrazie i rysuje strzałki wskazujące szerokość i wysokość obiektu.
+
+    Args:
+        image_path (str): Ścieżka do pliku wejściowego obrazu.
+        output_path (str): Ścieżka do pliku wyjściowego z narysowanymi strzałkami.
+        width (int): Szerokość obiektu w centymetrach (do wyświetlenia na obrazie).
+        height (int): Wysokość obiektu w centymetrach (do wyświetlenia na obrazie).
+
+    Returns:
+        str: Ścieżka do zapisanego pliku wyjściowego z narysowanymi strzałkami.
+
+    Raises:
+        ValueError: Jeśli nie wykryto żadnych konturów na obrazie.
     """
     print("Wykrywanie krawędzi i rysowanie strzałek...")
     image = Image.open(image_path)
@@ -49,6 +61,15 @@ def detect_and_draw_arrows(image_path, output_path, width, height):
 def draw_arrow(draw, start, end, direction='horizontal'):
     """
     Rysuje strzałkę na podanym obrazie.
+
+    Args:
+        draw (PIL.ImageDraw.ImageDraw): Obiekt rysujący (ImageDraw) dla obrazu.
+        start (tuple): Punkt początkowy strzałki w formacie (x, y).
+        end (tuple): Punkt końcowy strzałki w formacie (x, y).
+        direction (str): Kierunek strzałki ('horizontal' lub 'vertical'). Domyślnie 'horizontal'.
+
+    Returns:
+        None
     """
     draw.line([start, end], fill="black", width=3)
     if direction == 'horizontal':

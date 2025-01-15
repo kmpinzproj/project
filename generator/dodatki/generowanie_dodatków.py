@@ -30,15 +30,14 @@ bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 def add_window_rolling(window, glass, segment):
     """
     Dodaje okna do bramy roletowej, rozmieszczając je na środku każdego segmentu, z wyjątkiem ostatniego segmentu.
-    Dane szerokości, wysokości bramy i wysokości segmentu są pobierane z pliku JSON.
 
-    Argumenty:
-    window -- obiekt ramki okna (bpy.types.Object)
-    glass -- obiekt szyby (bpy.types.Object)
-    segment_height -- wysokość pojedynczego segmentu (float)
+    Args:
+        window (bpy.types.Object): Obiekt ramki okna.
+        glass (bpy.types.Object): Obiekt szyby.
+        segment (str): Typ segmentu, np. "100 mm".
 
-    Zwraca:
-    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, lista szyb.
+    Returns:
+        Tuple[List[bpy.types.Object], List[bpy.types.Object]]: Lista ramek i szyb.
     """
     try:
         # --- 1. Wczytaj dane bramy z pliku JSON ---
@@ -168,12 +167,13 @@ def add_window_segment(glass, pattern, przetloczenie):
     """
     Dodaje segmenty okien do bramy na podstawie wzoru (pattern) i danych z JSON.
 
-    Argumenty:
-    pattern -- wzór układu okien (np. 1, 2, 3)
-    glass -- obiekt szyby (bpy.types.Object)
+    Args:
+        glass (bpy.types.Object): Obiekt szyby.
+        pattern (str): Wzór układu okien (np. "Wzór 1").
+        przetloczenie (str): Rodzaj przetłoczenia.
 
-    Zwraca:
-    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, lista szyb.
+    Returns:
+        Tuple[List[bpy.types.Object], List[bpy.types.Object]]: Lista ramek i szyb.
     """
     try:
         # --- 1. Wczytaj dane bramy z pliku JSON ---
@@ -290,6 +290,18 @@ def add_window_segment(glass, pattern, przetloczenie):
         return [], []
 
 def add_window_rotation(window, glass, option, ilosc_skrzydel):
+    """
+    Dodaje okna obrotowe do bramy w zależności od liczby skrzydeł i opcji ustawienia.
+
+    Args:
+        window (bpy.types.Object): Obiekt ramki okna.
+        glass (bpy.types.Object): Obiekt szyby.
+        option (str): Opcja ustawienia okna ("Okna pionowe" lub inna).
+        ilosc_skrzydel (str): Liczba skrzydeł bramy.
+
+    Returns:
+        Tuple[List[bpy.types.Object], List[bpy.types.Object]]: Lista ramek i szyb.
+    """
     try:
         if not window or not glass:
             print("Nie znaleziono obiektu ramki okna lub szyby.")
@@ -396,15 +408,15 @@ def add_window_rotation(window, glass, option, ilosc_skrzydel):
 
 def add_window(window, glass, option):
     """
-    Dodaje okna oraz szyby do bramy w oparciu o dane z pliku JSON.
+    Dodaje okna i szyby do bramy w oparciu o dane z pliku JSON.
 
-    Argumenty:
-    window -- obiekt ramki okna (bpy.types.Object)
-    glass -- obiekt szyby (bpy.types.Object)
-    option -- opcja ustawienia okna (1 = poziome, 2 = pionowe obrócone o 90 stopni)
+    Args:
+        window (bpy.types.Object): Obiekt ramki okna.
+        glass (bpy.types.Object): Obiekt szyby.
+        option (str): Opcja ustawienia okna ("Okna pionowe" lub "Okna poziome").
 
-    Zwraca:
-    Tuple[List[bpy.types.Object], List[bpy.types.Object]] -- Lista ramek, Lista szyb
+    Returns:
+        Tuple[List[bpy.types.Object], List[bpy.types.Object]]: Lista ramek i szyb.
     """
     try:
         if not window or not glass:
@@ -504,10 +516,13 @@ def add_window(window, glass, option):
 
 def position_door_from_file(door):
     """
-    Tworzy kopię drzwi i ustawia ją 10 cm od lewej krawędzi bramy na podstawie danych z pliku JSON.
+    Tworzy kopię drzwi i ustawia ją na podstawie danych z pliku JSON.
 
-    Argumenty:
-    door -- obiekt drzwi (bpy.types.Object)
+    Args:
+        door (bpy.types.Object): Obiekt drzwi.
+
+    Returns:
+        bpy.types.Object: Skopiowany i ustawiony obiekt drzwi.
     """
     try:
         # Odczytaj dane bramy z pliku JSON
@@ -564,14 +579,15 @@ def position_door_from_file(door):
 
 def add_handle(handle,typ = "Klamka 1",  door=None):
     """
-    Dodaje kopię klamki zarówno do drzwi, jak i do bramy.
+    Dodaje klamkę do drzwi lub bramy.
 
-    Jeśli istnieją drzwi, klamka jest dodawana 10 cm od lewej krawędzi drzwi na wysokości 90 cm.
-    Jeśli istnieje brama, klamka jest dodawana na środku bramy.
+    Args:
+        handle (bpy.types.Object): Obiekt klamki.
+        typ (str): Typ klamki, np. "Klamka 1".
+        door (bpy.types.Object, optional): Obiekt drzwi.
 
-    Argumenty:
-    handle -- obiekt klamki (bpy.types.Object)
-    door -- obiekt drzwi (bpy.types.Object) (opcjonalny)
+    Returns:
+        bpy.types.Object: Skopiowany i ustawiony obiekt klamki.
     """
     try:
         if not handle:
@@ -648,17 +664,15 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
 
 def add_handle_swing_gate(handle, typ, ilosc_skrzydel):
     """
-    Dodaje kopię klamki dla bramy rozwieranej z uwzględnieniem odpowiedniej pozycji i obrotu:
-    - Lewoskrzydłowa: klamka po prawej stronie bramy i obrót względem prawej krawędzi.
-    - Prawoskrzydłowa: klamka po lewej stronie bramy i obrót względem lewej krawędzi.
-    - Dwuskrzydłowa: klamka po prawej krawędzi lewego skrzydła i obrót względem lewej krawędzi lewego skrzydła.
+    Dodaje kopię klamki do bramy rozwieranej, dostosowując jej pozycję i obrót w zależności od liczby skrzydeł.
 
-    Argumenty:
-    handle -- obiekt klamki (bpy.types.Object)
-    ilosc_skrzydel -- str, rodzaj bramy: "Jednoskrzydłowe lewe", "Jednoskrzydłowe prawe", "Dwuskrzydłowe".
+    Args:
+        handle (bpy.types.Object): Obiekt klamki.
+        typ (str): Typ klamki (np. "Klamka 1").
+        ilosc_skrzydel (str): Liczba skrzydeł bramy ("Jednoskrzydłowe lewe", "Jednoskrzydłowe prawe", "Dwuskrzydłowe").
 
-    Zwraca:
-    bpy.types.Object -- Obiekt klamki.
+    Returns:
+        bpy.types.Object: Obiekt klamki zaktualizowany o pozycję i obrót.
     """
     try:
         if not handle:
@@ -757,15 +771,15 @@ def add_handle_swing_gate(handle, typ, ilosc_skrzydel):
 
 def position_vent_from_file(vent, option):
     """
-    Tworzy kopię kratki wentylacyjnej i ustawia ją w odpowiednim miejscu na podstawie danych z pliku JSON.
-    Wszystkie kratki łączy w jeden obiekt i zwraca ten obiekt.
+    Tworzy kopię kratki wentylacyjnej i ustawia ją w odpowiednim miejscu na bramie,
+    na podstawie danych z pliku JSON.
 
-    Argumenty:
-    vent -- obiekt kratki wentylacyjnej (bpy.types.Object)
-    option -- str, opcja "Lewa", "Prawa" lub "Obustronna"
+    Args:
+        vent (bpy.types.Object): Obiekt kratki wentylacyjnej.
+        option (str): Opcja ustawienia kratki ("Lewa", "Prawa", "Obustronna").
 
-    Zwraca:
-    bpy.types.Object -- Połączony obiekt kratki wentylacyjnej
+    Returns:
+        bpy.types.Object: Połączony obiekt kratki wentylacyjnej, jeśli utworzono kopie. W przeciwnym razie None.
     """
     try:
         # Odczytaj dane bramy z pliku JSON
@@ -837,16 +851,15 @@ def position_vent_from_file(vent, option):
 
 def add_vent_rotation(vent, option, ilosc_skrzydel):
     """
-    Tworzy kopię kratki wentylacyjnej i ustawia ją w odpowiednim miejscu na bramie rozwieranej,
-    z uwzględnieniem obrotu względem tylnej krawędzi bramy. Wszystkie kratki są łączone w jeden obiekt.
+    Tworzy kopię kratki wentylacyjnej i ustawia ją z uwzględnieniem obrotu w zależności od liczby skrzydeł bramy.
 
-    Argumenty:
-    vent -- obiekt kratki wentylacyjnej (bpy.types.Object)
-    option -- str, opcja "Lewa", "Prawa" lub "Obustronna"
-    ilosc_skrzydel -- str, liczba skrzydeł: "Jednoskrzydłowe lewe", "Jednoskrzydłowe prawe", "Dwuskrzydłowe"
+    Args:
+        vent (bpy.types.Object): Obiekt kratki wentylacyjnej.
+        option (str): Opcja ustawienia kratki ("Lewa", "Prawa", "Obustronna").
+        ilosc_skrzydel (str): Liczba skrzydeł bramy ("Jednoskrzydłowe lewe", "Jednoskrzydłowe prawe", "Dwuskrzydłowe").
 
-    Zwraca:
-    bpy.types.Object -- Połączony obiekt kratki wentylacyjnej
+    Returns:
+        bpy.types.Object: Połączony obiekt kratki wentylacyjnej, jeśli utworzono kopie. W przeciwnym razie None.
     """
     try:
         if not vent:
@@ -941,11 +954,14 @@ def add_vent_rotation(vent, option, ilosc_skrzydel):
 
 def export_multiple_objects_to_obj_custom(objects, output_path):
     """
-    Eksportuje wiele obiektów do jednego pliku .obj bez użycia operatora Blendera, z obrotem o -90 stopni w osi X.
+    Eksportuje wiele obiektów do pliku .obj z rotacją o -90 stopni w osi X.
 
     Args:
-        objects (list of bpy.types.Object): Lista obiektów do eksportu.
+        objects (List[bpy.types.Object]): Lista obiektów do eksportu.
         output_path (str): Ścieżka do pliku wyjściowego.
+
+    Returns:
+        None
     """
     try:
         # Utwórz macierz obrotu o -90 stopni wokół osi X
@@ -1001,14 +1017,14 @@ def export_multiple_objects_to_obj_custom(objects, output_path):
 
 def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_addons.obj"):
     """
-    Eksportuje wybrane obiekty (drzwi, kratka wentylacyjna) do jednego pliku .obj.
+    Eksportuje wybrane dodatki (np. drzwi, kratki wentylacyjne, klamki, okna) do pliku .obj.
 
     Args:
-        dodatki (dict): Wybrane opcje z pliku JSON.
-        szerokosc (float): Szerokość bramy.
-        door (bpy.types.Object): Obiekt drzwi.
-        vent (bpy.types.Object): Obiekt kratki wentylacyjnej.
-        output_path (str): Ścieżka do pliku wyjściowego.
+        dodatki (dict): Słownik zawierający dane o wybranych dodatkach i ich ustawieniach.
+        output_path (str): Ścieżka do pliku wyjściowego .obj, domyślnie "../generator/dodatki/combined_addons.obj".
+
+    Returns:
+        None
     """
     objects_to_export = []
 
@@ -1097,6 +1113,15 @@ def export_selected_objects(dodatki, output_path="../generator/dodatki/combined_
         print("Brak obiektów do eksportu.")
 
 def read_json(json_path):
+    """
+    Odczytuje dane z pliku JSON i zwraca je w formacie słownika.
+
+    Args:
+        json_path (str): Ścieżka do pliku JSON.
+
+    Returns:
+        dict: Dane odczytane z pliku JSON.
+    """
     result = {}
 
     with open(json_path, 'r', encoding='utf-8') as file:

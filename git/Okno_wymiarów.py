@@ -10,7 +10,17 @@ import os
 
 
 class OknoWymiarow(QMainWindow):
+    """
+    Klasa reprezentująca okno aplikacji do podawania wymiarów bramy garażowej.
+    """
+
     def __init__(self):
+        """
+        Inicjalizuje okno wymiarów aplikacji.
+
+        Tworzy interfejs użytkownika, ładuje wymiary z pliku JSON (jeśli istnieje)
+        oraz przygotowuje pola do wprowadzania danych.
+        """
         super().__init__()
         self.setObjectName("OknoWymiarow")  # Dodanie identyfikatora dla stylów
         self.setWindowTitle("Garage Door Designer")
@@ -26,7 +36,9 @@ class OknoWymiarow(QMainWindow):
 
 
     def _setup_ui(self):
-        """Configures the main layout and divides it into left and right panels."""
+        """
+        Konfiguruje główny układ okna, dzieląc je na panele lewy i prawy.
+        """
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
 
@@ -44,7 +56,12 @@ class OknoWymiarow(QMainWindow):
         main_layout.setStretch(1, 2)  # Right panel
 
     def _create_left_panel(self):
-        """Creates the left panel with input fields and navigation buttons."""
+        """
+        Tworzy lewy panel z polami wprowadzania wymiarów oraz przyciskami nawigacyjnymi.
+
+        Returns:
+            QWidget: Panel z polami tekstowymi i przyciskami.
+        """
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
@@ -95,7 +112,12 @@ class OknoWymiarow(QMainWindow):
         return left_widget
 
     def _create_int_input_field(self):
-        """Helper to create an integer input field with a validator."""
+        """
+        Tworzy pole wprowadzania liczb całkowitych z ograniczeniem wartości.
+
+        Returns:
+            QLineEdit: Pole wprowadzania danych z walidatorem liczbowym.
+        """
         input_field = QLineEdit()
         validator = QIntValidator(1000, 9999)  # Ograniczenie do czterech cyfr
         input_field.setValidator(validator)
@@ -106,19 +128,25 @@ class OknoWymiarow(QMainWindow):
         width = self.width_input.text()
         height = self.height_input.text()
 
-        width_valid = width.isdigit() and int(width) >= 2200
-        height_valid = height.isdigit() and int(height) >= 2000
+        # Sprawdzamy, czy liczby są czterocyfrowe i czy są w odpowiednim zakresie
+        width_valid = len(width) == 4 and width.isdigit() and int(width) >= 2200
+        height_valid = len(height) == 4 and height.isdigit() and int(height) >= 2000
 
         # Obsługa komunikatów błędów
-        self.width_error_label.setVisible(not width_valid)
-        self.height_error_label.setVisible(not height_valid)
+        self.width_error_label.setVisible(len(width) == 4 and not width_valid)
+        self.height_error_label.setVisible(len(height) == 4 and not height_valid)
 
         # Aktywacja przycisku, jeśli oba pola są poprawne
         self.accept_button.setEnabled(width_valid and height_valid)
 
     @staticmethod
     def _create_right_panel():
-        """Creates the right panel with measurement instructions."""
+        """
+        Tworzy prawy panel zawierający instrukcje dotyczące pomiaru wymiarów.
+
+        Returns:
+            QWidget: Panel z opisem kroków pomiaru.
+        """
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
@@ -150,7 +178,12 @@ class OknoWymiarow(QMainWindow):
         return input_field
 
     def _add_navigation_buttons(self, layout):
-        """Adds navigation buttons to the layout at the bottom of the panel."""
+        """
+        Dodaje przyciski nawigacyjne („Cofnij” i „Akceptuj”) do podanego układu.
+
+        Args:
+            layout (QVBoxLayout): Układ, do którego zostaną dodane przyciski.
+        """
         buttons_layout = QHBoxLayout()
         self.back_button = StyledButton("Cofnij")
         self.accept_button = StyledButton("Akceptuj")
@@ -169,11 +202,18 @@ class OknoWymiarow(QMainWindow):
 
     @staticmethod
     def _add_spacer(layout):
-        """Adds a vertical spacer to center content vertically."""
+        """
+        Dodaje odstęp w układzie, aby wyśrodkować elementy w pionie.
+
+        Args:
+            layout (QVBoxLayout): Układ, do którego zostanie dodany odstęp.
+        """
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def save_dimensions(self):
-        """Reads the dimensions from input fields and saves them to self.dimensions and the JSON file."""
+        """
+        Zapisuje wymiary bramy do zmiennej `dimensions` oraz do pliku JSON.
+        """
         width = self.width_input.text()
         height = self.height_input.text()
 
@@ -184,24 +224,10 @@ class OknoWymiarow(QMainWindow):
             # Zapisz wymiary do pliku JSON
             self.save_dimensions_to_file()
 
-    def validate_inputs(self):
-        """Enable or disable the accept button based on whether the inputs are filled and valid."""
-        width = self.width_input.text()
-        height = self.height_input.text()
-
-        # Sprawdzamy, czy liczby są czterocyfrowe i czy są w odpowiednim zakresie
-        width_valid = len(width) == 4 and width.isdigit() and int(width) >= 2200
-        height_valid = len(height) == 4 and height.isdigit() and int(height) >= 2000
-
-        # Obsługa komunikatów błędów
-        self.width_error_label.setVisible(len(width) == 4 and not width_valid)
-        self.height_error_label.setVisible(len(height) == 4 and not height_valid)
-
-        # Aktywacja przycisku, jeśli oba pola są poprawne
-        self.accept_button.setEnabled(width_valid and height_valid)
-
     def save_dimensions_to_file(self):
-        """Saves the gate dimensions to a JSON file."""
+        """
+        Zapisuje wymiary bramy do pliku JSON w ścieżce ../resources/selected_options.json.
+        """
         file_path = "../resources/selected_options.json"
         try:
             # Ensure the file exists; if not, create an empty JSON structure
@@ -227,7 +253,9 @@ class OknoWymiarow(QMainWindow):
             print(f"Wystąpił błąd podczas zapisywania wymiarów do pliku: {e}")
 
     def load_dimensions_from_file(self):
-        """Loads dimensions from the JSON file and updates the input fields."""
+        """
+        Wczytuje wymiary z pliku JSON (jeśli istnieje) i aktualizuje pola tekstowe.
+        """
         file_path = "../resources/selected_options.json"
         if os.path.exists(file_path):
             try:
@@ -251,10 +279,10 @@ class OknoWymiarow(QMainWindow):
     @staticmethod
     def clear_json(file_path):
         """
-        Nadpisuje plik JSON pustą strukturą (pusty obiekt {}).
+        Czyści plik JSON, zapisując pustą strukturę.
 
         Args:
-            file_path (str): Ścieżka do pliku JSON, który ma zostać wyczyszczony.
+            file_path (str): Ścieżka do pliku JSON.
         """
         file_path = "../resources/selected_options.json"
         try:

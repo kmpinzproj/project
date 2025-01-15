@@ -44,7 +44,22 @@ def compute_normals(vertices, faces):
 
 
 class OpenGLWidget(QOpenGLWidget):
+    """
+    Klasa odpowiedzialna za renderowanie obiektu 3D w widoku aplikacji.
+
+    Umożliwia wyświetlanie bramy, szyn oraz dodatków z obsługą tekstur,
+    oświetlenia, dynamicznej interakcji z użytkownikiem (obracanie, przesuwanie,
+    zoom) oraz zarządzania plikami OBJ i MTL.
+    """
     def __init__(self, obj_file, rails_obj_file, parent=None):
+        """
+        Inicjalizuje widżet OpenGL.
+
+        Args:
+            obj_file (str): Ścieżka do pliku OBJ reprezentującego model bramy.
+            rails_obj_file (str): Ścieżka do pliku OBJ reprezentującego model szyn.
+            parent (QWidget, optional): Rodzic widżetu OpenGL. Domyślnie None.
+        """
         super().__init__(parent)
         self.obj_file = obj_file
         self.rails_obj_file = rails_obj_file
@@ -73,6 +88,10 @@ class OpenGLWidget(QOpenGLWidget):
         self.addon_colors = addon_colors  # Słownik z kolorami dla dodatków (nazwa dodatku -> (R, G, B))
 
     def initializeGL(self):
+        """
+        Inicjalizuje ustawienia OpenGL, takie jak oświetlenie, materiały i głębia,
+        oraz ładuje modele bramy, szyn i dodatków.
+        """
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
         glEnable(GL_NORMALIZE)
@@ -103,6 +122,16 @@ class OpenGLWidget(QOpenGLWidget):
 
 
     def load_texture(self, texture_file, rotation_angle=90):
+        """
+        Ładuje teksturę z pliku i aplikuje obrót.
+
+        Args:
+            texture_file (str): Ścieżka do pliku tekstury.
+            rotation_angle (int, optional): Kąt obrotu tekstury w stopniach. Domyślnie 90.
+
+        Returns:
+            int: ID tekstury OpenGL.
+        """
         if not os.path.exists(texture_file):
             print(f"UWAGA: Plik tekstury {texture_file} nie istnieje.")
             return None
@@ -128,6 +157,12 @@ class OpenGLWidget(QOpenGLWidget):
         return texture_id
 
     def load_model(self, obj_file):
+        """
+        Ładuje model bramy z pliku OBJ i oblicza normalne oraz tekstury.
+
+        Args:
+            obj_file (str): Ścieżka do pliku OBJ reprezentującego model bramy.
+        """
         self.scene = pywavefront.Wavefront(obj_file, collect_faces=True, parse=True)
         self.vertices = np.array(self.scene.vertices)
         self.faces = np.concatenate([mesh.faces for name, mesh in self.scene.meshes.items()])
@@ -155,6 +190,15 @@ class OpenGLWidget(QOpenGLWidget):
 
     @staticmethod
     def parse_mtl_file(mtl_path):
+        """
+        Parsuje plik MTL w celu przypisania tekstur do materiałów.
+
+        Args:
+            mtl_path (str): Ścieżka do pliku MTL.
+
+        Returns:
+            dict: Słownik z mapowaniem nazw materiałów na ścieżki tekstur.
+        """
         texture_map = {}
         try:
             with open(mtl_path, 'r', encoding='utf-8') as file:
@@ -171,6 +215,9 @@ class OpenGLWidget(QOpenGLWidget):
             return {}
 
     def draw_model(self):
+        """
+        Renderuje model bramy, w tym tekstury i oświetlenie.
+        """
         glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
         scale_uv = 8.0  # Skalowanie UV (liczba powtórzeń tekstury na osi X i Y)
         glDisable(GL_COLOR_MATERIAL)  # Wyłącz koloryzację materiałów dla bramy
@@ -204,6 +251,15 @@ class OpenGLWidget(QOpenGLWidget):
         glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
     def compute_adjusted_center(self, vertices):
+        """
+        Oblicza środek modelu, uwzględniając tylko współrzędne Y.
+
+        Args:
+            vertices (np.ndarray): Współrzędne wierzchołków modelu.
+
+        Returns:
+            np.ndarray: Środek modelu z uwzględnieniem współrzędnych Y.
+        """
         min_y = np.min(vertices[:, 1])
         max_y = np.max(vertices[:, 1])
         center_y = (min_y + max_y) / 2
@@ -212,13 +268,32 @@ class OpenGLWidget(QOpenGLWidget):
         return adjusted_center
 
     def resizeGL(self, width, height):
+        """
+        Oblicza środek modelu, uwzględniając tylko współrzędne Y.
+
+        Args:
+            vertices (np.ndarray): Współrzędne wierzchołków modelu.
+
+        Returns:
+            np.ndarray: Środek modelu z uwzględnieniem współrzędnych Y.
+        """
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(45, width / height, 0.1, 100.0)
         glMatrixMode(GL_MODELVIEW)
+
     @staticmethod
     def load_obj_simple(filepath):
+        """
+        Ładuje wierzchołki i twarze z pliku OBJ.
+
+        Args:
+            filepath (str): Ścieżka do pliku OBJ.
+
+        Returns:
+            tuple: Wierzchołki (np.ndarray) i twarze (np.ndarray) modelu.
+        """
         vertices = []
         faces = []
         try:
@@ -235,7 +310,12 @@ class OpenGLWidget(QOpenGLWidget):
             return None, None
 
     def load_rails(self, obj_file):
-        """Ładowanie szyn z pliku .obj za pomocą własnego parsera."""
+        """
+        Ładuje model szyn z pliku OBJ.
+
+        Args:
+            obj_file (str): Ścieżka do pliku OBJ reprezentującego szyny.
+        """
         vertices, faces = self.load_obj_simple(obj_file)
         self.vertices = np.array(self.scene.vertices)
 
@@ -246,6 +326,9 @@ class OpenGLWidget(QOpenGLWidget):
             print("Error loading rails data.")
 
     def draw_rails(self):
+        """
+        Renderuje model szyn w widoku OpenGL.
+        """
         glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
         if not hasattr(self, 'rails_vertices') or not hasattr(self, 'rails_faces'):
             print("No rails data to render.")
@@ -280,12 +363,19 @@ class OpenGLWidget(QOpenGLWidget):
         glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
     def clear_addons(self):
-        """Czyści wszystkie dodatki i odświeża widok."""
+        """
+        Czyści wszystkie dodatki załadowane do widoku i odświeża scenę.
+        """
         self.addons.clear()  # Usunięcie wszystkich danych o dodatkach
         self.update()  # Odśwież widok
 
     def load_addons(self, obj_file):
-        """Ładowanie dodatków z pliku .obj."""
+        """
+        Ładuje dodatki z pliku OBJ.
+
+        Args:
+            obj_file (str): Ścieżka do pliku OBJ z dodatkami.
+        """
         self.clear_addons()  # Wyczyść poprzednie dodatki
 
         if not os.path.exists(obj_file):
@@ -340,6 +430,9 @@ class OpenGLWidget(QOpenGLWidget):
         self.update()  # Odśwież widok po wprowadzeniu zmian
 
     def draw_addons(self):
+        """
+        Renderuje wszystkie załadowane dodatki na scenie.
+        """
         for addon in self.addons:
             glPushAttrib(GL_ALL_ATTRIB_BITS)  # Zapisz aktualny stan OpenGL
             vertices = np.array(addon['vertices'], dtype=np.float32)
@@ -372,6 +465,9 @@ class OpenGLWidget(QOpenGLWidget):
             glPopAttrib()  # Przywróć poprzedni stan OpenGL
 
     def paintGL(self):
+        """
+        Renderuje scenę OpenGL, w tym model bramy, szyny oraz dodatki.
+        """
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         glTranslatef(self.pan_x, self.pan_y, self.zoom)
@@ -387,6 +483,12 @@ class OpenGLWidget(QOpenGLWidget):
         self.draw_addons() #
 
     def read_color(self, image):
+        """
+        Pobiera kolor z obrazu i modyfikuje kolory dodatków.
+
+        Args:
+            image (PIL.Image): Obraz do analizy kolorów.
+        """
         addons = ["drzwi_w_bramie", "ramka_okna_1","ramka_okna_2", "ramka_okna_3", "szyny"]
         x, y = 50, 50  # Przykładowe współrzędne
 
@@ -407,9 +509,21 @@ class OpenGLWidget(QOpenGLWidget):
             self.addon_colors[addon] = darkened_color
 
     def mousePressEvent(self, event):
+        """
+        Obsługuje kliknięcia myszą, ustawiając punkt początkowy dla przesuwania i obracania.
+
+        Args:
+            event (QMouseEvent): Zdarzenie kliknięcia myszą.
+        """
         self.last_mouse_position = event.position()
 
     def mouseMoveEvent(self, event):
+        """
+        Obsługuje ruch myszą, umożliwiając przesuwanie i obracanie widoku.
+
+        Args:
+            event (QMouseEvent): Zdarzenie ruchu myszą.
+        """
         if self.last_mouse_position is not None:
             dx = event.position().x() - self.last_mouse_position.x()
             dy = event.position().y() - self.last_mouse_position.y()
@@ -427,16 +541,31 @@ class OpenGLWidget(QOpenGLWidget):
         self.last_mouse_position = event.position()
 
     def mouseReleaseEvent(self, event):
+        """
+        Resetuje pozycję myszy po zakończeniu interakcji.
+
+        Args:
+            event (QMouseEvent): Zdarzenie zwolnienia przycisku myszy.
+        """
         self.last_mouse_position = None
 
     def wheelEvent(self, event):
+        """
+        Obsługuje scroll myszki, umożliwiając przybliżanie i oddalanie widoku.
+
+        Args:
+            event (QWheelEvent): Zdarzenie przewijania.
+        """
         delta = event.angleDelta().y() / 120
         self.zoom += delta * 0.2
         self.update()
 
     def mouseDoubleClickEvent(self, event):
         """
-        Resetowanie widoku kamery po podwójnym kliknięciu.
+        Resetuje widok kamery po podwójnym kliknięciu.
+
+        Args:
+            event (QMouseEvent): Zdarzenie podwójnego kliknięcia.
         """
         previous_pan_y = self.pan_y  # Zapisujemy bieżącą pozycję Y, aby jej nie zmieniać
         self.set_camera_based_on_model_size()  # Ustaw ponownie widok kamery
@@ -447,7 +576,7 @@ class OpenGLWidget(QOpenGLWidget):
 
     def set_camera_based_on_model_size(self):
         """
-        Oblicza wymiary obiektu i dostosowuje zoom oraz pozycję Y, aby obiekt mieścił się w widoku.
+        Dostosowuje zoom i pozycję kamery na podstawie rozmiarów modelu.
         """
         min_coords = np.min(self.vertices, axis=0)  # Najmniejsze współrzędne (x, y, z)
         max_coords = np.max(self.vertices, axis=0)  # Największe współrzędne (x, y, z)
