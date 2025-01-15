@@ -1,110 +1,85 @@
 import json
-import os
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from PySide6.QtWidgets import QFileDialog, QApplication
-from PySide6.QtCore import Qt
+import os
 
-# Register a font that supports Polish characters
+# Rejestracja czcionki
 pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
 
-def create_pdf():
-    # Load JSON data from file
-    json_path = "../resources/selected_options.json"
+def load_json_data(file_path):
+    """Wczytaj dane z pliku JSON."""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except Exception as e:
+        print(f"Error loading JSON data: {e}")
+        return {}
 
-    if not os.path.exists(json_path):
-        print(f"Error: JSON file '{json_path}' not found.")
-        return
+class PDFGenerator:
+    def __init__(self, output_path="output.pdf"):
+        self.output_path = output_path
 
-    with open(json_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
+    def create_pdf(self):
+        """Generuje PDF na podstawie wczytanych danych."""
+        product_data = load_json_data("../resources/selected_options.json")
 
-    # Extract dimensions from the data if available
-    dimensions = None
-    if 'Wymiary' in data and isinstance(data['Wymiary'], dict):
-        width = data['Wymiary'].get('Szerokość')
-        height = data['Wymiary'].get('Wysokość')
-        if width and height:
-            dimensions = f"{width} x {height}"
+        # Inicjalizacja dokumentu PDF
+        pdf = SimpleDocTemplate(
+            self.output_path,
+            pagesize=A4,
+            leftMargin=20,
+            rightMargin=20,
+            topMargin=20,
+            bottomMargin=20
+        )
+        elements = []
 
-    # Initialize QApplication
-    app = QApplication.instance()
-    if not app:
-        app = QApplication([])
-
-    # Prompt the user to choose the save location for the PDF
-    output_path, _ = QFileDialog.getSaveFileName(
-        None,
-        "Save PDF File",
-        os.path.expanduser("~/"),
-        "PDF files (*.pdf)"
-    )
-
-    if not output_path:
-        print("No file selected for saving the PDF.")
-        return
-
-    # Remove the existing file if it exists
-    # if os.path.exists(output_path):
-    #     try:
-    #         os.remove(output_path)
-    #     except PermissionError as e:
-    #         print(f"Error: Unable to delete the existing PDF file. {e}")
-    #         return
-
-    pdf = SimpleDocTemplate(output_path, pagesize=A4, leftMargin=20, rightMargin=20, topMargin=20, bottomMargin=20)
-
-    # Create a list to hold PDF elements
-    elements = []
-
-    page_width, page_height = A4
-    max_height = page_height - 20  # Subtract margins
-
-    # Add images one below the other
-    image_paths = ["../generator/image_with_arrows.png", "../generator/sketch_iso_no_diagonals.png"]
-
-    for image_path in image_paths:
-        if os.path.exists(image_path):
-            image = Image(image_path, width=page_width * 0.9, height=page_height * 0.3)  # Resize image
-            elements.append(image)
-        else:
-            print(f"Warning: Image '{image_path}' not found.")
-
-    # Create the vertical table from JSON data
-    if isinstance(data, dict) and data:
-        formatted_table_data = []
+        # Style
         styles = getSampleStyleSheet()
+        title_style = styles['Title']
         normal_style = styles['Normal']
+        title_style.fontName = 'DejaVuSans'
         normal_style.fontName = 'DejaVuSans'
 
-        for key, value in data.items():
-            if key == 'Wymiary' and dimensions:
-                formatted_table_data.append([Paragraph("Wymiary", normal_style), Paragraph(dimensions, normal_style)])
-            else:
-                if isinstance(value, list):
-                    value = ", ".join(map(str, value))  # Convert list to comma-separated string
-                formatted_table_data.append([Paragraph(str(key), normal_style), Paragraph(str(value), normal_style)])
+        # Nagłówek
+        elements.append(Paragraph("DOKUMENT PRODUKTU", title_style))
+        elements.append(Spacer(1, 10))
 
-        # Create vertical table
-        table = Table(formatted_table_data)
+        # Dane w tabeli
+        table_data = []
+        if product_data:
+            for key, value in product_data.items():
+                if isinstance(value, list):
+                    value = ", ".join(map(str, value))
+                table_data.append([Paragraph(str(key), normal_style), Paragraph(str(value), normal_style)])
+        else:
+            table_data.append(["Brak danych", ""])
+
+        table = Table(table_data)
         table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSans'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 0), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
         elements.append(table)
-    else:
-        print("Warning: No valid data found in JSON.")
 
-    # Build the PDF
-    pdf.build(elements)
-    print(f"PDF successfully created at '{os.path.abspath(output_path)}'")
+        # Dodanie obrazów
+        image_paths = [
+            "../generator/image_with_arrows.png",
+            "../generator/sketch_iso_no_diagonals.png"
+        ]
+        for image_path in image_paths:
+            if os.path.exists(image_path):
+                elements.append(Image(image_path, width=400, height=200))
+            else:
+                print(f"Image not found: {image_path}")
 
-if __name__ == "__main__":
-    create_pdf()
+        pdf.build(elements)
+        print(f"PDF saved at: {self.output_path}")
