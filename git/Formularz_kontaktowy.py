@@ -11,7 +11,7 @@ from InvoiceGenerator import InvoiceGenerator
 import os
 import json
 
-from git.PDF_Generator import create_pdf
+from PDF_Generator import PDFGenerator
 
 
 class ContactForm(QMainWindow):
@@ -235,5 +235,35 @@ class ContactForm(QMainWindow):
 
         detect_and_draw_arrows(output_orthogonal_file, final_output_path, width, height)
 
-        create_pdf()
+        try:
+            save_window = QApplication.instance()
+            if not save_window:
+                save_window = QApplication([])
+
+            # Prompt the user to choose the save location for the PDF
+            output_path, _ = QFileDialog.getSaveFileName(
+                None,
+                "Save PDF File",
+                os.path.expanduser("~/"),
+                "PDF files (*.pdf)"
+            )
+
+            if not output_path:
+                print("No file selected for saving the PDF.")
+                return
+
+            # Remove the existing file if it exists
+            if os.path.exists(output_path):
+                try:
+                    os.remove(output_path)
+                except PermissionError as e:
+                    print(f"Error: Unable to delete the existing PDF file. {e}")
+                    return
+
+            pdf_generator = PDFGenerator(output_path=output_path)
+            pdf_generator.create_pdf()
+            print("Faktura PDF została wygenerowana pomyślnie.")
+        except Exception as e:
+            print(f"Wystąpił błąd podczas generowania faktury PDF: {e}")
+
 
