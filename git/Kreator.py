@@ -163,7 +163,7 @@ class Kreator(QMainWindow):
         self.render_button = StyledButton("Renderuj")
         self.calculate_price_button = StyledButton("Kalkuluj cenę")
         self.save_button = StyledButton("Zapisz")
-        self.contact_button = StyledButton("Kontakt")
+        self.contact_button = StyledButton("Przejdź dalej")
         self.back_button = StyledButton("Cofnij")
 
         self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
