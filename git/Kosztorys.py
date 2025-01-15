@@ -12,14 +12,14 @@ def calculate_price(data, db_manager):
     gate_type = data.get("Typ bramy")
 
     try:
-        width = int(data.get("Wymiary", {}).get("Szerokość", 2500))
+        width = int(data.get("Wymiary", {}).get("Szerokość", 2200))
     except (ValueError, TypeError):
-        width = 2500
+        width = 2200
 
     try:
-        height = int(data.get("Wymiary", {}).get("Wysokość", 2125))
+        height = int(data.get("Wymiary", {}).get("Wysokość", 2000))
     except (ValueError, TypeError):
-        height = 2125
+        height = 2000
 
     price = db_manager.get_price(gate_type, 'Bazowa', 'Cena')
 
@@ -40,8 +40,8 @@ def calculate_price(data, db_manager):
             price += surcharge
             price_details.append(f"{param}: {option} (+{surcharge} zł)")
 
-    extra_width = max(0, width - 2500)
-    extra_height = max(0, height - 2125)
+    extra_width = max(0, width - 2200)
+    extra_height = max(0, height - 2000)
 
     extra_width_rate = 1  # Cena za każdy dodatkowy mm szerokości
     extra_height_rate = 1  # Cena za każdy dodatkowy mm wysokości
