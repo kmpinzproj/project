@@ -97,8 +97,8 @@ class PDFGenerator:
 
         # Dodanie obrazów
         image_paths = [
-            "generator/image_with_arrows.png",
-            "generator/sketch_iso_no_diagonals.png"
+            "generator/szkic/image_with_arrows.png",
+            "generator/szkic/sketch_iso_no_diagonals.png"
         ]
         for image_path in image_paths:
             if os.path.exists(image_path):

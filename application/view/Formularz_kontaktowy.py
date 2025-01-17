@@ -268,9 +268,9 @@ class ContactForm(QMainWindow):
          """
         selected_options = self.load_selected_options("../resources/selected_options.json")
         input_obj_file = "generator/model.obj"
-        output_isometric_file = "generator/sketch_iso_no_diagonals.png"
-        output_orthogonal_file = "generator/sketch_orthogonal.png"
-        final_output_path = 'generator/image_with_arrows.png'
+        output_isometric_file = "generator/szkic/sketch_iso_no_diagonals.png"
+        output_orthogonal_file = "generator/szkic/sketch_orthogonal.png"
+        final_output_path = 'generator/szkic/image_with_arrows.png'
         dimensions = selected_options["Wymiary"]
         width = dimensions["Szerokość"]
         height = dimensions["Wysokość"]
