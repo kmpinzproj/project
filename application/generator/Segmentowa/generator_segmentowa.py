@@ -205,7 +205,7 @@ def add_and_align_rails(gate):
 
 # Eksport z teksturą
 def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
-                                      output_obj_path="model.obj", output_mtl_path="model.mtl"):
+                                      output_obj_path="model.obj", output_mtl_path1="model.mtl"):
     """
     Eksportuje obiekt do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
 
@@ -221,7 +221,7 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
         return
 
     output_obj_path = "generator/" + output_obj_path
-    output_mtl_path = "generator/" + output_mtl_path
+    output_mtl_path = "generator/" + output_mtl_path1
 
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
     transformed_matrix = rotation_matrix @ obj.matrix_world
@@ -238,7 +238,7 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec",
         mtl_file.write(f"map_Kd {texture_path}\n")
 
     with open(output_obj_path, 'w') as obj_file:
-        obj_file.write(f"mtllib {output_mtl_path}\n")
+        obj_file.write(f"mtllib {output_mtl_path1}\n")
         obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
         obj_file.write(f"# Object: {object_name}\n\n")
 

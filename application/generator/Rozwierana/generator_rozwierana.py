@@ -430,7 +430,7 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
             obj_file.write(f"f {' '.join(face_vertices)}\n")
 
 def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right_door_name="Right_Door",
-                                 output_obj_path="model.obj", output_mtl_path="model.mtl"):
+                                 output_obj_path="model.obj", output_mtl_path1="model.mtl"):
     """
     Eksportuje drzwi (lewe i prawe) do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
 
@@ -482,7 +482,7 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
 
     # Przygotowanie ścieżek do zapisu
     output_obj_path = "generator/" + output_obj_path
-    output_mtl_path = "generator/" + output_mtl_path
+    output_mtl_path = "generator/" + output_mtl_path1
 
     # Obrót obiektu o -90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -505,7 +505,7 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
 
     # Eksportuj obiekt do pliku .obj
     with open(output_obj_path, 'w') as obj_file:
-        obj_file.write(f"mtllib {os.path.basename(output_mtl_path)}\n")
+        obj_file.write(f"mtllib {os.path.basename(output_mtl_path1)}\n")
         obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
         obj_file.write(f"# Object: Combined_Doors\n\n")
 

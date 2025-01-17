@@ -93,8 +93,9 @@ class BlenderScriptRunner:
                 ], check=True)
             else:
                 # Jeśli opcje są puste, nadpisujemy plik combined_addons.obj pustym plikiem
-                with open("dodatki/combined_addons.obj", 'w') as f:
+                with open("generator/dodatki/combined_addons.obj", 'w') as f:
                     f.write("# Pusty plik OBJ, ponieważ nie wybrano żadnych dodatków\n")
+                print("TEST OBJ")
 
 
         except subprocess.CalledProcessError as e:

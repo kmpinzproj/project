@@ -230,7 +230,7 @@ def add_and_align_rails(gate):
     except Exception as e:
         print(f"Wystąpił błąd: {e}")
 
-def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", output_obj_path="model.obj", output_mtl_path="model.mtl"):
+def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", output_obj_path="model.obj", output_mtl_path1="model.mtl"):
     """
     Eksportuje obiekt do pliku .obj wraz z plikiem .mtl, zawierającym informacje o teksturze.
 
@@ -248,7 +248,7 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", 
 
     # Ścieżki wyjściowe
     output_obj_path = "generator/" + output_obj_path
-    output_mtl_path = "generator/" + output_mtl_path
+    output_mtl_path = "generator/" + output_mtl_path1
 
     # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -269,7 +269,7 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", 
     # Tworzenie pliku OBJ
     with open(output_obj_path, 'w') as obj_file:
         # Dodanie odniesienia do pliku MTL
-        obj_file.write(f"mtllib {output_mtl_path}\n")
+        obj_file.write(f"mtllib {output_mtl_path1}\n")
         obj_file.write(f"# Exported from Blender with rotation -90 degrees in X-axis\n")
         obj_file.write(f"# Object: {object_name}\n\n")
 

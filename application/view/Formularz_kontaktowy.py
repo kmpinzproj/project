@@ -212,7 +212,7 @@ class ContactForm(QMainWindow):
             "Uwagi:": self.comments_input.toPlainText().strip()
         }
 
-        output_path = "../../resources/invoice_data.json"
+        output_path = "../resources/invoice_data.json"
 
         try:
             with open(output_path, 'w', encoding='utf-8') as file:

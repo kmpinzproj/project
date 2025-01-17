@@ -95,7 +95,7 @@ class PriceCalculator(QWidget):
 
         db_manager = DatabaseManager()
 
-        data = load_json_data('../../resources/selected_options.json')
+        data = load_json_data('../resources/selected_options.json')
         total_price, price_details = calculate_price(data, db_manager)
 
         summary = "Parametry:\n"

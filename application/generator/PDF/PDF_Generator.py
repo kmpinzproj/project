@@ -51,7 +51,7 @@ class PDFGenerator:
         Raises:
             Exception: Jeśli wystąpi błąd podczas generowania PDF.
         """
-        product_data = load_json_data("../../../resources/selected_options.json")
+        product_data = load_json_data("../resources/selected_options.json")
 
         # Inicjalizacja dokumentu PDF
         pdf = SimpleDocTemplate(
@@ -97,8 +97,8 @@ class PDFGenerator:
 
         # Dodanie obrazów
         image_paths = [
-            "../generator/image_with_arrows.png",
-            "../generator/sketch_iso_no_diagonals.png"
+            "generator/image_with_arrows.png",
+            "generator/sketch_iso_no_diagonals.png"
         ]
         for image_path in image_paths:
             if os.path.exists(image_path):

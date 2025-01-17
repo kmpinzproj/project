@@ -108,8 +108,8 @@ class InvoiceGenerator:
         """
         Generuje fakturę VAT w formacie PDF na podstawie danych o produkcie i nabywcy.
         """
-        product_parameters = load_json_data("../../../resources/selected_options.json")
-        customer_data = load_json_data("../../../resources/invoice_data.json")  # Wczytanie danych nabywcy
+        product_parameters = load_json_data("../resources/selected_options.json")
+        customer_data = load_json_data("../resources/invoice_data.json")  # Wczytanie danych nabywcy
         total_price, price_details = calculate_price(product_parameters, self.db_manager)
 
         pdf = SimpleDocTemplate(self.output_path, pagesize=A4, leftMargin=20, rightMargin=20, topMargin=20,
