@@ -86,10 +86,10 @@ docker-compose.override.yml
 *.pyo
 *.egg
 *.egg-info
-/generator/model.mtl
-/generator/render_camera2.png
-/generator/render_camera1.png
-/generator/sketch_final.png
-/generator/image_with_arrows.png
-/generator/sketch_iso_no_diagonals.png
-/generator/sketch_orthogonal.png
+/application/generator/model.mtl
+/application/generator/render_camera2.png
+/application/generator/render_camera1.png
+/application/generator/sketch_final.png
+/application/generator/image_with_arrows.png
+/application/generator/sketch_iso_no_diagonals.png
+/application/generator/sketch_orthogonal.png
