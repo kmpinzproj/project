@@ -12,6 +12,7 @@ from PySide6.QtGui import QSurfaceFormat
 from pathlib import Path
 import os
 from application.path import get_resource_path
+from application.path import get_persistent_db_path
 
 
 QApplication.setStyle("Fusion")
@@ -27,7 +28,7 @@ class MainApplication(QMainWindow):
         "gate_creator": 3,
         "contact_form": 4,
     }
-    DB_FILE = get_resource_path("resources/project_db.db")
+    DB_FILE = get_persistent_db_path()
 
     def __init__(self):
         """

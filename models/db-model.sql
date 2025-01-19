@@ -137,14 +137,14 @@ INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES ('Brama Rozwiera
 
 -- Parametry i dopłaty
 INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
-('Brama Rozwierana', 'Ilość skrzydeł', 'Dwuskrzydłowe', 300),
-('Brama Rozwierana', 'Ilość skrzydeł', 'Jednoskrzydłowe prawe', 200),
-('Brama Rozwierana', 'Ilość skrzydeł', 'Jednoskrzydłowe lewe', 200),
+('Brama Rozwierana', 'Ilość skrzydeł', 'Dwuskrzydłowe', 100),
+
+('Brama Rozwierana', 'Ocieplenie', 'Brama ocieplana', 300),
 
 ('Brama Rozwierana', 'Układ wypełnienia', 'Poziome', 0),
 ('Brama Rozwierana', 'Układ wypełnienia', 'Pionowe', 0),
 ('Brama Rozwierana', 'Układ wypełnienia', 'Jodełka w górę', 150),
-('Brama Uchylna', 'Układ wypełnienia', 'Jodełka w dół', 150),
+('Brama Rozwierana', 'Układ wypełnienia', 'Jodełka w dół', 150),
 
 ('Brama Rozwierana', 'Przeszklenia', 'Okna poziome', 300),
 ('Brama Rozwierana', 'Przeszklenia', 'Okna pionowe', 400),
@@ -173,7 +173,6 @@ INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
 ('Brama Uchylna', 'Układ wypełnienia', 'Pionowe', 100),
 ('Brama Uchylna', 'Układ wypełnienia', 'Poziome', 100),
 ('Brama Uchylna', 'Układ wypełnienia', 'Jodełka w górę', 150),
-('Brama Uchylna', 'Układ wypełnienia', 'Jodełka w dół', 150),
 
 ('Brama Uchylna', 'Przeszklenia', 'Okna poziome', 300),
 ('Brama Uchylna', 'Przeszklenia', 'Okna pionowe', 400),
@@ -195,9 +194,3 @@ INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
 ('Brama Uchylna', 'Klamka do bramy', 'Klamka 2', 70),
 ('Brama Uchylna', 'Klamka do bramy', 'Klamka 3', 100),
 ('Brama Uchylna', 'Klamka do bramy', 'Klamka 4', 150);
-
--- Kratka wentylacyjna (Brama Uchylna)
-INSERT INTO CENNIK (typ_bramy, parametr, opcja, doplata) VALUES
-('Brama Uchylna', 'Kratka wentylacyjna', 'Lewa', 100),
-('Brama Uchylna', 'Kratka wentylacyjna', 'Prawa', 100),
-('Brama Uchylna', 'Kratka wentylacyjna', 'Obustronna', 200);

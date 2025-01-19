@@ -1,14 +1,16 @@
 import sqlite3
 import json
 from application.path import get_resource_path
+from application.path import get_persistent_db_path
 
 class DatabaseManager:
 
-    DB_PATH = get_resource_path('resources/project_db.db')
+    DB_PATH = get_persistent_db_path()
 
     def connect(self):
         """Nawiązuje połączenie z bazą danych."""
         return sqlite3.connect(self.DB_PATH)
+
 
     def list_projects(self):
         """Wyświetla wszystkie rekordy z tabeli Projekt."""
