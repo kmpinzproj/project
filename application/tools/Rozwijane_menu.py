@@ -2,9 +2,9 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QScrollArea, QGroupBox, QLabel, QHBoxLayout, QGridLayout, QPushButton, QCheckBox
 )
 from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QPixmap, QPalette, QColor
+from PySide6.QtGui import QPixmap
 import os
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 class ScrollableMenu(QWidget):

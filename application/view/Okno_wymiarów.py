@@ -7,7 +7,7 @@ from PySide6.QtGui import QIntValidator
 from application.tools.button import StyledButton
 import json
 import os
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 class OknoWymiarow(QMainWindow):

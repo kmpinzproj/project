@@ -5,9 +5,8 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from PySide6.QtWidgets import QFileDialog, QApplication
 import os
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 

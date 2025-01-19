@@ -7,9 +7,8 @@ import pywavefront
 import numpy as np
 from PIL import Image
 import os
-import cv2
 
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 addon_colors = {
             "wentylacja": (1.0, 0.0, 0.0),  # Czerwony

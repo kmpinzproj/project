@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import sys
 
 # Rejestracja czcionki
@@ -14,30 +13,6 @@ def get_resource_path(relative_path):
         return os.path.join(sys._MEIPASS, relative_path)
     # Jeśli działa w trybie deweloperskim
     return  "../" + relative_path
-
-def load_qss_with_resources(qss_path):
-    """
-    Wczytuje plik QSS i zastępuje relatywne ścieżki absolutnymi ścieżkami do zasobów.
-    :param qss_path: Relatywna ścieżka do pliku QSS.
-    :return: Zmodyfikowany arkusz stylów jako string.
-    """
-    absolute_qss_path = get_resource_path(qss_path)
-
-    try:
-        with open(absolute_qss_path, 'r', encoding='utf-8') as file:
-            qss = file.read()
-
-        # Zastąp ścieżki w stylach, np. url(../resources/image.png)
-        qss = qss.replace('url(', f'url({get_resource_path("")}/')
-        return qss
-
-    except Exception as e:
-        print(f"Error loading QSS file: {e}")
-        return ""
-
-import os
-import sys
-import shutil
 
 def get_persistent_db_path():
     """
@@ -60,7 +35,3 @@ def get_persistent_db_path():
 
     return db_path
 
-# Przykład użycia
-if __name__ == "__main__":
-    db_path = get_persistent_db_path()
-    print(f"Trwała ścieżka do bazy danych: {db_path}")

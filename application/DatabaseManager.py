@@ -1,7 +1,6 @@
 import sqlite3
 import json
-from application.path import get_resource_path
-from application.path import get_persistent_db_path
+from application.tools.path import get_persistent_db_path
 
 class DatabaseManager:
 

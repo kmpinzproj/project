@@ -1,5 +1,4 @@
 import sys
-import os
 import sqlite3
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget, QLabel
@@ -9,10 +8,9 @@ from application.view.Okno_startowe import OknoStartowe
 from application.view.Okno_wymiarów import OknoWymiarow
 from application.view.Wybór_bramy import WyborBramy
 from PySide6.QtGui import QSurfaceFormat
-from pathlib import Path
 import os
-from application.path import get_resource_path
-from application.path import get_persistent_db_path
+from application.tools.path import get_resource_path
+from application.tools.path import get_persistent_db_path
 
 
 QApplication.setStyle("Fusion")

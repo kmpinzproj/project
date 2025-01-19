@@ -10,7 +10,7 @@ from application.DatabaseManager import DatabaseManager
 from application.generator.generator_gateV2 import BlenderScriptRunner
 from application.tools.Widget3D import OpenGLWidget
 from application.tools.Kosztorys import PriceCalculator  # Import klasy z pliku Kosztorys.py
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 class Kreator(QMainWindow):

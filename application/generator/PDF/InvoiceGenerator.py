@@ -6,7 +6,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from application.DatabaseManager import DatabaseManager
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 
@@ -220,6 +220,4 @@ class InvoiceGenerator:
         print(f"Faktura została zapisana jako {self.output_path}")
 
 
-if __name__ == "__main__":
-    invoice_generator = InvoiceGenerator(output_path="faktura.pdf")
-    invoice_generator.generate_invoice()
+

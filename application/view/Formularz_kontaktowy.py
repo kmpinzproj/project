@@ -10,7 +10,7 @@ from application.generator.szkic.szkic_opencv import detect_and_draw_arrows
 from application.generator.PDF.InvoiceGenerator import InvoiceGenerator
 import os
 import json
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 from application.generator.PDF.PDF_Generator import PDFGenerator
 

@@ -1,7 +1,7 @@
 import json
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from application.DatabaseManager import DatabaseManager
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 def load_json_data(file_path):
@@ -111,9 +111,3 @@ class PriceCalculator(QWidget):
         layout.addWidget(label)
         self.setLayout(layout)
 
-
-if __name__ == "__main__":
-    app = QApplication([])
-    calculator = PriceCalculator()
-    calculator.show()
-    app.exec()

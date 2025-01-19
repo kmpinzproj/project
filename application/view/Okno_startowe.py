@@ -1,14 +1,13 @@
-from pathlib import Path
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QMainWindow, QSpacerItem, QSizePolicy, QWidget,
     QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QHeaderView
 )
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtGui import QPixmap
 from application.tools.button import StyledButton
 from application.DatabaseManager import DatabaseManager
 import json
-from application.path import get_resource_path
+from application.tools.path import get_resource_path
 
 
 class OknoStartowe(QMainWindow):
