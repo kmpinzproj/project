@@ -43,7 +43,6 @@ class BlenderScriptRunner:
         self.blend_file_d = os.path.join(self.project_root, dodatki_blend)
         self.script_file_d = os.path.join(self.project_root, dodatki_script)
 
-        print(self.project_root)
 
     def _get_default_blender_path(self):
         """
@@ -80,8 +79,6 @@ class BlenderScriptRunner:
         self.validate_paths()
         opcje = self.read_json(get_resource_path("resources/selected_options.json"))
         path = get_resource_path("")
-        print("Ścieżka do jsona")
-        print(path)
         try:
             # Uruchom pierwszy skrypt Blenderowy
             subprocess.run([
@@ -107,7 +104,6 @@ class BlenderScriptRunner:
                 # Jeśli opcje są puste, nadpisujemy plik combined_addons.obj pustym plikiem
                 with open(get_resource_path("application/generator/dodatki/combined_addons.obj"), 'w') as f:
                     f.write("# Pusty plik OBJ, ponieważ nie wybrano żadnych dodatków\n")
-                print("TEST OBJ")
 
 
         except subprocess.CalledProcessError as e:

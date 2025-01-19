@@ -192,8 +192,7 @@ class MainApplication(QMainWindow):
         Przechodzi do widoku formularza kontaktowego.
         """
         # Sprawdzenie, czy użytkownik podał nazwę projektu
-        project_name_provided = self.gate_creator_view.prompt_project_name()
-
+        project_name_provided = self.gate_creator_view.validate_and_proceed()
         if project_name_provided:  # Jeśli nazwa została poprawnie podana
             self.previous_index = self.stack.currentWidget()
             self.stack.setCurrentIndex(self.VIEW_INDICES["contact_form"])
@@ -245,8 +244,6 @@ def load_stylesheet(app, file_path):
             base_path = base_path.replace("\\", "/")
             qss = qss.replace("url(", base_path)
             app.setStyleSheet(qss)
-            print(base_path)
-            print(qss)
     else:
         print(f"Plik stylów {full_path} nie istnieje!")
 

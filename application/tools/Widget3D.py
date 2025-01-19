@@ -166,14 +166,12 @@ class OpenGLWidget(QOpenGLWidget):
             obj_file (str): Ścieżka do pliku OBJ reprezentującego model bramy.
         """
         self.scene = pywavefront.Wavefront(obj_file, collect_faces=True, parse=True)
-        print(obj_file)
         self.vertices = np.array(self.scene.vertices)
         self.faces = np.concatenate([mesh.faces for name, mesh in self.scene.meshes.items()])
 
         # Parsowanie pliku .mtl
         mtl_path = obj_file.replace('.obj', '.mtl')  # Zakładamy, że plik .mtl ma tę samą nazwę
         material_textures = self.parse_mtl_file(mtl_path)
-        print(mtl_path)
 
         # Przypisywanie tekstur do materiałów
         for material_name, material in self.scene.materials.items():

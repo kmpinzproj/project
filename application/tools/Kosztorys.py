@@ -49,10 +49,8 @@ def calculate_price(data, db_manager):
     for param, option in data.items():
         if param in ["Typ bramy", "Wymiary", "Nazwa projektu", "Kolor standardowy", "Kolor RAL"]:
             continue
-        print(param)
         if isinstance(option, list):
             for single_option in option:
-                print(single_option)
                 if isinstance(single_option, (str, int, float)):
                     surcharge = db_manager.get_price(gate_type, param, str(single_option))
                     if surcharge > 0:

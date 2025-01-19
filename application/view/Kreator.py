@@ -195,7 +195,7 @@ class Kreator(QMainWindow):
         self.contact_button = StyledButton("Przejdź dalej")
         self.back_button = StyledButton("Cofnij")
 
-        self.save_button.clicked.connect(lambda: self.prompt_project_name(True))
+        self.save_button.clicked.connect(lambda: self.prompt_project_name(False))
         self.render_button.clicked.connect(self.render_and_change)
         self.calculate_price_button.clicked.connect(self.open_cost_calculator)
 
@@ -231,8 +231,8 @@ class Kreator(QMainWindow):
             bool: True, jeśli walidacja zakończyła się sukcesem, False w przeciwnym przypadku.
         """
         if self.validate_fields():
-            self.prompt_project_name()
-            return True
+
+            return self.prompt_project_name()
         else:
             return False
 

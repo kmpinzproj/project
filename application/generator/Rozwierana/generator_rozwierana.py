@@ -592,7 +592,6 @@ def read_json(json_path):
 dimensions, ilosc_skrzydel, kolor, uklad_wypelnienia = read_json(resources_path+"/resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
-print(ilosc_skrzydel)
 tilt_gate_rozwierana(width, height, ilosc_skrzydel, uklad_wypelnienia)
 export_doors_to_obj_with_mtl(kolor)
 custom_export_to_obj_without_mtl()
