@@ -3,7 +3,13 @@ import math
 import mathutils
 import bmesh
 import json
-import os
+import sys
+# Pobierz argumenty przekazane po "--"
+argv = sys.argv
+argv = argv[argv.index("--") + 1:]  # Wszystkie argumenty po "--"
+
+# Pierwszy argument to ścieżka do zasobów
+resources_path = argv[0]
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
 object_names = ["brama-segmentowa", "szyny-na-brame.001", "brama-segmentowa-z-szynami", "brama-uchylna-z-szynami", "szyny", "brama-koniec"]
 
@@ -174,7 +180,7 @@ def tilt_gate(width, height, wypelnienie="Poziome"):
                 "location": [gate.location.x, gate.location.y, gate.location.z],
                 "dimensions": [gate.dimensions.x, gate.dimensions.y, gate.dimensions.z]
             }
-            with open("generator/dodatki/gate_data.json", "w") as json_file:
+            with open(resources_path +"application/generator/dodatki/gate_data.json", "w") as json_file:
                 json.dump(gate_data, json_file)
         else:
             print("Nie znaleziono obiektu bramy.")
@@ -247,8 +253,8 @@ def custom_export_to_obj_with_texture(texture_path, object_name="brama-koniec", 
         return
 
     # Ścieżki wyjściowe
-    output_obj_path = "generator/" + output_obj_path
-    output_mtl_path = "generator/" + output_mtl_path1
+    output_obj_path = resources_path + "application/generator/" + output_obj_path
+    output_mtl_path = resources_path + "application/generator/" + output_mtl_path1
 
     # Rotacja o 90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -317,7 +323,7 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
         return
 
-    output_obj_path = "generator/" + output_obj_path
+    output_obj_path = resources_path +"application/generator/" + output_obj_path
 
     # Obrót obiektu o -90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -378,20 +384,20 @@ def read_json(json_path):
             wypelnienie = "START"
         if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
-            base_path = "../jpg/Kolor_Standardowy/"
+            base_path = resources_path + "jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
         elif "Kolor RAL" in existing_data and existing_data["Kolor RAL"] is not None:
             name = existing_data["Kolor RAL"]
-            base_path = "../jpg/Kolor_RAL/"
+            base_path = resources_path + "jpg/Kolor_RAL/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
         else:
-            kolor = f"../jpg/Kolor_RAL/7040.png"
+            kolor = resources_path + "jpg/Kolor_RAL/7040.png"
         return [wymiary, wypelnienie, kolor]
 
 
-dimensions, wypelnienie, kolor = read_json("../resources/selected_options.json")
+dimensions, wypelnienie, kolor = read_json(resources_path+"/resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 
