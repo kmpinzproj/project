@@ -40,6 +40,8 @@ class BlenderScriptRunner:
         self.blend_file_d = os.path.join(self.project_root, dodatki_blend)
         self.script_file_d = os.path.join(self.project_root, dodatki_script)
 
+        print(self.project_root)
+
     def _get_default_blender_path(self):
         """
         Zwraca domyślną ścieżkę do Blendera na podstawie systemu operacyjnego.

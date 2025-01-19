@@ -55,26 +55,30 @@ def calculate_price(data, db_manager):
     price = db_manager.get_price(gate_type, 'Bazowa', 'Cena')
     price_details = []
 
+    price_details.append(f"Cena bazowa: {gate_type} (+{price} zł)")
+
     for param, option in data.items():
-        if param in ["Typ bramy", "Wymiary", "Nazwa projektu"]:
+        if param in ["Typ bramy", "Wymiary", "Nazwa projektu", "Kolor standardowy", "Kolor RAL"]:
             continue
 
         if isinstance(option, list):
             for single_option in option:
                 if isinstance(single_option, (str, int, float)):
                     surcharge = db_manager.get_price(gate_type, param, str(single_option))
-                    price += surcharge
-                    price_details.append(f"{param}: {single_option} (+{surcharge} zł)")
+                    if surcharge > 0:
+                        price += surcharge
+                        price_details.append(f"{param}: {single_option} (+{surcharge} zł)")
         elif isinstance(option, (str, int, float)):
             surcharge = db_manager.get_price(gate_type, param, str(option))
-            price += surcharge
-            price_details.append(f"{param}: {option} (+{surcharge} zł)")
+            if surcharge > 0:
+                price += surcharge
+                price_details.append(f"{param}: {option} (+{surcharge} zł)")
 
-    extra_width = max(0, width - 2500)
-    extra_height = max(0, height - 2125)
+    extra_width = max(0, width - 2200)
+    extra_height = max(0, height - 2000)
 
-    extra_width_rate = 1  # Cena za każdy dodatkowy mm szerokości
-    extra_height_rate = 1  # Cena za każdy dodatkowy mm wysokości
+    extra_width_rate = 0.5  # Cena za każdy dodatkowy mm szerokości
+    extra_height_rate = 0.5  # Cena za każdy dodatkowy mm wysokości
 
     extra_width_cost = extra_width * extra_width_rate
     extra_height_cost = extra_height * extra_height_rate

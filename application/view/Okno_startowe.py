@@ -168,6 +168,9 @@ class OknoStartowe(QMainWindow):
             for row, project in enumerate(projects):
                 project_name = project[1]
                 project_date = project[2]
+                project_type = project[3]
+
+                image_path = f"../jpg/{project_type}.png"
 
                 image_label = QLabel()
                 pixmap = QPixmap(image_path)

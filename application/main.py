@@ -9,6 +9,8 @@ from application.view.Okno_startowe import OknoStartowe
 from application.view.Okno_wymiarów import OknoWymiarow
 from application.view.Wybór_bramy import WyborBramy
 from PySide6.QtGui import QSurfaceFormat
+from pathlib import Path
+
 
 QApplication.setStyle("Fusion")
 
@@ -218,16 +220,22 @@ class MainApplication(QMainWindow):
 
 def load_stylesheet(app, file_path):
     """
-    Ładuje i stosuje arkusz stylów z podanej ścieżki.
+    Ładuje i stosuje arkusz stylów z podanej ścieżki, uwzględniając tryb deweloperski
+    i uruchomienie po kompilacji z PyInstaller.
 
     Args:
-        path (str): Ścieżka do pliku z arkuszem stylów.
+        app (QApplication): Instancja aplikacji PyQt5.
+        file_path (str): Relatywna ścieżka do pliku z arkuszem stylów.
     """
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
+    # Obsługa ścieżki dla PyInstaller (_MEIPASS) i trybu deweloperskiego
+    base_path = getattr(sys, '_MEIPASS', Path(__file__).parent)
+    full_path = Path(base_path) / file_path
+
+    if full_path.exists():
+        with open(full_path, "r", encoding="utf-8") as file:
             app.setStyleSheet(file.read())
     else:
-        print(f"Plik stylów {file_path} nie istnieje!")
+        print(f"Plik stylów {full_path} nie istnieje!")
 
 if __name__ == "__main__":
     format = QSurfaceFormat()
