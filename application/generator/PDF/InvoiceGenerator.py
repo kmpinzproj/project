@@ -6,10 +6,14 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from application.DatabaseManager import DatabaseManager
+from application.path import get_resource_path
+
+
+
 
 # Rejestracja czcionki DejaVuSans z poprawioną ścieżką
-pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
-
+font_path = get_resource_path('resources/DejaVuSans.ttf')
+pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
 
 def load_json_data(file_path):
     """
@@ -112,8 +116,8 @@ class InvoiceGenerator:
         """
         Generuje fakturę VAT w formacie PDF na podstawie danych o produkcie i nabywcy.
         """
-        product_parameters = load_json_data("../resources/selected_options.json")
-        customer_data = load_json_data("../resources/invoice_data.json")  # Wczytanie danych nabywcy
+        product_parameters = load_json_data(get_resource_path("resources/selected_options.json"))
+        customer_data = load_json_data(get_resource_path("resources/invoice_data.json"))  # Wczytanie danych nabywcy
         total_price, price_details = calculate_price(product_parameters, self.db_manager)
 
         pdf = SimpleDocTemplate(self.output_path, pagesize=A4, leftMargin=20, rightMargin=20, topMargin=20,

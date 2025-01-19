@@ -1,9 +1,10 @@
 import sqlite3
 import json
+from application.path import get_resource_path
 
 class DatabaseManager:
 
-    DB_PATH = '../resources/project_db.db'
+    DB_PATH = get_resource_path('resources/project_db.db')
 
     def connect(self):
         """Nawiązuje połączenie z bazą danych."""
@@ -482,7 +483,8 @@ if __name__ == "__main__":
     # Załadowanie JSON jako słownika Python
 
     db_manager = DatabaseManager()
-    with open("../resources/selected_options.json", "r", encoding="utf-8") as file:
+    path = get_resource_path("resources/selected_options.json")
+    with open(path, "r", encoding="utf-8") as file:
         project_json = json.load(file)
     # Dodanie projektu do bazy danych
     db_manager = DatabaseManager()

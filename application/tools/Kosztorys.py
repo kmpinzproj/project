@@ -1,6 +1,8 @@
 import json
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel
 from application.DatabaseManager import DatabaseManager
+from application.path import get_resource_path
+
 
 def load_json_data(file_path):
     """
@@ -99,7 +101,7 @@ class PriceCalculator(QWidget):
 
         db_manager = DatabaseManager()
 
-        data = load_json_data('../resources/selected_options.json')
+        data = load_json_data(get_resource_path('resources/selected_options.json'))
         total_price, price_details = calculate_price(data, db_manager)
 
         summary = "Parametry:\n"

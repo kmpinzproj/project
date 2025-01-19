@@ -7,9 +7,14 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from PySide6.QtWidgets import QFileDialog, QApplication
 import os
+from application.path import get_resource_path
 
-# Rejestracja czcionki
-pdfmetrics.registerFont(TTFont('DejaVuSans', '../resources/DejaVuSans.ttf'))
+
+
+
+# Rejestracja czcionki DejaVuSans z poprawioną ścieżką
+font_path = get_resource_path('resources/DejaVuSans.ttf')
+pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
 
 def load_json_data(file_path):
     """
@@ -51,7 +56,7 @@ class PDFGenerator:
         Raises:
             Exception: Jeśli wystąpi błąd podczas generowania PDF.
         """
-        product_data = load_json_data("../resources/selected_options.json")
+        product_data = load_json_data(get_resource_path("resources/selected_options.json"))
 
         # Inicjalizacja dokumentu PDF
         pdf = SimpleDocTemplate(
@@ -97,8 +102,8 @@ class PDFGenerator:
 
         # Dodanie obrazów
         image_paths = [
-            "generator/szkic/image_with_arrows.png",
-            "generator/szkic/sketch_iso_no_diagonals.png"
+            get_resource_path("application/generator/szkic/image_with_arrows.png"),
+            get_resource_path("application/generator/szkic/sketch_iso_no_diagonals.png")
         ]
         for image_path in image_paths:
             if os.path.exists(image_path):

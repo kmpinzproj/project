@@ -9,7 +9,7 @@ QPushButton:hover {
 
 /* Tło dla całego głównego okna */
 QMainWindow {
-    border-image: url('../jpg/tło.jpg') 0 0 0 0 stretch stretch;
+    border-image: url() 0 0 0 0 stretch stretch;
 }
 
 #oknoStartoweWindow QTableWidget#projectTable {

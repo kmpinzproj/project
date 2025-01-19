@@ -2,6 +2,9 @@ import os
 import subprocess
 import json
 
+from application.path import get_resource_path
+
+
 class BlenderScriptRunner:
     """
     Klasa obsługująca uruchamianie Blendera w tle z plikami .blend i skryptami Python.
@@ -75,14 +78,19 @@ class BlenderScriptRunner:
         """
         # Sprawdzanie ścieżek
         self.validate_paths()
-        opcje = self.read_json("../resources/selected_options.json")
+        opcje = self.read_json(get_resource_path("resources/selected_options.json"))
+        path = get_resource_path("")
+        print("Ścieżka do jsona")
+        print(path)
         try:
             # Uruchom pierwszy skrypt Blenderowy
             subprocess.run([
                 self.blender_path,
                 "--background",  # Tryb bez interfejsu graficznego
                 self.blend_file,  # Plik .blend do otwarcia
-                "--python", self.script_file  # Skrypt do wykonania
+                "--python", self.script_file,  # Skrypt do wykonania
+                "--",
+                path
             ], check=True)
 
             if opcje:
@@ -91,11 +99,13 @@ class BlenderScriptRunner:
                     self.blender_path,
                     "--background",  # Tryb bez interfejsu graficznego
                     self.blend_file_d,  # Plik .blend do otwarcia
-                    "--python", self.script_file_d  # Skrypt do wykonania
+                    "--python", self.script_file_d,  # Skrypt do wykonania
+                    "--",
+                    path
                 ], check=True)
             else:
                 # Jeśli opcje są puste, nadpisujemy plik combined_addons.obj pustym plikiem
-                with open("generator/dodatki/combined_addons.obj", 'w') as f:
+                with open(get_resource_path("application/generator/dodatki/combined_addons.obj"), 'w') as f:
                     f.write("# Pusty plik OBJ, ponieważ nie wybrano żadnych dodatków\n")
                 print("TEST OBJ")
 

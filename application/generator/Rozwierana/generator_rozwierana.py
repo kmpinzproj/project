@@ -6,6 +6,13 @@ import bmesh
 from mathutils import Vector
 from math import radians
 import json
+import sys
+# Pobierz argumenty przekazane po "--"
+argv = sys.argv
+argv = argv[argv.index("--") + 1:]  # Wszystkie argumenty po "--"
+
+# Pierwszy argument to ścieżka do zasobów
+resources_path = argv[0]
 
 # Lista nazw obiektów do sprawdzenia i ewentualnego usunięcia
 object_names = ["szyny", "szyny-na-brame.001", "brama-uchylna-z-szynami", "Right_Door", "Left_Door", "brama-uchylna", "brama-koniec"]
@@ -195,7 +202,7 @@ def tilt_gate_rozwierana(width, height, ilosc_skrzydel, wypelnienie=None):
             "dimensions": [joined_gate.dimensions.x, joined_gate.dimensions.y, joined_gate.dimensions.z]
         }
 
-        with open("generator/dodatki/gate_data.json", "w") as json_file:
+        with open(resources_path +"application/generator/dodatki/gate_data.json", "w") as json_file:
             json.dump(gate_data, json_file)
 
 
@@ -389,7 +396,7 @@ def custom_export_to_obj_without_mtl(object_name="szyny", output_obj_path="szyny
         print(f"Obiekt '{object_name}' nie został znaleziony w scenie.")
         return
 
-    output_obj_path = "generator/" + output_obj_path
+    output_obj_path = resources_path +"application/generator/" + output_obj_path
 
     # Obrót obiektu o -90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -481,8 +488,8 @@ def export_doors_to_obj_with_mtl(texture_path, left_door_name="Left_Door", right
         combined_doors.name = "Single_Door"
 
     # Przygotowanie ścieżek do zapisu
-    output_obj_path = "generator/" + output_obj_path
-    output_mtl_path = "generator/" + output_mtl_path1
+    output_obj_path = resources_path + "application/generator/" + output_obj_path
+    output_mtl_path = resources_path + "application/generator/" + output_mtl_path1
 
     # Obrót obiektu o -90 stopni w osi X
     rotation_matrix = mathutils.Matrix.Rotation(-math.radians(90), 4, 'X')
@@ -568,21 +575,21 @@ def read_json(json_path):
             uklad_wypelnienia = "START"
         if "Kolor standardowy" in existing_data and existing_data["Kolor standardowy"] is not None:
             name = existing_data["Kolor standardowy"]
-            base_path = "../jpg/Kolor_Standardowy/"
+            base_path = resources_path + "jpg/Kolor_Standardowy/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
         elif "Kolor RAL" in existing_data and existing_data["Kolor RAL"] is not None:
             name = existing_data["Kolor RAL"]
-            base_path = "../jpg/Kolor_RAL/"
+            base_path = resources_path+"jpg/Kolor_RAL/"
             sanitized_name = name.strip()
             kolor = f"{base_path}{sanitized_name}.png"
         else:
-            kolor = f"../jpg/Kolor_RAL/7040.png"
+            kolor = resources_path+"jpg/Kolor_RAL/7040.png"
         return [wymiary, przetloczenie, kolor, uklad_wypelnienia]
 
 
 # Uruchom funkcję
-dimensions, ilosc_skrzydel, kolor, uklad_wypelnienia = read_json("../resources/selected_options.json")
+dimensions, ilosc_skrzydel, kolor, uklad_wypelnienia = read_json(resources_path+"/resources/selected_options.json")
 width = dimensions.get("Szerokość")
 height = dimensions.get("Wysokość")
 print(ilosc_skrzydel)

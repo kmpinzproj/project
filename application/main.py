@@ -10,6 +10,8 @@ from application.view.Okno_wymiarów import OknoWymiarow
 from application.view.Wybór_bramy import WyborBramy
 from PySide6.QtGui import QSurfaceFormat
 from pathlib import Path
+import os
+from application.path import get_resource_path
 
 
 QApplication.setStyle("Fusion")
@@ -25,7 +27,7 @@ class MainApplication(QMainWindow):
         "gate_creator": 3,
         "contact_form": 4,
     }
-    DB_FILE = "../resources/project_db.db"
+    DB_FILE = get_resource_path("resources/project_db.db")
 
     def __init__(self):
         """
@@ -208,7 +210,8 @@ class MainApplication(QMainWindow):
             print("Baza danych nie istnieje. Tworzenie bazy...")
             try:
                 conn = sqlite3.connect(self.DB_FILE)
-                with open('../models/db-model.sql', 'r', encoding='utf-8') as file:
+                path = get_resource_path('models/db-model.sql')
+                with open(path, 'r', encoding='utf-8') as file:
                     sql_commands = file.read()
                     conn.executescript(sql_commands)
                 conn.close()
@@ -224,16 +227,22 @@ def load_stylesheet(app, file_path):
     i uruchomienie po kompilacji z PyInstaller.
 
     Args:
-        app (QApplication): Instancja aplikacji PyQt5.
+        app (QApplication): Instancja aplikacji PySide6.
         file_path (str): Relatywna ścieżka do pliku z arkuszem stylów.
     """
-    # Obsługa ścieżki dla PyInstaller (_MEIPASS) i trybu deweloperskiego
-    base_path = getattr(sys, '_MEIPASS', Path(__file__).parent)
-    full_path = Path(base_path) / file_path
+    # Pobierz ścieżkę do pliku z zasobami
+    if hasattr(sys, '_MEIPASS'):
+        full_path = get_resource_path(file_path)
+    else:
+        full_path = get_resource_path(file_path).strip("../")
 
-    if full_path.exists():
+    if os.path.exists(full_path):
         with open(full_path, "r", encoding="utf-8") as file:
-            app.setStyleSheet(file.read())
+            qss = file.read()
+            # Zamień ścieżki w QSS (np. url(...)) na absolutne
+            base_path = f"url({get_resource_path("jpg/tło.jpg")}"
+            qss = qss.replace("url(", base_path)
+            app.setStyleSheet(qss)
     else:
         print(f"Plik stylów {full_path} nie istnieje!")
 
@@ -245,9 +254,9 @@ if __name__ == "__main__":
     app = QApplication.instance()  # Sprawdź, czy aplikacja już istnieje
     if not app:  # Jeśli nie istnieje, utwórz nową instancję
         app = QApplication(sys.argv)
-    load_stylesheet(app, "tools/styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
+    load_stylesheet(app, "tools/styles.qss")
     main_app.show()
     sys.exit(app.exec())
 

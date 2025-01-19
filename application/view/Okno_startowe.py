@@ -8,7 +8,7 @@ from PySide6.QtGui import QFont, QPixmap
 from application.tools.button import StyledButton
 from application.DatabaseManager import DatabaseManager
 import json
-import os
+from application.path import get_resource_path
 
 
 class OknoStartowe(QMainWindow):
@@ -94,7 +94,7 @@ class OknoStartowe(QMainWindow):
         if project_name_item:
             project_name = project_name_item.text()
             try:
-                output_file = "../resources/selected_options.json"
+                output_file = get_resource_path("resources/selected_options.json")
                 self.db_manager.load_project_to_json(project_name, output_file)
             except Exception as e:
                 print(f"Błąd podczas zapisywania projektu do JSON: {e}")
@@ -160,7 +160,7 @@ class OknoStartowe(QMainWindow):
         self.project_table.clearContents()
 
         projects = self.db_manager.list_projects()
-        image_path = "../jpg/icon.png"
+        image_path = get_resource_path("jpg/icon.png")
 
         if projects:
             self.project_table.setRowCount(len(projects))
@@ -170,7 +170,7 @@ class OknoStartowe(QMainWindow):
                 project_date = project[2]
                 project_type = project[3]
 
-                image_path = f"../jpg/{project_type}.png"
+                image_path = get_resource_path(f"jpg/{project_type}.png")
 
                 image_label = QLabel()
                 pixmap = QPixmap(image_path)
@@ -197,7 +197,7 @@ class OknoStartowe(QMainWindow):
 
         Zapisuje pusty słownik do pliku JSON, usuwając wszystkie poprzednie dane.
         """
-        file_path = "../resources/selected_options.json"
+        file_path = get_resource_path("resources/selected_options.json")
         try:
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump({}, file, ensure_ascii=False, indent=4)

@@ -9,6 +9,8 @@ from PIL import Image
 import os
 import cv2
 
+from application.path import get_resource_path
+
 addon_colors = {
             "wentylacja": (1.0, 0.0, 0.0),  # Czerwony
             "drzwi_w_bramie": (51, 56, 52),  # Zielony
@@ -63,7 +65,7 @@ class OpenGLWidget(QOpenGLWidget):
         super().__init__(parent)
         self.obj_file = obj_file
         self.rails_obj_file = rails_obj_file
-        self.addons_file = "generator/dodatki/combined_addons.obj"  # Ścieżka do pliku dodatków
+        self.addons_file = get_resource_path("application/generator/dodatki/combined_addons.obj")  # Ścieżka do pliku dodatków
 
         self.scene = None
         self.rails_scene = None

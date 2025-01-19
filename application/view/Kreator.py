@@ -10,6 +10,7 @@ from application.DatabaseManager import DatabaseManager
 from application.generator.generator_gateV2 import BlenderScriptRunner
 from application.tools.Widget3D import OpenGLWidget
 from application.tools.Kosztorys import PriceCalculator  # Import klasy z pliku Kosztorys.py
+from application.path import get_resource_path
 
 
 class Kreator(QMainWindow):
@@ -33,10 +34,10 @@ class Kreator(QMainWindow):
         self.setMinimumSize(834, 559)
 
         # Wczytanie opcji z pliku JSON, w tym gate_type
-        data = self.load_selected_options("../resources/selected_options.json")
+        data = self.load_selected_options(get_resource_path("resources/selected_options.json"))
         self.gate_type = data.get("Typ bramy", "Default")  # Domyślna wartość, jeśli gate_type nie istnieje
         self.default_options = {key: value for key, value in data.items() if key != "Typ bramy"}
-        self.required_fields = self.load_required_fields("../resources/wymagane.txt").get(self.gate_type, [])
+        self.required_fields = self.load_required_fields(get_resource_path("resources/wymagane.txt")).get(self.gate_type, [])
         self.selected_options = {}
 
         # Initialize UI
@@ -112,8 +113,8 @@ class Kreator(QMainWindow):
         self.gate_render_start()
 
         # Ścieżka do pliku .obj
-        gate_file = "generator/model.obj"
-        rail_file = "generator/szyny.obj"
+        gate_file = get_resource_path("application/generator/model.obj")
+        rail_file = get_resource_path("application/generator/szyny.obj")
 
         # Tworzenie widżetu OpenGL
         self.opengl_widget = OpenGLWidget(gate_file, rail_file)
@@ -124,7 +125,7 @@ class Kreator(QMainWindow):
         Renderuje bramę na podstawie zaznaczonych opcji i aktualizuje widok.
         """
         self.selected_options = self.navigation_menu.get_selected_options()
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        self.save_selected_options(get_resource_path("resources/selected_options.json"), self.selected_options)
 
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
@@ -139,7 +140,7 @@ class Kreator(QMainWindow):
         Renderuje początkową wersję bramy przy uruchomieniu kreatora.
         """
         self.selected_options = self.navigation_menu.get_selected_options()
-        self.save_selected_options("../resources/selected_options.json", self.default_options)
+        self.save_selected_options(get_resource_path("resources/selected_options.json"), self.default_options)
 
         # Uruchomienie Blendera za pomocą BlenderScriptRunner
         try:
@@ -153,9 +154,9 @@ class Kreator(QMainWindow):
         """
         Przeładowuje model bramy i szyn w widoku 3D.
         """
-        gate_file = "generator/model.obj"
-        rail_file = "generator/szyny.obj"
-        addons_file = "generator/dodatki/combined_addons.obj"
+        gate_file = get_resource_path("application/generator/model.obj")
+        rail_file = get_resource_path("application/generator/szyny.obj")
+        addons_file = get_resource_path("application/generator/dodatki/combined_addons.obj")
 
         if os.path.exists(gate_file) and os.path.exists(rail_file):
             self.opengl_widget.load_model(gate_file)
@@ -271,8 +272,8 @@ class Kreator(QMainWindow):
                 self.selected_options.update(self.navigation_menu.get_selected_options())
 
                 # Zapisz zaznaczone opcje do pliku
-                self.save_selected_options("../resources/selected_options.json", self.selected_options)
-                self.save_json_to_db("../resources/selected_options.json", self.selected_options)
+                self.save_selected_options(get_resource_path("resources/selected_options.json"), self.selected_options)
+                self.save_json_to_db(get_resource_path("resources/selected_options.json"), self.selected_options)
 
                 return True  # Projekt został pomyślnie zapisany
             else:
@@ -349,7 +350,7 @@ class Kreator(QMainWindow):
         Otwiera okno kalkulatora cen.
         """
         self.selected_options = self.navigation_menu.get_selected_options()
-        self.save_selected_options("../resources/selected_options.json", self.selected_options)
+        self.save_selected_options(get_resource_path("resources/selected_options.json"), self.selected_options)
         self.cost_calculator_window = PriceCalculator()  # Tworzenie instancji okna
         self.cost_calculator_window.show()  # Wyświetlenie okna
 

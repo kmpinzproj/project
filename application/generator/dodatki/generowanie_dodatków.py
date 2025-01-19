@@ -1,8 +1,14 @@
 import json
 import bpy
 import mathutils
-import os
+import sys
 import math
+# Pobierz argumenty przekazane po "--"
+argv = sys.argv
+argv = argv[argv.index("--") + 1:]  # Wszystkie argumenty po "--"
+
+# Pierwszy argument to ścieżka do zasobów
+resources_path = argv[0]
 
 object_names = ["klamka-1.001", "klamka-1.002", "drzwi.001"]
 
@@ -41,7 +47,7 @@ def add_window_rolling(window, glass, segment):
     """
     try:
         # --- 1. Wczytaj dane bramy z pliku JSON ---
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie szerokości i wysokości bramy z JSON
@@ -177,7 +183,7 @@ def add_window_segment(glass, pattern, przetloczenie):
     """
     try:
         # --- 1. Wczytaj dane bramy z pliku JSON ---
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie szerokości i wysokości bramy z JSON
@@ -308,7 +314,7 @@ def add_window_rotation(window, glass, option, ilosc_skrzydel):
             return None, None
 
         # Wczytaj dane bramy
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         gate_location = gate_data["location"]
@@ -424,7 +430,7 @@ def add_window(window, glass, option):
             return None, None
 
         # Wczytaj dane bramy z pliku JSON
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie danych bramy
@@ -526,7 +532,7 @@ def position_door_from_file(door):
     """
     try:
         # Odczytaj dane bramy z pliku JSON
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie danych bramy
@@ -595,7 +601,7 @@ def add_handle(handle,typ = "Klamka 1",  door=None):
             return None
 
         # Wczytaj dane bramy z pliku JSON
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie danych bramy
@@ -680,7 +686,7 @@ def add_handle_swing_gate(handle, typ, ilosc_skrzydel):
             return None
 
         # Wczytaj dane bramy
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
         if typ == "Klamka 2":
             handle = bpy.data.objects.get("klamka-2")
@@ -783,7 +789,7 @@ def position_vent_from_file(vent, option):
     """
     try:
         # Odczytaj dane bramy z pliku JSON
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         # Pobranie danych bramy
@@ -867,7 +873,7 @@ def add_vent_rotation(vent, option, ilosc_skrzydel):
             return None
 
         # Wczytaj dane bramy
-        with open("generator/dodatki/gate_data.json", "r") as json_file:
+        with open(resources_path + "application/generator/dodatki/gate_data.json", "r") as json_file:
             gate_data = json.load(json_file)
 
         gate_location = gate_data["location"]
@@ -1015,7 +1021,7 @@ def export_multiple_objects_to_obj_custom(objects, output_path):
     except Exception as e:
         print(f"Wystąpił błąd podczas eksportu: {e}")
 
-def export_selected_objects(dodatki, output_path="generator/dodatki/combined_addons.obj"):
+def export_selected_objects(dodatki, output_path=resources_path + "application/generator/dodatki/combined_addons.obj"):
     """
     Eksportuje wybrane dodatki (np. drzwi, kratki wentylacyjne, klamki, okna) do pliku .obj.
 
@@ -1165,6 +1171,6 @@ def read_json(json_path):
     return result
 
 
-dodatki = read_json("../resources/selected_options.json")
+dodatki = read_json(resources_path + "resources/selected_options.json")
 szerokość = dodatki["wymiary"]["Szerokość"]
 export_selected_objects(dodatki)

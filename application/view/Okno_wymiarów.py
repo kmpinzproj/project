@@ -7,6 +7,7 @@ from PySide6.QtGui import QIntValidator
 from application.tools.button import StyledButton
 import json
 import os
+from application.path import get_resource_path
 
 
 class OknoWymiarow(QMainWindow):
@@ -228,7 +229,7 @@ class OknoWymiarow(QMainWindow):
         """
         Zapisuje wymiary bramy do pliku JSON w ścieżce ../resources/selected_options.json.
         """
-        file_path = "../resources/selected_options.json"
+        file_path = get_resource_path("resources/selected_options.json")
         try:
             # Ensure the file exists; if not, create an empty JSON structure
             if not os.path.exists(file_path):
@@ -256,7 +257,7 @@ class OknoWymiarow(QMainWindow):
         """
         Wczytuje wymiary z pliku JSON (jeśli istnieje) i aktualizuje pola tekstowe.
         """
-        file_path = "../resources/selected_options.json"
+        file_path = get_resource_path("resources/selected_options.json")
         if os.path.exists(file_path):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
@@ -284,7 +285,7 @@ class OknoWymiarow(QMainWindow):
         Args:
             file_path (str): Ścieżka do pliku JSON.
         """
-        file_path = "../resources/selected_options.json"
+        file_path = get_resource_path("resources/selected_options.json")
         try:
             # Nadpisanie pustą strukturą
             with open(file_path, 'w', encoding='utf-8') as file:

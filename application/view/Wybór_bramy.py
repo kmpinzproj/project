@@ -4,10 +4,10 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QGridLayout, QFrame, QVBoxLayout,
     QHBoxLayout, QLabel, QSizePolicy
 )
-
 from application.tools.button import StyledButton
-import os
 import json
+import os
+from application.path import get_resource_path
 
 
 class WyborBramy(QMainWindow):
@@ -108,7 +108,7 @@ class WyborBramy(QMainWindow):
         vertical_layout.addWidget(label_description)
 
         # Image setup
-        image_path = os.path.abspath(f"../jpg/Brama/{title}.png")
+        image_path = get_resource_path(f"jpg/Brama/{title}.png")
         self.label_image = QLabel()
         pixmap = QPixmap(image_path)
         if not pixmap.isNull():
@@ -230,7 +230,7 @@ class WyborBramy(QMainWindow):
         Args:
             gate_type (str): Wybrany typ bramy do zapisania.
         """
-        file_path = "../resources/selected_options.json"
+        file_path = get_resource_path("resources/selected_options.json")
         try:
             # Sprawdź, czy plik istnieje; jeśli nie, utwórz go z pustym słownikiem
             if not os.path.isfile(file_path):

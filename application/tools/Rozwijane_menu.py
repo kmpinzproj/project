@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QPixmap, QPalette, QColor
 import os
+from application.path import get_resource_path
 
 
 class ScrollableMenu(QWidget):
@@ -55,7 +56,7 @@ class ScrollableMenu(QWidget):
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         self.content_layout.setSpacing(5)
 
-        options_data = self.load_options_data("../resources/options_data.txt")
+        options_data = self.load_options_data(get_resource_path("resources/options_data.txt"))
         if self.gate_type in options_data:
             for field_name, options in options_data[self.gate_type].items():
                 self.content_layout.addWidget(self._create_field_group(field_name, options))
@@ -135,7 +136,7 @@ class ScrollableMenu(QWidget):
         options_layout.setContentsMargins(5, 5, 5, 5)
         options_layout.setSpacing(10)
 
-        folder_path = os.path.abspath(os.path.join("../jpg", category.replace(" ", "_")))
+        folder_path = os.path.abspath(os.path.join(get_resource_path("jpg"), category.replace(" ", "_")))
         option_items = []
 
         for option in options:
@@ -176,7 +177,7 @@ class ScrollableMenu(QWidget):
         image_label = QLabel()
         pixmap = QPixmap(image_path)
         if pixmap.isNull():
-            pixmap = QPixmap("../jpg/placeholder.jpg")
+            pixmap = QPixmap(get_resource_path("jpg/placeholder.jpg"))
 
         # Check for specific category to adjust the size
         if category == "Przeszklenia":

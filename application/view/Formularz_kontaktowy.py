@@ -10,6 +10,7 @@ from application.generator.szkic.szkic_opencv import detect_and_draw_arrows
 from application.generator.PDF.InvoiceGenerator import InvoiceGenerator
 import os
 import json
+from application.path import get_resource_path
 
 from application.generator.PDF.PDF_Generator import PDFGenerator
 
@@ -212,7 +213,7 @@ class ContactForm(QMainWindow):
             "Uwagi:": self.comments_input.toPlainText().strip()
         }
 
-        output_path = "../resources/invoice_data.json"
+        output_path = get_resource_path("resources/invoice_data.json")
 
         try:
             with open(output_path, 'w', encoding='utf-8') as file:
@@ -266,11 +267,11 @@ class ContactForm(QMainWindow):
         """
          Generuje podgląd i szkice na podstawie wybranych opcji oraz zapisuje je w formacie PDF.
          """
-        selected_options = self.load_selected_options("../resources/selected_options.json")
-        input_obj_file = "generator/model.obj"
-        output_isometric_file = "generator/szkic/sketch_iso_no_diagonals.png"
-        output_orthogonal_file = "generator/szkic/sketch_orthogonal.png"
-        final_output_path = 'generator/szkic/image_with_arrows.png'
+        selected_options = self.load_selected_options(get_resource_path("resources/selected_options.json"))
+        input_obj_file = get_resource_path("application/generator/model.obj")
+        output_isometric_file = get_resource_path("application/generator/szkic/sketch_iso_no_diagonals.png")
+        output_orthogonal_file = get_resource_path("application/generator/szkic/sketch_orthogonal.png")
+        final_output_path = get_resource_path("application/generator/szkic/image_with_arrows.png")
         dimensions = selected_options["Wymiary"]
         width = dimensions["Szerokość"]
         height = dimensions["Wysokość"]
