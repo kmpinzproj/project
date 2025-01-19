@@ -462,30 +462,38 @@ class DatabaseManager:
             print(f"Błąd podczas pobierania ceny: {e}")
             return 0
 
+    def delete_project_by_name(self, project_name):
+        """
+        Usuwa projekt oraz powiązane dane bramy z bazy danych na podstawie nazwy projektu.
 
-# TESTOWANIE BAZY DANYCH
-if __name__ == "__main__":
-    db_manager = DatabaseManager()
-    #
-    # # Dodanie nowego projektu
-    # db_manager.add_project("Projekt G", "Brama Segmentowa")
-    # db_manager.add_project("Projekt H", "Brama Roletowa")
-    # db_manager.add_project("Projekt I", "Brama Uchylna")
-    # db_manager.add_project("Projekt J", "Brama Rozwierana")
-    # db_manager.add_project("Projekt K", "Brama Uchylna")
+        :param project_name: Nazwa projektu do usunięcia.
+        """
+        try:
+            conn = self.connect()
+            cursor = conn.cursor()
 
-    # Listowanie projektów
-    projekty = db_manager.list_projects()
-    for projekt in projekty:
-        print(projekt)
-        print("TEST")
+            # Sprawdzenie, czy projekt istnieje
+            cursor.execute("SELECT id FROM Projekt WHERE nazwa = ?", (project_name,))
+            project = cursor.fetchone()
 
-    # Załadowanie JSON jako słownika Python
+            if not project:
+                print(f"Projekt o nazwie '{project_name}' nie istnieje.")
+                return
 
-    db_manager = DatabaseManager()
-    path = get_resource_path("resources/selected_options.json")
-    with open(path, "r", encoding="utf-8") as file:
-        project_json = json.load(file)
-    # Dodanie projektu do bazy danych
-    db_manager = DatabaseManager()
-    db_manager.add_project_from_json(project_json)
+            projekt_id = project[0]
+
+            # Usuwanie danych z powiązanych tabel
+            cursor.execute("DELETE FROM BramaSegmentowa WHERE projekt_id = ?", (projekt_id,))
+            cursor.execute("DELETE FROM BramaRoletowa WHERE projekt_id = ?", (projekt_id,))
+            cursor.execute("DELETE FROM BramaRozwierana WHERE projekt_id = ?", (projekt_id,))
+            cursor.execute("DELETE FROM BramaUchylna WHERE projekt_id = ?", (projekt_id,))
+
+            # Usuwanie projektu
+            cursor.execute("DELETE FROM Projekt WHERE id = ?", (projekt_id,))
+            conn.commit()
+
+            print(f"Projekt '{project_name}' został pomyślnie usunięty.")
+        except sqlite3.Error as e:
+            print(f"Błąd podczas usuwania projektu: {e}")
+        finally:
+            conn.close()

@@ -57,7 +57,8 @@ class OknoStartowe(QMainWindow):
         """
         Tworzy lewy panel w oknie startowym.
 
-        Panel zawiera przyciski do tworzenia nowych projektów lub otwierania zapisancyh.
+        Panel zawiera przyciski do tworzenia nowych projektów, otwierania zapisanych
+        oraz usuwania projektów.
         """
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
@@ -66,38 +67,22 @@ class OknoStartowe(QMainWindow):
 
         self.create_new_button = StyledButton("Stwórz nowy")
         self.open_saved_button = StyledButton("Otwórz zapisany")
+        self.delete_button = StyledButton("Usuń projekt")  # Nowy przycisk
         self.open_saved_button.setEnabled(False)  # Domyślnie wyłączony
+        self.delete_button.setEnabled(False)  # Wyłączony domyślnie
 
         self.create_new_button.clicked.connect(self.clear_selected_options)
         self.open_saved_button.clicked.connect(self.open_selected_project)
+        self.delete_button.clicked.connect(self.delete_selected_project)  # Połączenie z metodą
 
         left_layout.addWidget(self.create_new_button)
         left_layout.addWidget(self.open_saved_button)
+        left_layout.addWidget(self.delete_button)  # Dodanie przycisku
 
         self._add_spacer(left_layout)
         left_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         return left_widget
-
-    def open_selected_project(self):
-        """
-        Otwiera wybrany projekt z bazy danych.
-
-        Wczytuje dane projektu i zapisuje je do pliku JSON, który będzie używany w kolejnych widokach.
-        """
-        self.clear_selected_options()
-
-        selected_items = self.project_table.selectedItems()
-
-        selected_row = self.project_table.row(selected_items[0])
-        project_name_item = self.project_table.item(selected_row, 1)
-        if project_name_item:
-            project_name = project_name_item.text()
-            try:
-                output_file = get_resource_path("resources/selected_options.json")
-                self.db_manager.load_project_to_json(project_name, output_file)
-            except Exception as e:
-                print(f"Błąd podczas zapisywania projektu do JSON: {e}")
 
     def _create_right_panel(self):
         """
@@ -133,15 +118,58 @@ class OknoStartowe(QMainWindow):
         """
         Obsługuje wybór wiersza w tabeli projektów.
 
-        Włącza przycisk "Otwórz zapisany", gdy wiersz w tabeli jest zaznaczony.
+        Włącza przyciski "Otwórz zapisany" i "Usuń projekt", gdy wiersz w tabeli jest zaznaczony.
         """
         selected_items = self.project_table.selectedItems()
         if selected_items:
             self.selected_row = self.project_table.row(selected_items[0]) + 1
-            self.open_saved_button.setEnabled(True)  # Aktywuj przycisk
+            self.open_saved_button.setEnabled(True)  # Aktywuj przycisk otwierania
+            self.delete_button.setEnabled(True)  # Aktywuj przycisk usuwania
         else:
             self.selected_row = None
-            self.open_saved_button.setEnabled(False)  # Wyłącz przycisk
+            self.open_saved_button.setEnabled(False)  # Wyłącz przycisk otwierania
+            self.delete_button.setEnabled(False)  # Wyłącz przycisk usuwania
+
+    def open_selected_project(self):
+        """
+        Otwiera wybrany projekt z bazy danych.
+
+        Wczytuje dane projektu i zapisuje je do pliku JSON, który będzie używany w kolejnych widokach.
+        """
+        self.clear_selected_options()
+
+        selected_items = self.project_table.selectedItems()
+
+        selected_row = self.project_table.row(selected_items[0])
+        project_name_item = self.project_table.item(selected_row, 1)
+        if project_name_item:
+            project_name = project_name_item.text()
+            try:
+                output_file = get_resource_path("resources/selected_options.json")
+                self.db_manager.load_project_to_json(project_name, output_file)
+            except Exception as e:
+                print(f"Błąd podczas zapisywania projektu do JSON: {e}")
+
+    def delete_selected_project(self):
+        """
+        Usuwa wybrany projekt z bazy danych.
+
+        Wywołuje funkcję `test` z klasy `DatabaseManager`.
+        """
+        selected_items = self.project_table.selectedItems()
+
+        if selected_items:
+            selected_row = self.project_table.row(selected_items[0])
+            project_name_item = self.project_table.item(selected_row, 1)
+
+            if project_name_item:
+                project_name = project_name_item.text()
+                try:
+                    self.db_manager.delete_project_by_name(project_name)  # Wywołanie funkcji `test`
+                    self.refresh()  # Odświeżenie tabeli po usunięciu
+                    print(f"Projekt '{project_name}' został usunięty.")
+                except Exception as e:
+                    print(f"Błąd podczas usuwania projektu: {e}")
 
     def refresh(self):
         """

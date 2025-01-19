@@ -240,9 +240,12 @@ def load_stylesheet(app, file_path):
         with open(full_path, "r", encoding="utf-8") as file:
             qss = file.read()
             # Zamień ścieżki w QSS (np. url(...)) na absolutne
-            base_path = f"url({get_resource_path("jpg/tło.jpg")}"
+            base_path = f"url({get_resource_path("jpg\\tło.jpg")}"
+            base_path = base_path.replace("\\", "/")
             qss = qss.replace("url(", base_path)
             app.setStyleSheet(qss)
+            print(base_path)
+            print(qss)
     else:
         print(f"Plik stylów {full_path} nie istnieje!")
 
@@ -254,9 +257,9 @@ if __name__ == "__main__":
     app = QApplication.instance()  # Sprawdź, czy aplikacja już istnieje
     if not app:  # Jeśli nie istnieje, utwórz nową instancję
         app = QApplication(sys.argv)
+    load_stylesheet(app, "tools/styles.qss")
     app.setFont(QFont("Arial"))
     main_app = MainApplication()
-    load_stylesheet(app, "tools/styles.qss")
     main_app.show()
     sys.exit(app.exec())
 
