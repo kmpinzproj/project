@@ -77,10 +77,8 @@ class ContactForm(QMainWindow):
         # Title and subtitle
         title_label = QLabel("Segmentowe. Wyślij zapytanie.")
         title_label.setFont(QFont("Arial", 16, QFont.Bold))
-        subtitle_label = QLabel("Wypełnij formularz kontaktowy. Nasz konsultant skontaktuje się z Tobą.")
 
         layout.addWidget(title_label)
-        layout.addWidget(subtitle_label)
 
         # Create input fields with labels
         form_layout = QVBoxLayout()
